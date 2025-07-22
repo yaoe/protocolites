@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alien Microbe Invaders</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .container {
+            background: #111;
+            border: 4px solid #0f0;
+            padding: 30px;
+            box-shadow: 0 0 50px #0f0;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0f0;
+            margin-bottom: 30px;
+            font-size: 3em;
+            font-weight: bold;
+            text-shadow: 0 0 20px #0f0;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button, select {
+            background: #000;
+            color: #0f0;
+            border: 3px solid #0f0;
+            padding: 15px 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button:hover, select:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 20px #0f0;
+        }
+
+        .parents-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #0f0;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .parents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .parent-creature {
+            text-align: center;
+            padding: 15px;
+            border: 2px solid #0f0;
+            background: #000;
+        }
+
+        .parent-identicon {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+            background: #000;
+            border: 2px solid #0f0;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+
+        .parent-identicon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px #0f0;
+        }
+
+        .children-section {
+            border-top: 3px solid #0f0;
+            padding-top: 30px;
+        }
+
+        .children-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .child-creature {
+            text-align: center;
+            padding: 10px;
+            border: 2px solid #f00;
+            background: #000;
+        }
+
+        .child-identicon {
+            width: 128px;
+            height: 128px;
+            margin: 0 auto;
+            background: #000;
+            border: 2px solid #f00;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: all 0.1s ease;
+            cursor: pointer;
+        }
+
+        .child-identicon:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 25px #f00;
+        }
+
+        .creature-type {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #0f0;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .child-type {
+            color: #f00;
+        }
+
+        .description {
+            text-align: center;
+            color: #0f0;
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .breeding-info {
+            text-align: center;
+            color: #f00;
+            font-size: 12px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👾 ALIEN MICROBE INVADERS 👾</h1>
+        <div class="description">
+            PIXELATED BACTERIAL INVADERS FROM OUTER SPACE
+        </div>
+        <div class="breeding-info">
+            CLASSIC ARCADE ORGANISMS: Space invaders infected with microbial DNA
+        </div>
+        
+        <div class="controls">
+            <select id="parentSize" style="margin-right: 15px;">
+                <option value="36">LARGE INVADERS (36x36)</option>
+                <option value="24">MEDIUM INVADERS (24x24)</option>
+            </select>
+            <button onclick="generateParents()">START INVASION</button>
+            <button onclick="clearAll()">GAME OVER</button>
+        </div>
+
+        <div class="parents-section">
+            <div class="section-title">Alien Microbes - Click to Spawn</div>
+            <div class="parents-grid" id="parents"></div>
+        </div>
+
+        <div class="children-section">
+            <div class="section-title">Mini Invaders (16x16)</div>
+            <div class="children-grid" id="children"></div>
+        </div>
+    </div>
+
+    <script>
+        const creatureTypes = [
+            'SQUID-BACTERIUM', 'CRAB-VIRUS', 'OCTOPUS-CELL', 'JELLYFISH-GERM', 
+            'UFO-MICROBE', 'SKULL-PATHOGEN', 'GHOST-BACTERIA', 'SPIDER-PHAGE',
+            'ALIEN-SPORE', 'INVADER-CELL', 'PIXEL-VIRUS', 'RETRO-MICROBE'
+        ];
+
+        let parentData = [];
+
+        function generateCreatureIcon(seed, type, size = 36, parentGenetics = null) {
+            const canvas = document.createElement('canvas');
+            const pixelSize = size === 36 ? 5 : size === 24 ? 6 : size === 16 ? 8 : 8;
+            const gridSize = size;
+            canvas.width = gridSize * pixelSize;
+            canvas.height = gridSize * pixelSize;
+            const ctx = canvas.getContext('2d');
+            
+            ctx.imageSmoothingEnabled = false;
+            
+            let seedValue = seed;
+            function random() {
+                seedValue = (seedValue * 9301 + 49297) % 233280;
+                return seedValue / 233280;
+            }
+
+            // Classic arcade colors
+            const colors = [
+                '#00ff00', '#ff0000', '#ffff00', '#00ffff', '#ff00ff', '#ffffff',
+                '#ff8800', '#0088ff', '#88ff00', '#ff0088', '#8800ff', '#00ff88'
+            ];
+
+            let primaryColor, secondaryColor, accentColor;
+
+            if (parentGenetics) {
+                primaryColor = parentGenetics.primaryColor;
+                secondaryColor = parentGenetics.secondaryColor;
+                accentColor = parentGenetics.accentColor;
+            } else {
+                primaryColor = colors[Math.floor(random() * colors.length)];
+                secondaryColor = colors[Math.floor(random() * colors.length)];
+                accentColor = colors[Math.floor(random() * colors.length)];
+            }
+
+            const grid = Array(gridSize).fill().map(() => Array(gridSize).fill('#000000'));
+            const centerX = Math.floor(gridSize / 2);
+            const centerY = Math.floor(gridSize / 2);
+
+            // Classic space invader types but with microbial features
+            const invaderTypes = ['squid', 'crab', 'octopus', 'jellyfish', 'skull'];
+            const invaderType = invaderTypes[(seed + 100) % invaderTypes.length];
+
+            if (invaderType === 'squid') {
+                // Classic squid-style space invader with bacterial flagella
+                const bodyWidth = size === 36 ? 11 : size === 24 ? 7 : 4;
+                const bodyHeight = size === 36 ? 8 : size === 24 ? 5 : 3;
+                
+                // Main body (classic invader shape)
+                for (let y = 0; y < bodyHeight; y++) {
+                    for (let x = 0; x < bodyWidth; x++) {
+                        const px = centerX - Math.floor(bodyWidth/2) + x;
+                        const py = centerY - Math.floor(bodyHeight/2) + y;
+                        
+                        // Classic space invader body pattern
+                        if (size === 36) {
+                            if ((y === 0 && (x >= 3 && x <= 7)) ||
+                                (y === 1 && (x >= 2 && x <= 8)) ||
+                                (y === 2 && (x >= 1 && x <= 9)) ||
+                                (y === 3 && (x === 0 || x === 2 || x === 3 || x === 5 || x === 7 || x === 8 || x === 10)) ||
+                                (y === 4 && x !== 1 && x !== 9) ||
+                                (y === 5 && (x >= 2 && x <= 8)) ||
+                                (y === 6 && (x === 3 || x === 4 || x === 6 || x === 7)) ||
+                                (y === 7 && (x === 2 || x === 8))) {
+                                if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                                    grid[py][px] = primaryColor;
+                                }
+                            }
+                        } else if (size === 24) {
+                            if ((y === 0 && (x >= 2 && x <= 4)) ||
+                                (y === 1 && (x >= 1 && x <= 5)) ||
+                                (y === 2 && (x === 0 || x === 2 || x === 4 || x === 6)) ||
+                                (y === 3 && (x >= 1 && x <= 5)) ||
+                                (y === 4 && (x === 0 || x === 6))) {
+                                if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                                    grid[py][px] = primaryColor;
+                                }
+                            }
+                        } else {
+                            // Simple 16x16 version
+                            if ((y === 0 && x === 2) ||
+                                (y === 1 && (x >= 1 && x <= 3)) ||
+                                (y === 2 && (x === 0 || x === 2 || x === 4))) {
+                                if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                                    grid[py][px] = primaryColor;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Eyes (classic invader eyes)
+                const eyeY = centerY - 1;
+                if (size >= 24) {
+                    const eyeSpacing = size === 36 ? 3 : 2;
+                    if (centerX - eyeSpacing >= 0) grid[eyeY][centerX - eyeSpacing] = '#ffffff';
+                    if (centerX + eyeSpacing < gridSize) grid[eyeY][centerX + eyeSpacing] = '#ffffff';
+                }
+                
+                // Bacterial flagella (tentacles)
+                const flagellaCount = size === 36 ? 6 : size === 24 ? 4 : 3;
+                const bottomY = centerY + Math.floor(bodyHeight/2);
+                for (let i = 0; i < flagellaCount; i++) {
+                    const flagX = centerX - Math.floor(bodyWidth/2) + 1 + i * 2;
+                    const flagLength = size === 36 ? 6 : size === 24 ? 4 : 2;
+                    
+                    for (let f = 1; f <= flagLength; f++) {
+                        const wave = Math.sin(f * 0.5 + i) * 1;
+                        const fx = flagX + Math.round(wave);
+                        const fy = bottomY + f;
+                        
+                        if (fx >= 0 && fx < gridSize && fy >= 0 && fy < gridSize) {
+                            grid[fy][fx] = secondaryColor;
+                        }
+                    }
+                }
+
+            } else if (invaderType === 'crab') {
+                // Crab-style invader with virus spikes
+                const bodyWidth = size === 36 ? 12 : size === 24 ? 8 : 5;
+                const bodyHeight = size === 36 ? 8 : size === 24 ? 5 : 3;
+                
+                // Classic crab invader body
+                for (let y = 0; y < bodyHeight; y++) {
+                    for (let x = 0; x < bodyWidth; x++) {
+                        const px = centerX - Math.floor(bodyWidth/2) + x;
+                        const py = centerY - Math.floor(bodyHeight/2) + y;
+                        
+                        if (size === 36) {
+                            if ((y === 0 && (x === 2 || x === 9)) ||
+                                (y === 1 && (x >= 3 && x <= 8)) ||
+                                (y === 2 && (x >= 2 && x <= 9)) ||
+                                (y === 3 && (x === 1 || x === 2 || x === 4 || x === 5 || x === 6 || x === 7 || x === 9 || x === 10)) ||
+                                (y === 4 && x >= 0 && x <= 11) ||
+                                (y === 5 && (x === 0 || x === 2 || x === 9 || x === 11)) ||
+                                (y === 6 && (x === 0 || x === 3 || x === 8 || x === 11)) ||
+                                (y === 7 && (x === 3 || x === 4 || x === 7 || x === 8))) {
+                                if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                                    grid[py][px] = primaryColor;
+                                }
+                            }
+                        } else {
+                            // Simplified for smaller sizes
+                            if ((y === 0 && (x === 1 || x === bodyWidth - 2)) ||
+                                (y === 1 && x >= 1 && x < bodyWidth - 1) ||
+                                (y === 2 && (x === 0 || x === 2 || x === bodyWidth - 3 || x === bodyWidth - 1))) {
+                                if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                                    grid[py][px] = primaryColor;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Virus-like protein spikes around the body
+                const spikeCount = size === 36 ? 8 : size === 24 ? 6 : 4;
+                for (let i = 0; i < spikeCount; i++) {
+                    const angle = (i / spikeCount) * Math.PI * 2;
+                    const spikeRadius = size === 36 ? 7 : size === 24 ? 5 : 3;
+                    
+                    const sx = centerX + Math.round(Math.cos(angle) * spikeRadius);
+                    const sy = centerY + Math.round(Math.sin(angle) * spikeRadius);
+                    
+                    if (sx >= 0 && sx < gridSize && sy >= 0 && sy < gridSize) {
+                        grid[sy][sx] = accentColor;
+                    }
+                }
+
+            } else if (invaderType === 'octopus') {
+                // Octopus invader with cell membrane
+                const bodyRadius = size === 36 ? 6 : size === 24 ? 4 : 2;
+                
+                // Membrane-like circular body
+                for (let dy = -bodyRadius; dy <= bodyRadius; dy++) {
+                    for (let dx = -bodyRadius; dx <= bodyRadius; dx++) {
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance <= bodyRadius) {
+                            const x = centerX + dx;
+                            const y = centerY + dy;
+                            if (x >= 0 && x < gridSize && y >= 0 && y < gridSize) {
+                                // Cell membrane pattern
+                                if (distance > bodyRadius - 2) {
+                                    grid[y][x] = primaryColor;
+                                } else if ((dx + dy) % 2 === 0) {
+                                    grid[y][x] = secondaryColor;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Classic invader tentacles
+                const tentacleCount = 8;
+                for (let i = 0; i < tentacleCount; i++) {
+                    const angle = (i / tentacleCount) * Math.PI * 2;
+                    const tentLength = size === 36 ? 4 : size === 24 ? 3 : 2;
+                    
+                    for (let t = bodyRadius; t < bodyRadius + tentLength; t++) {
+                        const tx = centerX + Math.round(Math.cos(angle) * t);
+                        const ty = centerY + Math.round(Math.sin(angle) * t);
+                        
+                        if (tx >= 0 && tx < gridSize && ty >= 0 && ty < gridSize) {
+                            grid[ty][tx] = accentColor;
+                        }
+                    }
+                }
+                
+                // Big invader eyes
+                if (size >= 24) {
+                    const eyeY = centerY - 1;
+                    const eyeSize = size === 36 ? 2 : 1;
+                    for (let ey = 0; ey < eyeSize; ey++) {
+                        for (let ex = 0; ex < eyeSize; ex++) {
+                            if (centerX - 2 - ex >= 0) grid[eyeY - ey][centerX - 2 - ex] = '#ffffff';
+                            if (centerX + 2 + ex < gridSize) grid[eyeY - ey][centerX + 2 + ex] = '#ffffff';
+                        }
+                    }
+                }
+
+            } else if (invaderType === 'jellyfish') {
+                // Jellyfish invader with microbial cilia
+                const bellWidth = size === 36 ? 10 : size === 24 ? 7 : 4;
+                const bellHeight = size === 36 ? 6 : size === 24 ? 4 : 2;
+                
+                // Classic UFO/bell shape
+                for (let y = 0; y < bellHeight; y++) {
+                    const rowWidth = bellWidth - (y * 2);
+                    for (let x = 0; x < rowWidth; x++) {
+                        const px = centerX - Math.floor(rowWidth/2) + x;
+                        const py = centerY - bellHeight + y;
+                        
+                        if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                            grid[py][px] = primaryColor;
+                        }
+                    }
+                }
+                
+                // Microbial cilia (hair-like projections)
+                const ciliaCount = size === 36 ? 12 : size === 24 ? 8 : 5;
+                const bottomY = centerY;
+                for (let i = 0; i < ciliaCount; i++) {
+                    const ciliaX = centerX - Math.floor(bellWidth/2) + 1 + i;
+                    const ciliaLength = size === 36 ? 5 : size === 24 ? 3 : 2;
+                    
+                    for (let c = 0; c < ciliaLength; c++) {
+                        const wave = Math.sin(i * 0.8 + c * 0.5) * 1;
+                        const cx = ciliaX + Math.round(wave);
+                        const cy = bottomY + c;
+                        
+                        if (cx >= 0 && cx < gridSize && cy >= 0 && cy < gridSize) {
+                            grid[cy][cx] = secondaryColor;
+                        }
+                    }
+                }
+                
+                // UFO lights
+                const lightY = centerY - Math.floor(bellHeight/2);
+                const lightSpacing = size === 36 ? 3 : 2;
+                for (let l = -1; l <= 1; l++) {
+                    const lx = centerX + l * lightSpacing;
+                    if (lx >= 0 && lx < gridSize && lightY >= 0) {
+                        grid[lightY][lx] = accentColor;
+                    }
+                }
+
+            } else if (invaderType === 'skull') {
+                // Skull invader with bacterial features
+                const skullSize = size === 36 ? 8 : size === 24 ? 5 : 3;
+                
+                // Skull shape
+                for (let y = -skullSize; y <= skullSize/2; y++) {
+                    for (let x = -skullSize/2; x <= skullSize/2; x++) {
+                        const px = centerX + x;
+                        const py = centerY + y;
+                        
+                        // Create skull outline
+                        if (size === 36) {
+                            if ((y === -8 && x >= -2 && x <= 2) ||
+                                (y === -7 && x >= -3 && x <= 3) ||
+                                (y === -6 && x >= -4 && x <= 4) ||
+                                (y >= -5 && y <= -2 && x >= -4 && x <= 4) ||
+                                (y >= -1 && y <= 2 && x >= -3 && x <= 3) ||
+                                (y === 3 && (x === -2 || x === 0 || x === 2))) {
+                                if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                                    grid[py][px] = primaryColor;
+                                }
+                            }
+                        } else {
+                            // Simple skull for smaller sizes
+                            if ((Math.abs(y) <= skullSize && Math.abs(x) <= skullSize/2) &&
+                                !(Math.abs(y) === skullSize && Math.abs(x) === skullSize/2)) {
+                                if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                                    grid[py][px] = primaryColor;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Eye sockets
+                const eyeY = centerY - 2;
+                if (size >= 24) {
+                    const eyeSpacing = 2;
+                    for (let ey = 0; ey < 2; ey++) {
+                        for (let ex = 0; ex < 2; ex++) {
+                            if (centerX - eyeSpacing - ex >= 0 && eyeY + ey < gridSize) {
+                                grid[eyeY + ey][centerX - eyeSpacing - ex] = '#000000';
+                            }
+                            if (centerX + eyeSpacing + ex < gridSize && eyeY + ey < gridSize) {
+                                grid[eyeY + ey][centerX + eyeSpacing + ex] = '#000000';
+                            }
+                        }
+                    }
+                }
+                
+                // Bacterial pili (hair-like appendages)
+                const piliCount = size === 36 ? 8 : size === 24 ? 6 : 4;
+                for (let i = 0; i < piliCount; i++) {
+                    const angle = (i / piliCount) * Math.PI * 2;
+                    const piliRadius = size === 36 ? 6 : size === 24 ? 4 : 2;
+                    
+                    const px = centerX + Math.round(Math.cos(angle) * piliRadius);
+                    const py = centerY + Math.round(Math.sin(angle) * piliRadius);
+                    
+                    if (px >= 0 && px < gridSize && py >= 0 && py < gridSize) {
+                        grid[py][px] = accentColor;
+                    }
+                }
+            }
+
+            // Add classic arcade scanlines
+            for (let y = 0; y < gridSize; y += 2) {
+                for (let x = 0; x < gridSize; x++) {
+                    if (grid[y][x] !== '#000000') {
+                        const color = grid[y][x];
+                        const rgb = color.match(/[0-9a-f]{2}/g);
+                        if (rgb) {
+                            const r = Math.max(0, parseInt(rgb[0], 16) - 30);
+                            const g = Math.max(0, parseInt(rgb[1], 16) - 30);
+                            const b = Math.max(0, parseInt(rgb[2], 16) - 30);
+                            grid[y][x] = `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+                        }
+                    }
+                }
+            }
+
+            // Render the grid to canvas
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    ctx.fillStyle = grid[y][x];
+                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                }
+            }
+
+            const genetics = {
+                primaryColor,
+                secondaryColor,
+                accentColor,
+                seed,
+                type
+            };
+
+            return { canvas, genetics };
+        }
+
+        function generateParents() {
+            const container = document.getElementById('parents');
+            const sectionTitle = document.querySelector('.parents-section .section-title');
+            container.innerHTML = '';
+            parentData = [];
+            
+            const selectedSize = parseInt(document.getElementById('parentSize').value);
+            sectionTitle.textContent = `Alien Microbes (${selectedSize}x${selectedSize}) - Click to Spawn`;
+            
+            for (let i = 0; i < 6; i++) {
+                const seed = Math.floor(Math.random() * 10000);
+                const type = creatureTypes[Math.floor(Math.random() * creatureTypes.length)];
+                
+                const result = generateCreatureIcon(seed, type, selectedSize);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'parent-creature';
+                
+                result.canvas.className = 'parent-identicon';
+                result.canvas.onclick = () => breed(result.genetics, i);
+                
+                const label = document.createElement('div');
+                label.className = 'creature-type';
+                label.textContent = type;
+                
+                wrapper.appendChild(result.canvas);
+                wrapper.appendChild(label);
+                container.appendChild(wrapper);
+                
+                parentData[i] = result.genetics;
+            }
+        }
+
+        function breed(parentGenetics, parentIndex) {
+            const childrenContainer = document.getElementById('children');
+            
+            for (let i = 0; i < 3; i++) {
+                const childSeed = parentGenetics.seed + (i + 1) * 1000 + Math.floor(Math.random() * 100);
+                const childType = parentGenetics.type;
+                
+                const result = generateCreatureIcon(childSeed, childType, 16, parentGenetics);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'child-creature';
+                
+                result.canvas.className = 'child-identicon';
+                
+                const label = document.createElement('div');
+                label.className = 'creature-type child-type';
+                label.textContent = `${childType}-JR${i + 1}`;
+                
+                wrapper.appendChild(result.canvas);
+                wrapper.appendChild(label);
+                childrenContainer.appendChild(wrapper);
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('parents').innerHTML = '';
+            document.getElementById('children').innerHTML = '';
+            parentData = [];
+        }
+
+        generateParents();
+    </script>
+</body>
+</html>

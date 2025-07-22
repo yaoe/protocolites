@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viral Breeding Colony</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a0a0a 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .container {
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #000;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .parents-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #00ff00;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .parents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .parent-creature {
+            text-align: center;
+            padding: 15px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 50, 0, 0.2);
+        }
+
+        .parent-identicon {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+            background: #000;
+            border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .parent-identicon:hover {
+            transform: scale(1.05);
+            border-color: #00ff00;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .children-section {
+            border-top: 2px solid rgba(0, 255, 0, 0.3);
+            padding-top: 30px;
+        }
+
+        .children-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .child-creature {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(50, 50, 0, 0.2);
+            animation: spawn 0.5s ease-out;
+        }
+
+        @keyframes spawn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .child-identicon {
+            width: 128px;
+            height: 128px;
+            margin: 0 auto;
+            background: #000;
+            border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .child-identicon:hover {
+            transform: scale(1.1);
+            border-color: #ffff00;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+        }
+
+        .creature-type {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #00ff00;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .child-type {
+            color: #ffff00;
+        }
+
+        .description {
+            text-align: center;
+            color: #00ff00;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .breeding-info {
+            text-align: center;
+            color: #ffff00;
+            font-size: 12px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧬 VIRAL BREEDING COLONY 🧬</h1>
+        <div class="description">
+            CLICK PARENT ORGANISMS TO TRIGGER ASEXUAL REPRODUCTION • 36x36 SPAWNERS GENERATE 16x16 OFFSPRING
+        </div>
+        <div class="breeding-info">
+            GENETIC INHERITANCE: Colors, patterns, and viral characteristics pass to offspring with mutations
+        </div>
+        
+        <div class="controls">
+            <select id="parentSize" style="background: #000; color: #00ff00; border: 2px solid #00ff00; padding: 12px 20px; font-family: 'Courier New', monospace; font-size: 14px; font-weight: bold; text-transform: uppercase; margin-right: 15px;">
+                <option value="36">LARGE PARENTS (36x36)</option>
+                <option value="24">MEDIUM PARENTS (24x24)</option>
+            </select>
+            <button onclick="generateParents()">SPAWN PARENTS</button>
+            <button onclick="clearAll()">STERILIZE COLONY</button>
+        </div>
+
+        <div class="parents-section">
+            <div class="section-title">Parent Organisms (36x36) - Click to Breed</div>
+            <div class="parents-grid" id="parents"></div>
+        </div>
+
+        <div class="children-section">
+            <div class="section-title">Offspring Colony (16x16)</div>
+            <div class="children-grid" id="children"></div>
+        </div>
+    </div>
+
+    <script>
+        const creatureTypes = [
+            'BLOOD-HARVESTER', 'BONE-BORER', 'FLESH-WEAVER', 'NERVE-CRAWLER', 
+            'MARROW-MITE', 'TISSUE-RIPPER', 'VEIN-STALKER', 'CELL-DEVOURER',
+            'ORGAN-PARASITE', 'BRAIN-FEEDER', 'SPINE-NEEDLE', 'SKIN-MELTER'
+        ];
+
+        let parentData = []; // Store parent genetic information
+
+        function generateCreatureIcon(seed, type, size = 36, parentGenetics = null) {
+            const canvas = document.createElement('canvas');
+            const pixelSize = size === 36 ? 5 : size === 24 ? 6 : size === 16 ? 8 : 8;
+            const gridSize = size;
+            canvas.width = gridSize * pixelSize;
+            canvas.height = gridSize * pixelSize;
+            const ctx = canvas.getContext('2d');
+            
+            // Disable anti-aliasing for crisp pixels
+            ctx.imageSmoothingEnabled = false;
+            
+            // Seeded random function
+            let seedValue = seed;
+            function random() {
+                seedValue = (seedValue * 9301 + 49297) % 233280;
+                return seedValue / 233280;
+            }
+
+            // Highly saturated color palette - no grays, all vivid colors
+            const colors = [
+                '#ff0000', '#00ff00', '#0066ff', '#ffff00', '#ff00ff', '#00ffff',
+                '#ff6600', '#6600ff', '#ff0066', '#66ff00', '#0066ff', '#ff3300',
+                '#33ff00', '#0033ff', '#ff0033', '#3300ff', '#ff3366', '#ff6633'
+            ];
+
+            let primaryColor, secondaryColor, accentColor;
+
+            if (parentGenetics) {
+                // Inherit colors from parent exactly (no mutations)
+                primaryColor = parentGenetics.primaryColor;
+                secondaryColor = parentGenetics.secondaryColor;
+                accentColor = parentGenetics.accentColor;
+            } else {
+                primaryColor = colors[Math.floor(random() * colors.length)];
+                secondaryColor = colors[Math.floor(random() * colors.length)];
+                accentColor = colors[Math.floor(random() * colors.length)];
+            }
+
+            // Function to get opposite color
+            function getOppositeColor(color) {
+                // Parse hex color
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                
+                // Invert each channel
+                const invR = (255 - r).toString(16).padStart(2, '0');
+                const invG = (255 - g).toString(16).padStart(2, '0');
+                const invB = (255 - b).toString(16).padStart(2, '0');
+                
+                return '#' + invR + invG + invB;
+            }
+            
+            // Function to get similar hue color (more noticeable variant)
+            function getSimilarColor(color, variation = 0.5) {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                
+                // Create a more noticeable but harmonious variant
+                // Use a combination of lightening/darkening and slight hue shift
+                const method = Math.floor(random() * 3);
+                
+                let newR, newG, newB;
+                
+                if (method === 0) {
+                    // Make darker
+                    const factor = 0.5 + (random() * 0.3); // 50-80% of original brightness
+                    newR = Math.max(0, Math.round(r * factor));
+                    newG = Math.max(0, Math.round(g * factor));
+                    newB = Math.max(0, Math.round(b * factor));
+                } else if (method === 1) {
+                    // Make lighter
+                    const factor = 1.3 + (random() * 0.4); // 130-170% of original brightness
+                    newR = Math.min(255, Math.round(r * factor));
+                    newG = Math.min(255, Math.round(g * factor));
+                    newB = Math.min(255, Math.round(b * factor));
+                } else {
+                    // Slight hue shift while maintaining brightness
+                    const shift = (random() - 0.5) * 60; // ±30 in each channel
+                    newR = Math.max(0, Math.min(255, r + shift));
+                    newG = Math.max(0, Math.min(255, g + shift));
+                    newB = Math.max(0, Math.min(255, b + shift));
+                }
+                
+                const hexR = Math.round(newR).toString(16).padStart(2, '0');
+                const hexG = Math.round(newG).toString(16).padStart(2, '0');
+                const hexB = Math.round(newB).toString(16).padStart(2, '0');
+                
+                return '#' + hexR + hexG + hexB;
+            }
+            
+            const eyeColor = getOppositeColor(primaryColor);
+            const sparkleColor = '#ffffff';
+            const secondaryBodyColor = getSimilarColor(primaryColor);
+
+            // Create a pixel grid
+            const grid = Array(gridSize).fill().map(() => Array(gridSize).fill('#000000'));
+
+            // Draw pixelated main body (symmetrical)
+            const centerX = Math.floor(gridSize / 2);
+            const centerY = Math.floor(gridSize / 2);
+
+            // Adjust body size based on grid size
+            const bodyStart = size === 36 ? 10 : size === 24 ? 7 : size === 16 ? 4 : 3;
+            const bodyEnd = size === 36 ? 26 : size === 24 ? 17 : size === 16 ? 12 : 9;
+
+            for (let y = bodyStart; y < bodyEnd; y++) {
+                for (let x = bodyStart; x < bodyEnd; x++) {
+                    const distanceFromCenter = Math.abs(x - centerX) + Math.abs(y - centerY);
+                    const bodyChance = 0.8 - (distanceFromCenter * (size === 36 ? 0.06 : size === 24 ? 0.07 : size === 16 ? 0.1 : 0.15));
+                    
+                    if (random() < bodyChance) {
+                        // Choose between primary and secondary body color
+                        const useSecondaryColor = random() < 0.4; // 40% chance for secondary color
+                        const bodyColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                        
+                        grid[y][x] = bodyColor;
+                        // Mirror horizontally for symmetry
+                        if (x !== centerX) {
+                            const mirrorX = centerX - (x - centerX);
+                            if (mirrorX >= 0 && mirrorX < gridSize) {
+                                grid[y][mirrorX] = bodyColor;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Kawaii eye configurations with variable spacing
+            const spacingVariations = [0.15, 0.2, 0.25, 0.3, 0.33]; // Reduced eye spacings
+            const randomSpacing = spacingVariations[seed % spacingVariations.length];
+            
+            const eyeConfig = [
+                { type: 'original', size: 3, yPos: 0.39 }, // Original viral eyes
+                { type: 'sparkly', size: 3, yPos: 0.35 }, // Big sparkly eyes
+                { type: 'closed', size: 2, yPos: 0.35 }, // Happy closed eyes
+                { type: 'starry', size: 2, yPos: 0.35 }, // Star eyes
+                { type: 'round', size: 3, yPos: 0.35 }, // Big round eyes
+                { type: 'antenna', size: 2, yPos: 0.35 }, // Antenna/stalk eyes
+                { type: 'bug', size: 4, yPos: 0.35 }, // Bug compound eyes
+                { type: 'horizontal-antenna', size: 2, yPos: 0.35 } // Horizontal antenna eyes
+            ];
+            
+            const eyeType = (seed + 100) % eyeConfig.length;
+            const eyes = eyeConfig[eyeType];
+            
+            const eyeY = Math.floor(gridSize * eyes.yPos);
+            const eyeSpacing = Math.floor(gridSize * randomSpacing);
+            
+            // Draw kawaii eyes based on type
+            if (eyes.type === 'original') {
+                // Original viral eyes with variable spacing
+                if (size === 36) {
+                    const eyeX1 = centerX - eyeSpacing - 1;
+                    const eyeX2 = centerX + eyeSpacing - 1;
+                    // Larger eyes for 36x36
+                    for (let dy = 0; dy < 3; dy++) {
+                        for (let dx = 0; dx < 3; dx++) {
+                            if (eyeX1 + dx >= 0 && eyeX1 + dx < gridSize) grid[eyeY + dy][eyeX1 + dx] = eyeColor;
+                            if (eyeX2 + dx >= 0 && eyeX2 + dx < gridSize) grid[eyeY + dy][eyeX2 + dx] = eyeColor;
+                        }
+                    }
+                    // White highlights (same pattern as original)
+                    grid[eyeY][eyeX1 + 1] = '#ffffff';
+                    grid[eyeY][eyeX2 + 1] = '#ffffff';
+                    grid[eyeY + 1][eyeX1] = '#ffffff';
+                    grid[eyeY + 1][eyeX2] = '#ffffff';
+                } else if (size === 24) {
+                    const eyeX1 = centerX - eyeSpacing - 1;
+                    const eyeX2 = centerX + eyeSpacing - 1;
+                    // Medium eyes for 24x24 (2x2 with highlights)
+                    for (let dy = 0; dy < 2; dy++) {
+                        for (let dx = 0; dx < 2; dx++) {
+                            if (eyeX1 + dx >= 0 && eyeX1 + dx < gridSize) grid[eyeY + dy][eyeX1 + dx] = eyeColor;
+                            if (eyeX2 + dx >= 0 && eyeX2 + dx < gridSize) grid[eyeY + dy][eyeX2 + dx] = eyeColor;
+                        }
+                    }
+                    // White highlights
+                    grid[eyeY][eyeX1] = '#ffffff';
+                    grid[eyeY][eyeX2] = '#ffffff';
+                } else if (size === 16) {
+                    const eyeX1 = centerX - eyeSpacing;
+                    const eyeX2 = centerX + eyeSpacing;
+                    // Medium eyes for 16x16
+                    if (eyeX1 >= 0 && eyeX1 < gridSize) {
+                        grid[eyeY][eyeX1] = eyeColor;
+                        grid[eyeY + 1][eyeX1] = eyeColor;
+                        if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX1] = '#ffffff';
+                    }
+                    if (eyeX2 >= 0 && eyeX2 < gridSize) {
+                        grid[eyeY][eyeX2] = eyeColor;
+                        grid[eyeY + 1][eyeX2] = eyeColor;
+                        if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX2] = '#ffffff';
+                    }
+                } else {
+                    const eyeY = 4;
+                    const eyeX1 = 4;
+                    const eyeX2 = 7;
+                    grid[eyeY][eyeX1] = eyeColor;
+                    grid[eyeY][eyeX2] = eyeColor;
+                }
+            } else if (eyes.type === 'sparkly') {
+                // Big sparkly anime eyes
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing - 1;
+                    
+                    if (size === 36) {
+                        // White eye base (3x3)
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (eyeX + dx >= 0 && eyeX + dx < gridSize && eyeY + dy >= 0 && eyeY + dy < gridSize) {
+                                    grid[eyeY + dy][eyeX + dx] = '#ffffff';
+                                }
+                            }
+                        }
+                        
+                        // Dark pupil (2x2)
+                        if (eyeX >= 0 && eyeX + 1 < gridSize && eyeY >= 0 && eyeY + 1 < gridSize) {
+                            grid[eyeY][eyeX] = eyeColor;
+                            grid[eyeY][eyeX + 1] = eyeColor;
+                            grid[eyeY + 1][eyeX] = eyeColor;
+                            grid[eyeY + 1][eyeX + 1] = eyeColor;
+                        }
+                        
+                        // Sparkles
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                    } else if (size === 24) {
+                        // Medium sparkly eyes for 24x24 (2x2 base)
+                        for (let dy = 0; dy <= 1; dy++) {
+                            for (let dx = 0; dx <= 1; dx++) {
+                                if (eyeX + dx >= 0 && eyeX + dx < gridSize && eyeY + dy >= 0 && eyeY + dy < gridSize) {
+                                    grid[eyeY + dy][eyeX + dx] = '#ffffff';
+                                }
+                            }
+                        }
+                        
+                        // Dark pupil (1x1)
+                        if (eyeX >= 0 && eyeX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][eyeX] = eyeColor;
+                        }
+                        
+                        // Sparkles
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                    } else if (size === 16) {
+                        // Smaller sparkly eyes for 16x16
+                        if (eyeX >= 0 && eyeX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][eyeX] = eyeColor;
+                            if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX] = sparkleColor;
+                        }
+                    }
+                }
+            } else if (eyes.type === 'closed') {
+                // Happy closed eyes (curved lines)
+                const leftEyeX = centerX - eyeSpacing;
+                const rightEyeX = centerX + eyeSpacing;
+                
+                if (size === 36) {
+                    // Left eye
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (leftEyeX + dx >= 0 && leftEyeX + dx < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][leftEyeX + dx] = eyeColor;
+                        }
+                    }
+                    if (leftEyeX - 1 >= 0 && eyeY + 1 < gridSize) grid[eyeY + 1][leftEyeX - 1] = eyeColor;
+                    if (leftEyeX + 1 < gridSize && eyeY + 1 < gridSize) grid[eyeY + 1][leftEyeX + 1] = eyeColor;
+                    
+                    // Right eye
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (rightEyeX + dx >= 0 && rightEyeX + dx < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][rightEyeX + dx] = eyeColor;
+                        }
+                    }
+                    if (rightEyeX - 1 >= 0 && eyeY + 1 < gridSize) grid[eyeY + 1][rightEyeX - 1] = eyeColor;
+                    if (rightEyeX + 1 < gridSize && eyeY + 1 < gridSize) grid[eyeY + 1][rightEyeX + 1] = eyeColor;
+                } else if (size === 24) {
+                    // Medium closed eyes for 24x24
+                    if (leftEyeX >= 0 && leftEyeX + 1 < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                        grid[eyeY][leftEyeX] = eyeColor;
+                        grid[eyeY][leftEyeX + 1] = eyeColor;
+                        if (eyeY + 1 < gridSize) {
+                            grid[eyeY + 1][leftEyeX - 1 >= 0 ? leftEyeX - 1 : leftEyeX] = eyeColor;
+                            grid[eyeY + 1][leftEyeX + 2 < gridSize ? leftEyeX + 2 : leftEyeX + 1] = eyeColor;
+                        }
+                    }
+                    if (rightEyeX >= 0 && rightEyeX + 1 < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                        grid[eyeY][rightEyeX] = eyeColor;
+                        grid[eyeY][rightEyeX + 1] = eyeColor;
+                        if (eyeY + 1 < gridSize) {
+                            grid[eyeY + 1][rightEyeX - 1 >= 0 ? rightEyeX - 1 : rightEyeX] = eyeColor;
+                            grid[eyeY + 1][rightEyeX + 2 < gridSize ? rightEyeX + 2 : rightEyeX + 1] = eyeColor;
+                        }
+                    }
+                } else if (size === 16) {
+                    // Simpler closed eyes for 16x16
+                    if (leftEyeX >= 0 && leftEyeX + 1 < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                        grid[eyeY][leftEyeX] = eyeColor;
+                        grid[eyeY][leftEyeX + 1] = eyeColor;
+                    }
+                    if (rightEyeX >= 0 && rightEyeX + 1 < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                        grid[eyeY][rightEyeX] = eyeColor;
+                        grid[eyeY][rightEyeX + 1] = eyeColor;
+                    }
+                }
+            } else if (eyes.type === 'starry') {
+                // Star-shaped eyes
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing;
+                    
+                    if (size === 36) {
+                        // Star pattern
+                        if (eyeX >= 0 && eyeX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][eyeX] = sparkleColor;
+                            if (eyeX - 1 >= 0) grid[eyeY][eyeX - 1] = sparkleColor;
+                            if (eyeX + 1 < gridSize) grid[eyeY][eyeX + 1] = sparkleColor;
+                            if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX] = sparkleColor;
+                            if (eyeY + 1 < gridSize) grid[eyeY + 1][eyeX] = sparkleColor;
+                        }
+                    } else if (size === 24) {
+                        // Medium star for 24x24
+                        if (eyeX >= 0 && eyeX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][eyeX] = sparkleColor;
+                            if (eyeX - 1 >= 0) grid[eyeY][eyeX - 1] = sparkleColor;
+                            if (eyeX + 1 < gridSize) grid[eyeY][eyeX + 1] = sparkleColor;
+                            if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX] = sparkleColor;
+                            if (eyeY + 1 < gridSize) grid[eyeY + 1][eyeX] = sparkleColor;
+                        }
+                    } else if (size === 16) {
+                        // Smaller star for 16x16
+                        if (eyeX >= 0 && eyeX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][eyeX] = sparkleColor;
+                            if (eyeX - 1 >= 0) grid[eyeY][eyeX - 1] = sparkleColor;
+                            if (eyeX + 1 < gridSize) grid[eyeY][eyeX + 1] = sparkleColor;
+                        }
+                    }
+                }
+            } else if (eyes.type === 'round') {
+                // Big round eyes with highlights
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing - 1;
+                    
+                    if (size === 36) {
+                        // White eye base
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (Math.abs(dx) + Math.abs(dy) <= 2) {
+                                    if (eyeX + dx >= 0 && eyeX + dx < gridSize && eyeY + dy >= 0 && eyeY + dy < gridSize) {
+                                        grid[eyeY + dy][eyeX + dx] = '#ffffff';
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Pupil
+                        if (eyeX >= 0 && eyeX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][eyeX] = eyeColor;
+                        }
+                        
+                        // Highlight
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) {
+                            grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                        }
+                    } else if (size === 24) {
+                        // Medium round eyes for 24x24
+                        // White eye base (2x2)
+                        for (let dy = 0; dy <= 1; dy++) {
+                            for (let dx = 0; dx <= 1; dx++) {
+                                if (eyeX + dx >= 0 && eyeX + dx < gridSize && eyeY + dy >= 0 && eyeY + dy < gridSize) {
+                                    grid[eyeY + dy][eyeX + dx] = '#ffffff';
+                                }
+                            }
+                        }
+                        
+                        // Pupil
+                        if (eyeX >= 0 && eyeX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][eyeX] = eyeColor;
+                        }
+                        
+                        // Highlight
+                        if (eyeX + 1 < gridSize && eyeY >= 0) {
+                            grid[eyeY][eyeX + 1] = sparkleColor;
+                        }
+                    } else if (size === 16) {
+                        // Simpler round eyes for 16x16
+                        if (eyeX >= 0 && eyeX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                            grid[eyeY][eyeX] = eyeColor;
+                            if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX] = sparkleColor;
+                        }
+                    }
+                }
+            } else if (eyes.type === 'antenna') {
+                // Antenna/stalk eyes - eyes on stalks connected to body
+                // Limit antenna spacing to prevent them being too far apart
+                const maxAntennaSpacing = size === 36 ? 8 : size === 24 ? 6 : 4;
+                const limitedEyeSpacing = Math.min(eyeSpacing, maxAntennaSpacing);
+                
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - limitedEyeSpacing : centerX + limitedEyeSpacing;
+                    const distanceFromCenter = Math.abs(eyeX - centerX);
+                    
+                    if (size === 36) {
+                        // Connect stalk to body - find the top of body area
+                        const bodyTopY = Math.floor(gridSize * 0.28);
+                        
+                        // If antenna is far from center, add horizontal connection line
+                        if (distanceFromCenter > 4) {
+                            const connectionY = bodyTopY;
+                            const startX = Math.min(centerX, eyeX);
+                            const endX = Math.max(centerX, eyeX);
+                            
+                            // Draw horizontal connection line with holes (single pixel wide)
+                            for (let x = startX; x <= endX; x++) {
+                                if (x >= 0 && x < gridSize && connectionY >= 0) {
+                                    // 80% chance for each pixel to be filled (creates natural gaps)
+                                    if (random() < 0.8) {
+                                        // Use two-color system for connection line
+                                        const useSecondaryColor = random() < 0.3;
+                                        const connectionColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                        grid[connectionY][x] = connectionColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Draw stalk base - thicker at bottom to connect to body
+                        for (let dy = 0; dy < 2; dy++) {
+                            const stalkY = bodyTopY - dy;
+                            if (stalkY >= 0) {
+                                // Make base slightly wider using two-color system
+                                if (eyeX >= 0 && eyeX < gridSize) {
+                                    const useSecondaryColor = random() < 0.3;
+                                    grid[stalkY][eyeX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                }
+                                if (eyeX - 1 >= 0 && dy === 0) {
+                                    const useSecondaryColor = random() < 0.3;
+                                    grid[stalkY][eyeX - 1] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                }
+                                if (eyeX + 1 < gridSize && dy === 0) {
+                                    const useSecondaryColor = random() < 0.3;
+                                    grid[stalkY][eyeX + 1] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                }
+                            }
+                        }
+                        
+                        // Draw stalk going up (two-color system)
+                        for (let dy = 2; dy < 7; dy++) {
+                            const stalkY = bodyTopY - dy;
+                            if (eyeX >= 0 && eyeX < gridSize && stalkY >= 0) {
+                                const useSecondaryColor = random() < 0.3;
+                                grid[stalkY][eyeX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                        }
+                        
+                        // Bigger eye at the top of stalk (3x3)
+                        const eyeTopY = bodyTopY - 7;
+                        if (eyeTopY >= 0 && eyeTopY + 2 < gridSize) {
+                            // Draw 3x3 eye
+                            for (let dy = 0; dy < 3; dy++) {
+                                for (let dx = 0; dx < 3; dx++) {
+                                    if (eyeX - 1 + dx >= 0 && eyeX - 1 + dx < gridSize) {
+                                        grid[eyeTopY + dy][eyeX - 1 + dx] = eyeColor;
+                                    }
+                                }
+                            }
+                            // White highlight (2x2 in center)
+                            if (eyeX >= 0 && eyeX + 1 < gridSize) {
+                                grid[eyeTopY][eyeX] = sparkleColor;
+                                grid[eyeTopY][eyeX + 1] = sparkleColor;
+                                grid[eyeTopY + 1][eyeX] = sparkleColor;
+                                grid[eyeTopY + 1][eyeX + 1] = sparkleColor;
+                            }
+                        }
+                    } else if (size === 24) {
+                        // Medium antenna eyes for 24x24
+                        const bodyTopY = Math.floor(gridSize * 0.29);
+                        
+                        // If antenna is far from center, add horizontal connection line
+                        if (distanceFromCenter > 3) {
+                            const connectionY = bodyTopY;
+                            const startX = Math.min(centerX, eyeX);
+                            const endX = Math.max(centerX, eyeX);
+                            
+                            // Draw horizontal connection line with holes (single pixel wide)
+                            for (let x = startX; x <= endX; x++) {
+                                if (x >= 0 && x < gridSize && connectionY >= 0) {
+                                    // 80% chance for each pixel to be filled (creates natural gaps)
+                                    if (random() < 0.8) {
+                                        // Use two-color system for connection line
+                                        const useSecondaryColor = random() < 0.3;
+                                        const connectionColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                        grid[connectionY][x] = connectionColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Draw stalk base - thicker at bottom to connect to body
+                        for (let dy = 0; dy < 2; dy++) {
+                            const stalkY = bodyTopY - dy;
+                            if (stalkY >= 0) {
+                                // Make base slightly wider using two-color system
+                                if (eyeX >= 0 && eyeX < gridSize) {
+                                    const useSecondaryColor = random() < 0.3;
+                                    grid[stalkY][eyeX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                }
+                                if (eyeX - 1 >= 0 && dy === 0) {
+                                    const useSecondaryColor = random() < 0.3;
+                                    grid[stalkY][eyeX - 1] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                }
+                                if (eyeX + 1 < gridSize && dy === 0) {
+                                    const useSecondaryColor = random() < 0.3;
+                                    grid[stalkY][eyeX + 1] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                }
+                            }
+                        }
+                        
+                        // Draw stalk going up (two-color system)
+                        for (let dy = 2; dy < 5; dy++) {
+                            const stalkY = bodyTopY - dy;
+                            if (eyeX >= 0 && eyeX < gridSize && stalkY >= 0) {
+                                const useSecondaryColor = random() < 0.3;
+                                grid[stalkY][eyeX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                        }
+                        
+                        // Medium eye at the top of stalk (2x2)
+                        const eyeTopY = bodyTopY - 5;
+                        if (eyeTopY >= 0 && eyeTopY + 1 < gridSize) {
+                            // Draw 2x2 eye
+                            for (let dy = 0; dy < 2; dy++) {
+                                for (let dx = 0; dx < 2; dx++) {
+                                    if (eyeX + dx >= 0 && eyeX + dx < gridSize) {
+                                        grid[eyeTopY + dy][eyeX + dx] = eyeColor;
+                                    }
+                                }
+                            }
+                            // White highlight (1x1 in center)
+                            if (eyeX >= 0 && eyeX < gridSize) {
+                                grid[eyeTopY][eyeX] = sparkleColor;
+                            }
+                        }
+                    } else if (size === 16) {
+                        // Connect to body for small creatures
+                        const bodyTopY = Math.floor(gridSize * 0.3);
+                        
+                        // If antenna is far from center, add horizontal connection
+                        if (distanceFromCenter > 2) {
+                            const connectionY = bodyTopY;
+                            const startX = Math.min(centerX, eyeX);
+                            const endX = Math.max(centerX, eyeX);
+                            
+                            // Draw horizontal connection line with holes (single pixel wide)
+                            for (let x = startX; x <= endX; x++) {
+                                if (x >= 0 && x < gridSize && connectionY >= 0) {
+                                    // 80% chance for each pixel to be filled (creates natural gaps)
+                                    if (random() < 0.8) {
+                                        // Use two-color system for connection line
+                                        const useSecondaryColor = random() < 0.3;
+                                        const connectionColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                        grid[connectionY][x] = connectionColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Base connection to body
+                        if (bodyTopY >= 0 && eyeX >= 0 && eyeX < gridSize) {
+                            const useSecondaryColor = random() < 0.3;
+                            grid[bodyTopY][eyeX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                        }
+                        
+                        // Stalk (two-color system)
+                        for (let dy = 1; dy < 3; dy++) {
+                            const stalkY = bodyTopY - dy;
+                            if (eyeX >= 0 && eyeX < gridSize && stalkY >= 0) {
+                                const useSecondaryColor = random() < 0.3;
+                                grid[stalkY][eyeX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                        }
+                        
+                        // Bigger eye at top (2x2)
+                        const eyeTopY = bodyTopY - 3;
+                        if (eyeTopY >= 0 && eyeTopY + 1 < gridSize) {
+                            if (eyeX >= 0 && eyeX + 1 < gridSize) {
+                                grid[eyeTopY][eyeX] = eyeColor;
+                                grid[eyeTopY][eyeX + 1] = eyeColor;
+                                grid[eyeTopY + 1][eyeX] = eyeColor;
+                                grid[eyeTopY + 1][eyeX + 1] = eyeColor;
+                            }
+                            // White highlight
+                            if (eyeX >= 0 && eyeTopY >= 0) {
+                                grid[eyeTopY][eyeX] = sparkleColor;
+                            }
+                        }
+                    }
+                }
+            } else if (eyes.type === 'bug') {
+                // Bug compound eyes - multi-faceted insect eyes
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing;
+                    
+                    if (size === 36) {
+                        // Large compound eye (4x4 base with facets)
+                        // Main eye structure
+                        for (let dy = -2; dy <= 1; dy++) {
+                            for (let dx = -2; dx <= 1; dx++) {
+                                if (eyeX + dx >= 0 && eyeX + dx < gridSize && eyeY + dy >= 0 && eyeY + dy < gridSize) {
+                                    // Create oval shape
+                                    const distance = Math.sqrt(dx * dx + dy * dy * 0.8);
+                                    if (distance <= 2.2) {
+                                        grid[eyeY + dy][eyeX + dx] = eyeColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Add compound facets (small hexagonal/circular details)
+                        const facetPositions = [
+                            [-1, -1], [0, -1], [1, -1],
+                            [-1, 0], [0, 0], [1, 0],
+                            [-1, 1], [0, 1]
+                        ];
+                        
+                        for (let facet of facetPositions) {
+                            const facetX = eyeX + facet[0];
+                            const facetY = eyeY + facet[1];
+                            
+                            if (facetX >= 0 && facetX < gridSize && facetY >= 0 && facetY < gridSize) {
+                                if (grid[facetY][facetX] === eyeColor) {
+                                    // Add darker center to each facet
+                                    const darkerEyeColor = getSimilarColor(eyeColor, 0.6);
+                                    grid[facetY][facetX] = darkerEyeColor;
+                                }
+                            }
+                        }
+                        
+                        // Add some bright highlights on a few facets
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                        if (eyeX >= 0 && eyeY >= 0) grid[eyeY][eyeX] = sparkleColor;
+                        
+                    } else if (size === 24) {
+                        // Medium compound eye for 24x24 (3x3)
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (eyeX + dx >= 0 && eyeX + dx < gridSize && eyeY + dy >= 0 && eyeY + dy < gridSize) {
+                                    // Create more circular shape for medium size
+                                    const distance = Math.sqrt(dx * dx + dy * dy);
+                                    if (distance <= 1.5) {
+                                        grid[eyeY + dy][eyeX + dx] = eyeColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Add compound facets (medium detail)
+                        const mediumFacets = [[-1, -1], [0, -1], [1, -1], [-1, 0], [0, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+                        for (let facet of mediumFacets) {
+                            const facetX = eyeX + facet[0];
+                            const facetY = eyeY + facet[1];
+                            
+                            if (facetX >= 0 && facetX < gridSize && facetY >= 0 && facetY < gridSize) {
+                                if (grid[facetY][facetX] === eyeColor) {
+                                    // Add darker center to each facet
+                                    const darkerEyeColor = getSimilarColor(eyeColor, 0.6);
+                                    grid[facetY][facetX] = darkerEyeColor;
+                                }
+                            }
+                        }
+                        
+                        // Add some bright highlights
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                        if (eyeX >= 0 && eyeY >= 0) grid[eyeY][eyeX] = sparkleColor;
+                        
+                    } else if (size === 16) {
+                        // Smaller compound eye (3x3)
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (eyeX + dx >= 0 && eyeX + dx < gridSize && eyeY + dy >= 0 && eyeY + dy < gridSize) {
+                                    grid[eyeY + dy][eyeX + dx] = eyeColor;
+                                }
+                            }
+                        }
+                        
+                        // Add facet details (darker centers)
+                        const smallFacets = [[-1, -1], [0, 0], [1, 1]];
+                        for (let facet of smallFacets) {
+                            const facetX = eyeX + facet[0];
+                            const facetY = eyeY + facet[1];
+                            
+                            if (facetX >= 0 && facetX < gridSize && facetY >= 0 && facetY < gridSize) {
+                                const darkerEyeColor = getSimilarColor(eyeColor, 0.6);
+                                grid[facetY][facetX] = darkerEyeColor;
+                            }
+                        }
+                        
+                        // Single highlight
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                    }
+                }
+            } else if (eyes.type === 'horizontal-antenna') {
+                // Horizontal antenna eyes - eyes on stalks extending sideways
+                // Use same spacing limits as regular antennas
+                const maxAntennaSpacing = size === 36 ? 8 : size === 24 ? 6 : 4;
+                const limitedEyeSpacing = Math.min(eyeSpacing, maxAntennaSpacing);
+                
+                for (let eye = 0; eye < 2; eye++) {
+                    const baseEyeX = eye === 0 ? centerX - limitedEyeSpacing : centerX + limitedEyeSpacing;
+                    const direction = eye === 0 ? -1 : 1; // Left goes left, right goes right
+                    
+                    if (size === 36) {
+                        // Connect to body at eye level
+                        const connectY = eyeY;
+                        
+                        // If antenna extends far, add connection to center
+                        if (limitedEyeSpacing > 4) {
+                            const startX = Math.min(centerX, baseEyeX);
+                            const endX = Math.max(centerX, baseEyeX);
+                            
+                            // Draw horizontal connection line with holes
+                            for (let x = startX; x <= endX; x++) {
+                                if (x >= 0 && x < gridSize && connectY >= 0 && connectY < gridSize) {
+                                    if (random() < 0.8) {
+                                        const useSecondaryColor = random() < 0.3;
+                                        const connectionColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                        grid[connectY][x] = connectionColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Draw horizontal stalk extending outward
+                        for (let dx = 0; dx < 6; dx++) {
+                            const stalkX = baseEyeX + (direction * dx);
+                            if (stalkX >= 0 && stalkX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                                const useSecondaryColor = random() < 0.3;
+                                grid[eyeY][stalkX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                        }
+                        
+                        // Add slight curve upward at the end
+                        const curveStart = baseEyeX + (direction * 4);
+                        if (curveStart >= 0 && curveStart < gridSize && eyeY - 1 >= 0) {
+                            const useSecondaryColor = random() < 0.3;
+                            grid[eyeY - 1][curveStart] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                        }
+                        
+                        // Eye at the end of horizontal stalk (3x3)
+                        const eyeEndX = baseEyeX + (direction * 5);
+                        const eyeEndY = eyeY - 1;
+                        if (eyeEndY >= 0 && eyeEndY + 2 < gridSize && eyeEndX - 1 >= 0 && eyeEndX + 1 < gridSize) {
+                            // Draw 3x3 eye
+                            for (let dy = 0; dy < 3; dy++) {
+                                for (let dx = 0; dx < 3; dx++) {
+                                    if (eyeEndX - 1 + dx >= 0 && eyeEndX - 1 + dx < gridSize) {
+                                        grid[eyeEndY + dy][eyeEndX - 1 + dx] = eyeColor;
+                                    }
+                                }
+                            }
+                            // White highlight (2x2 in center)
+                            if (eyeEndX >= 0 && eyeEndX + 1 < gridSize) {
+                                grid[eyeEndY][eyeEndX] = sparkleColor;
+                                grid[eyeEndY][eyeEndX + 1] = sparkleColor;
+                                grid[eyeEndY + 1][eyeEndX] = sparkleColor;
+                                grid[eyeEndY + 1][eyeEndX + 1] = sparkleColor;
+                            }
+                        }
+                        
+                    } else if (size === 24) {
+                        // Medium horizontal stalks for 24x24 creatures
+                        const connectY = eyeY;
+                        
+                        // Connection to body if needed
+                        if (limitedEyeSpacing > 3) {
+                            const startX = Math.min(centerX, baseEyeX);
+                            const endX = Math.max(centerX, baseEyeX);
+                            
+                            for (let x = startX; x <= endX; x++) {
+                                if (x >= 0 && x < gridSize && connectY >= 0 && connectY < gridSize) {
+                                    if (random() < 0.8) {
+                                        const useSecondaryColor = random() < 0.3;
+                                        const connectionColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                        grid[connectY][x] = connectionColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Medium horizontal stalk
+                        for (let dx = 0; dx < 4; dx++) {
+                            const stalkX = baseEyeX + (direction * dx);
+                            if (stalkX >= 0 && stalkX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                                const useSecondaryColor = random() < 0.3;
+                                grid[eyeY][stalkX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                        }
+                        
+                        // Add slight curve upward at the end
+                        const curveStart = baseEyeX + (direction * 3);
+                        if (curveStart >= 0 && curveStart < gridSize && eyeY - 1 >= 0) {
+                            const useSecondaryColor = random() < 0.3;
+                            grid[eyeY - 1][curveStart] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                        }
+                        
+                        // Eye at the end of horizontal stalk (2x2)
+                        const eyeEndX = baseEyeX + (direction * 3);
+                        const eyeEndY = eyeY - 1;
+                        if (eyeEndY >= 0 && eyeEndY + 1 < gridSize && eyeEndX >= 0 && eyeEndX + 1 < gridSize) {
+                            // Draw 2x2 eye
+                            grid[eyeEndY][eyeEndX] = eyeColor;
+                            grid[eyeEndY][eyeEndX + 1] = eyeColor;
+                            grid[eyeEndY + 1][eyeEndX] = eyeColor;
+                            grid[eyeEndY + 1][eyeEndX + 1] = eyeColor;
+                            // White highlight
+                            grid[eyeEndY][eyeEndX] = sparkleColor;
+                            grid[eyeEndY][eyeEndX + 1] = sparkleColor;
+                        }
+                        
+                    } else if (size === 16) {
+                        // Shorter horizontal stalks for small creatures
+                        const connectY = eyeY;
+                        
+                        // Connection to body if needed
+                        if (limitedEyeSpacing > 2) {
+                            const startX = Math.min(centerX, baseEyeX);
+                            const endX = Math.max(centerX, baseEyeX);
+                            
+                            for (let x = startX; x <= endX; x++) {
+                                if (x >= 0 && x < gridSize && connectY >= 0 && connectY < gridSize) {
+                                    if (random() < 0.8) {
+                                        const useSecondaryColor = random() < 0.3;
+                                        const connectionColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                        grid[connectY][x] = connectionColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Short horizontal stalk
+                        for (let dx = 0; dx < 3; dx++) {
+                            const stalkX = baseEyeX + (direction * dx);
+                            if (stalkX >= 0 && stalkX < gridSize && eyeY >= 0 && eyeY < gridSize) {
+                                const useSecondaryColor = random() < 0.3;
+                                grid[eyeY][stalkX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                        }
+                        
+                        // Eye at the end (2x2)
+                        const eyeEndX = baseEyeX + (direction * 2);
+                        if (eyeY >= 0 && eyeY + 1 < gridSize && eyeEndX >= 0 && eyeEndX + 1 < gridSize) {
+                            grid[eyeY][eyeEndX] = eyeColor;
+                            grid[eyeY][eyeEndX + 1] = eyeColor;
+                            grid[eyeY + 1][eyeEndX] = eyeColor;
+                            grid[eyeY + 1][eyeEndX + 1] = eyeColor;
+                            // White highlight
+                            grid[eyeY][eyeEndX] = sparkleColor;
+                        }
+                    }
+                }
+            }
+
+            // Add cute mouth or nose
+            const mouthTypes = ['dot', 'line', 'w', 'o', 'triangle'];
+            const mouthType = mouthTypes[(seed + 50) % mouthTypes.length];
+            const mouthY = Math.floor(gridSize * 0.55); // Below the eyes
+            
+            if (mouthType === 'dot') {
+                // Simple dot nose
+                if (centerX >= 0 && centerX < gridSize && mouthY >= 0 && mouthY < gridSize) {
+                    grid[mouthY][centerX] = eyeColor;
+                }
+            } else if (mouthType === 'line') {
+                // Horizontal line mouth
+                const mouthWidth = size === 36 ? 3 : size === 24 ? 2 : 2;
+                for (let dx = -Math.floor(mouthWidth/2); dx <= Math.floor(mouthWidth/2); dx++) {
+                    if (centerX + dx >= 0 && centerX + dx < gridSize && mouthY >= 0 && mouthY < gridSize) {
+                        grid[mouthY][centerX + dx] = eyeColor;
+                    }
+                }
+            } else if (mouthType === 'w') {
+                // W-shaped mouth (like :3)
+                if (size === 36) {
+                    if (mouthY >= 0 && mouthY < gridSize) {
+                        if (centerX - 2 >= 0) grid[mouthY][centerX - 2] = eyeColor;
+                        if (centerX >= 0) grid[mouthY][centerX] = eyeColor;
+                        if (centerX + 2 < gridSize) grid[mouthY][centerX + 2] = eyeColor;
+                        if (mouthY + 1 < gridSize) {
+                            if (centerX - 1 >= 0) grid[mouthY + 1][centerX - 1] = eyeColor;
+                            if (centerX + 1 < gridSize) grid[mouthY + 1][centerX + 1] = eyeColor;
+                        }
+                    }
+                } else if (size === 24) {
+                    // Medium w-shaped mouth for 24x24
+                    if (mouthY >= 0 && mouthY < gridSize) {
+                        if (centerX - 1 >= 0) grid[mouthY][centerX - 1] = eyeColor;
+                        if (centerX >= 0) grid[mouthY][centerX] = eyeColor;
+                        if (centerX + 1 < gridSize) grid[mouthY][centerX + 1] = eyeColor;
+                        if (mouthY + 1 < gridSize) {
+                            if (centerX - 1 >= 0) grid[mouthY + 1][centerX - 1] = eyeColor;
+                            if (centerX + 1 < gridSize) grid[mouthY + 1][centerX + 1] = eyeColor;
+                        }
+                    }
+                } else {
+                    // Simpler w for small sizes
+                    if (mouthY >= 0 && mouthY < gridSize && centerX >= 0 && centerX < gridSize) {
+                        grid[mouthY][centerX] = eyeColor;
+                        if (centerX - 1 >= 0) grid[mouthY][centerX - 1] = eyeColor;
+                        if (centerX + 1 < gridSize) grid[mouthY][centerX + 1] = eyeColor;
+                    }
+                }
+            } else if (mouthType === 'o') {
+                // O-shaped mouth
+                if (size === 36) {
+                    if (mouthY >= 0 && mouthY + 1 < gridSize && centerX >= 0 && centerX + 1 < gridSize) {
+                        grid[mouthY][centerX] = eyeColor;
+                        grid[mouthY][centerX + 1] = eyeColor;
+                        grid[mouthY + 1][centerX] = eyeColor;
+                        grid[mouthY + 1][centerX + 1] = eyeColor;
+                    }
+                } else if (size === 24) {
+                    // Medium o-shaped mouth for 24x24 (1x1)
+                    if (centerX >= 0 && centerX < gridSize && mouthY >= 0 && mouthY < gridSize) {
+                        grid[mouthY][centerX] = eyeColor;
+                    }
+                } else {
+                    // Single pixel for small sizes
+                    if (centerX >= 0 && centerX < gridSize && mouthY >= 0 && mouthY < gridSize) {
+                        grid[mouthY][centerX] = eyeColor;
+                    }
+                }
+            } else if (mouthType === 'triangle') {
+                // Triangle nose (^)
+                if (mouthY >= 0 && mouthY < gridSize && centerX >= 0 && centerX < gridSize) {
+                    grid[mouthY][centerX] = eyeColor;
+                    if (mouthY - 1 >= 0) {
+                        if (centerX - 1 >= 0) grid[mouthY - 1][centerX - 1] = eyeColor;
+                        if (centerX + 1 < gridSize) grid[mouthY - 1][centerX + 1] = eyeColor;
+                    }
+                }
+            }
+
+            // Add tail property (seed-based)
+            const hasTail = (seed + 200) % 3 === 0; // About 33% of creatures have tails
+            
+            if (hasTail) {
+                const tailTypes = ['curved', 'straight', 'forked', 'spiral', 'zigzag', 'whip', 'fan', 'barbed', 'feathered', 'club'];
+                const tailType = tailTypes[(seed + 300) % tailTypes.length];
+                const tailStartY = Math.floor(gridSize * 0.7); // Start at bottom of body
+                
+                if (tailType === 'curved') {
+                    // Curved tail that arcs downward
+                    if (size === 36) {
+                        const tailLength = 8;
+                        const tailDirection = (seed % 2 === 0) ? 1 : -1; // Left or right curve
+                        
+                        for (let i = 0; i < tailLength; i++) {
+                            const progress = i / (tailLength - 1);
+                            const tailX = centerX + Math.floor(tailDirection * progress * 6);
+                            const tailY = tailStartY + Math.floor(progress * progress * 6); // Curved downward
+                            
+                            if (tailX >= 0 && tailX < gridSize && tailY >= 0 && tailY < gridSize) {
+                                // Use two-color system for tail
+                                const useSecondaryColor = random() < 0.4;
+                                const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                grid[tailY][tailX] = tailColor;
+                                
+                                // Add thickness to base of tail
+                                if (i < 3 && tailX - 1 >= 0) {
+                                    const useSecondaryColor2 = random() < 0.4;
+                                    const tailColor2 = useSecondaryColor2 ? secondaryBodyColor : primaryColor;
+                                    grid[tailY][tailX - tailDirection] = tailColor2;
+                                }
+                            }
+                        }
+                    } else if (size === 24) {
+                        // Medium curved tail for 24x24
+                        const tailLength = 6;
+                        const tailDirection = (seed % 2 === 0) ? 1 : -1;
+                        
+                        for (let i = 0; i < tailLength; i++) {
+                            const progress = i / (tailLength - 1);
+                            const tailX = centerX + Math.floor(tailDirection * progress * 4);
+                            const tailY = tailStartY + Math.floor(progress * progress * 4);
+                            
+                            if (tailX >= 0 && tailX < gridSize && tailY >= 0 && tailY < gridSize) {
+                                const useSecondaryColor = random() < 0.4;
+                                const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                grid[tailY][tailX] = tailColor;
+                                
+                                // Add thickness to base of tail
+                                if (i < 2 && tailX - 1 >= 0) {
+                                    const useSecondaryColor2 = random() < 0.4;
+                                    const tailColor2 = useSecondaryColor2 ? secondaryBodyColor : primaryColor;
+                                    grid[tailY][tailX - tailDirection] = tailColor2;
+                                }
+                            }
+                        }
+                    } else if (size === 16) {
+                        // Smaller curved tail for offspring
+                        const tailLength = 4;
+                        const tailDirection = (seed % 2 === 0) ? 1 : -1;
+                        
+                        for (let i = 0; i < tailLength; i++) {
+                            const progress = i / (tailLength - 1);
+                            const tailX = centerX + Math.floor(tailDirection * progress * 3);
+                            const tailY = tailStartY + Math.floor(progress * progress * 3);
+                            
+                            if (tailX >= 0 && tailX < gridSize && tailY >= 0 && tailY < gridSize) {
+                                const useSecondaryColor = random() < 0.4;
+                                const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                grid[tailY][tailX] = tailColor;
+                            }
+                        }
+                    }
+                } else if (tailType === 'straight') {
+                    // Straight tail going downward
+                    const tailLength = size === 36 ? 6 : size === 24 ? 4 : 3;
+                    
+                    for (let i = 0; i < tailLength; i++) {
+                        const tailY = tailStartY + i;
+                        
+                        if (centerX >= 0 && centerX < gridSize && tailY >= 0 && tailY < gridSize) {
+                            const useSecondaryColor = random() < 0.4;
+                            const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            grid[tailY][centerX] = tailColor;
+                            
+                            // Add width to base
+                            if ((size === 36 || size === 24) && i < 2) {
+                                if (centerX - 1 >= 0) {
+                                    const useSecondaryColor2 = random() < 0.4;
+                                    const tailColor2 = useSecondaryColor2 ? secondaryBodyColor : primaryColor;
+                                    grid[tailY][centerX - 1] = tailColor2;
+                                }
+                                if (centerX + 1 < gridSize) {
+                                    const useSecondaryColor3 = random() < 0.4;
+                                    const tailColor3 = useSecondaryColor3 ? secondaryBodyColor : primaryColor;
+                                    grid[tailY][centerX + 1] = tailColor3;
+                                }
+                            }
+                        }
+                    }
+                } else if (tailType === 'forked') {
+                    // Forked tail that splits into two
+                    const tailLength = size === 36 ? 5 : size === 24 ? 4 : 3;
+                    
+                    // Main tail stem
+                    for (let i = 0; i < 2; i++) {
+                        const tailY = tailStartY + i;
+                        
+                        if (centerX >= 0 && centerX < gridSize && tailY >= 0 && tailY < gridSize) {
+                            const useSecondaryColor = random() < 0.4;
+                            const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            grid[tailY][centerX] = tailColor;
+                        }
+                    }
+                    
+                    // Fork branches
+                    for (let i = 2; i < tailLength; i++) {
+                        const branchSpread = i - 1;
+                        const leftX = centerX - branchSpread;
+                        const rightX = centerX + branchSpread;
+                        const tailY = tailStartY + i;
+                        
+                        if (tailY >= 0 && tailY < gridSize) {
+                            // Left branch
+                            if (leftX >= 0 && leftX < gridSize) {
+                                const useSecondaryColor = random() < 0.4;
+                                const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                grid[tailY][leftX] = tailColor;
+                            }
+                            
+                            // Right branch
+                            if (rightX >= 0 && rightX < gridSize) {
+                                const useSecondaryColor = random() < 0.4;
+                                const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                grid[tailY][rightX] = tailColor;
+                            }
+                        }
+                    }
+                } else if (tailType === 'spiral') {
+                    // Spiral tail that curves in a helix pattern
+                    const tailLength = size === 36 ? 10 : size === 24 ? 7 : 4;
+                    const spiralTightness = 2.5; // How tight the spiral is
+                    
+                    for (let i = 0; i < tailLength; i++) {
+                        const progress = i / (tailLength - 1);
+                        const angle = progress * Math.PI * spiralTightness;
+                        const radius = progress * (size === 36 ? 4 : size === 24 ? 3 : 2);
+                        
+                        const tailX = centerX + Math.floor(Math.cos(angle) * radius);
+                        const tailY = tailStartY + Math.floor(progress * (size === 36 ? 8 : size === 24 ? 6 : 4));
+                        
+                        if (tailX >= 0 && tailX < gridSize && tailY >= 0 && tailY < gridSize) {
+                            const useSecondaryColor = random() < 0.4;
+                            const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            grid[tailY][tailX] = tailColor;
+                        }
+                    }
+                } else if (tailType === 'zigzag') {
+                    // Zigzag tail that alternates left and right
+                    const tailLength = size === 36 ? 8 : size === 24 ? 6 : 4;
+                    const zigzagWidth = size === 36 ? 3 : size === 24 ? 2 : 1;
+                    
+                    for (let i = 0; i < tailLength; i++) {
+                        const zigzagDirection = (i % 2 === 0) ? -1 : 1;
+                        const tailX = centerX + (zigzagDirection * zigzagWidth);
+                        const tailY = tailStartY + i;
+                        
+                        if (tailX >= 0 && tailX < gridSize && tailY >= 0 && tailY < gridSize) {
+                            const useSecondaryColor = random() < 0.4;
+                            const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            grid[tailY][tailX] = tailColor;
+                            
+                            // Connect to center for first segment
+                            if (i === 0) {
+                                grid[tailY][centerX] = tailColor;
+                            }
+                        }
+                    }
+                } else if (tailType === 'whip') {
+                    // Thin whip-like tail that tapers
+                    const tailLength = size === 36 ? 12 : size === 24 ? 9 : 6;
+                    const whipCurve = (seed % 2 === 0) ? 1 : -1;
+                    
+                    for (let i = 0; i < tailLength; i++) {
+                        const progress = i / (tailLength - 1);
+                        const curvature = Math.sin(progress * Math.PI) * whipCurve * 2;
+                        const tailX = centerX + Math.floor(curvature);
+                        const tailY = tailStartY + i;
+                        
+                        if (tailX >= 0 && tailX < gridSize && tailY >= 0 && tailY < gridSize) {
+                            const useSecondaryColor = random() < 0.4;
+                            const tailColor = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            grid[tailY][tailX] = tailColor;
+                            
+                            // Add thickness to base (first 2 segments)
+                            if (i < 2 && size >= 24) {
+                                if (tailX - 1 >= 0) {
+                                    const useSecondaryColor2 = random() < 0.4;
+                                    grid[tailY][tailX - 1] = useSecondaryColor2 ? secondaryBodyColor : primaryColor;
+                                }
+                                if (tailX + 1 < gridSize) {
+                                    const useSecondaryColor3 = random() < 0.4;
+                                    grid[tailY][tailX + 1] = useSecondaryColor3 ? secondaryBodyColor : primaryColor;
+                                }
+                            }
+                        }
+                    }
+                } else if (tailType === 'fan') {
+                    // Fan-shaped tail that spreads out
+                    const tailLength = size === 36 ? 5 : size === 24 ? 4 : 3;
+                    const maxSpread = size === 36 ? 6 : size === 24 ? 4 : 3;
+                    
+                    for (let i = 0; i < tailLength; i++) {
+                        const spread = Math.floor((i + 1) * maxSpread / tailLength);
+                        const tailY = tailStartY + i;
+                        
+                        // Draw center line
+                        if (centerX >= 0 && centerX < gridSize && tailY >= 0 && tailY < gridSize) {
+                            const useSecondaryColor = random() < 0.4;
+                            grid[tailY][centerX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                        }
+                        
+                        // Draw spreading lines
+                        for (let j = 1; j <= spread; j++) {
+                            const leftX = centerX - j;
+                            const rightX = centerX + j;
+                            
+                            if (leftX >= 0 && tailY >= 0 && tailY < gridSize) {
+                                const useSecondaryColor = random() < 0.4;
+                                grid[tailY][leftX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                            if (rightX < gridSize && tailY >= 0 && tailY < gridSize) {
+                                const useSecondaryColor = random() < 0.4;
+                                grid[tailY][rightX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                        }
+                    }
+                } else if (tailType === 'barbed') {
+                    // Tail with barbs/spikes along the sides
+                    const tailLength = size === 36 ? 8 : size === 24 ? 6 : 4;
+                    
+                    // Main tail spine
+                    for (let i = 0; i < tailLength; i++) {
+                        const tailY = tailStartY + i;
+                        
+                        if (centerX >= 0 && centerX < gridSize && tailY >= 0 && tailY < gridSize) {
+                            const useSecondaryColor = random() < 0.4;
+                            grid[tailY][centerX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                        }
+                        
+                        // Add barbs every other segment
+                        if (i % 2 === 1 && i < tailLength - 1) {
+                            const barbDirection = (i % 4 === 1) ? -1 : 1;
+                            const barbX = centerX + barbDirection;
+                            
+                            if (barbX >= 0 && barbX < gridSize) {
+                                const useSecondaryColor = random() < 0.4;
+                                grid[tailY][barbX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                
+                                // Add barb tip
+                                if (size >= 24 && tailY + 1 < gridSize) {
+                                    const useSecondaryColor2 = random() < 0.4;
+                                    grid[tailY + 1][barbX + barbDirection] = useSecondaryColor2 ? secondaryBodyColor : primaryColor;
+                                }
+                            }
+                        }
+                    }
+                } else if (tailType === 'feathered') {
+                    // Feathered tail with delicate fronds
+                    const tailLength = size === 36 ? 7 : size === 24 ? 5 : 3;
+                    
+                    // Main tail shaft
+                    for (let i = 0; i < tailLength; i++) {
+                        const tailY = tailStartY + i;
+                        
+                        if (centerX >= 0 && centerX < gridSize && tailY >= 0 && tailY < gridSize) {
+                            const useSecondaryColor = random() < 0.4;
+                            grid[tailY][centerX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                        }
+                        
+                        // Add feather fronds
+                        if (i >= 2) {
+                            const frondSize = Math.min(2, i - 1);
+                            
+                            for (let j = 1; j <= frondSize; j++) {
+                                // Alternating pattern for more organic look
+                                if ((i + j) % 2 === 0) {
+                                    const leftX = centerX - j;
+                                    const rightX = centerX + j;
+                                    
+                                    if (leftX >= 0 && tailY >= 0 && tailY < gridSize && random() < 0.7) {
+                                        const useSecondaryColor = random() < 0.4;
+                                        grid[tailY][leftX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                    }
+                                    if (rightX < gridSize && tailY >= 0 && tailY < gridSize && random() < 0.7) {
+                                        const useSecondaryColor = random() < 0.4;
+                                        grid[tailY][rightX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if (tailType === 'club') {
+                    // Club tail that's thin then thick at the end
+                    const tailLength = size === 36 ? 7 : size === 24 ? 5 : 3;
+                    const clubStart = tailLength - 2;
+                    
+                    for (let i = 0; i < tailLength; i++) {
+                        const tailY = tailStartY + i;
+                        
+                        if (i < clubStart) {
+                            // Thin part
+                            if (centerX >= 0 && centerX < gridSize && tailY >= 0 && tailY < gridSize) {
+                                const useSecondaryColor = random() < 0.4;
+                                grid[tailY][centerX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                            }
+                        } else {
+                            // Club end (thick)
+                            const clubWidth = size === 36 ? 3 : size === 24 ? 2 : 1;
+                            
+                            for (let dx = -clubWidth; dx <= clubWidth; dx++) {
+                                const clubX = centerX + dx;
+                                if (clubX >= 0 && clubX < gridSize && tailY >= 0 && tailY < gridSize) {
+                                    // More solid club end
+                                    if (Math.abs(dx) <= clubWidth - 1 || random() < 0.8) {
+                                        const useSecondaryColor = random() < 0.4;
+                                        grid[tailY][clubX] = useSecondaryColor ? secondaryBodyColor : primaryColor;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add cosmic dust/starfield background effect
+            const sparkCount = size === 36 ? 15 : size === 24 ? 12 : 8;
+            for (let i = 0; i < sparkCount; i++) {
+                const sparkX = Math.floor(random() * gridSize);
+                const sparkY = Math.floor(random() * gridSize);
+                
+                // Only add spark if the pixel is currently black (empty background)
+                if (grid[sparkY] && grid[sparkY][sparkX] === '#000000') {
+                    // Higher chance for cosmic dust to appear
+                    if (random() < 0.5) {
+                        // Variety of cosmic dust colors - some brighter stars, mostly dim dust
+                        const dustType = random();
+                        let sparkColor;
+                        
+                        if (dustType < 0.1) {
+                            // Rare bright stars
+                            sparkColor = '#aaaaaa';
+                        } else if (dustType < 0.3) {
+                            // Medium brightness dust
+                            sparkColor = '#666666';
+                        } else if (dustType < 0.6) {
+                            // Dim dust
+                            sparkColor = '#444444';
+                        } else {
+                            // Very dim dust
+                            sparkColor = '#222222';
+                        }
+                        
+                        grid[sparkY][sparkX] = sparkColor;
+                    }
+                }
+            }
+
+            // Render the grid to canvas
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    ctx.fillStyle = grid[y][x];
+                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                }
+            }
+
+            // Add scanlines effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            const scanlineSpacing = size === 36 ? 2 : size === 24 ? 2 : size === 16 ? 3 : 4;
+            for (let y = 0; y < canvas.height; y += scanlineSpacing) {
+                ctx.fillRect(0, y, canvas.width, 1);
+            }
+
+            // Store genetics for inheritance
+            const genetics = {
+                primaryColor,
+                secondaryColor,
+                accentColor,
+                seed,
+                type
+            };
+
+            return { canvas, genetics };
+        }
+
+        function generateParents() {
+            const container = document.getElementById('parents');
+            const sectionTitle = document.querySelector('.parents-section .section-title');
+            container.innerHTML = '';
+            parentData = [];
+            
+            // Get selected parent size
+            const selectedSize = parseInt(document.getElementById('parentSize').value);
+            
+            // Update section title
+            sectionTitle.textContent = `Parent Organisms (${selectedSize}x${selectedSize}) - Click to Breed`;
+            
+            for (let i = 0; i < 6; i++) {
+                const seed = Math.floor(Math.random() * 10000);
+                const type = creatureTypes[Math.floor(Math.random() * creatureTypes.length)];
+                
+                const result = generateCreatureIcon(seed, type, selectedSize);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'parent-creature';
+                
+                result.canvas.className = 'parent-identicon';
+                result.canvas.onclick = () => breed(result.genetics, i);
+                
+                const label = document.createElement('div');
+                label.className = 'creature-type';
+                label.textContent = type;
+                
+                wrapper.appendChild(result.canvas);
+                wrapper.appendChild(label);
+                container.appendChild(wrapper);
+                
+                // Store parent genetics
+                parentData[i] = result.genetics;
+            }
+        }
+
+        function breed(parentGenetics, parentIndex) {
+            const childrenContainer = document.getElementById('children');
+            
+            // Generate 3 offspring
+            for (let i = 0; i < 3; i++) {
+                const childSeed = parentGenetics.seed + (i + 1) * 1000 + Math.floor(Math.random() * 100);
+                
+                // Inherit type from parent exactly (no mutations)
+                let childType = parentGenetics.type;
+                
+                const result = generateCreatureIcon(childSeed, childType, 16, parentGenetics);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'child-creature';
+                
+                result.canvas.className = 'child-identicon';
+                
+                const label = document.createElement('div');
+                label.className = 'creature-type child-type';
+                label.textContent = `${childType}-JR${i + 1}`;
+                
+                wrapper.appendChild(result.canvas);
+                wrapper.appendChild(label);
+                childrenContainer.appendChild(wrapper);
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('parents').innerHTML = '';
+            document.getElementById('children').innerHTML = '';
+            parentData = [];
+        }
+
+        // Generate initial parents
+        generateParents();
+    </script>
+</body>
+</html>

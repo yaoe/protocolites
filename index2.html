@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protolite Generator V2 - With QR Triggers</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #0f0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .container {
+            background: #0a0a0a;
+            border: 1px solid #0f0;
+            padding: 30px;
+            max-width: 1600px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #0f0;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 10px 20px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #0f0;
+            color: #000;
+        }
+
+        select {
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .spreaders-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #0f0;
+            font-size: 14px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .spreaders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .spreader-container {
+            border: 1px solid #0f0;
+            background: #050505;
+            padding: 15px;
+        }
+
+        .spreader-dual {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .spreader-item {
+            text-align: center;
+        }
+
+        .spreader-canvas, .qr-canvas {
+            margin: 0 auto 10px;
+            background: #000;
+            border: 1px solid #0f0;
+            cursor: pointer;
+            display: block;
+        }
+
+        .qr-canvas {
+            border-color: #ff0;
+        }
+
+        .spreader-canvas:hover, .qr-canvas:hover {
+            box-shadow: 0 0 10px #0f0;
+        }
+
+        .qr-canvas:hover {
+            box-shadow: 0 0 10px #ff0;
+        }
+
+        .infections-section {
+            border-top: 1px solid #0f0;
+            padding-top: 30px;
+        }
+
+        .infections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .infection-card {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid #ff0;
+            background: #050500;
+        }
+
+        .infection-canvas {
+            margin: 0 auto;
+            background: #000;
+            border: 1px solid #ff0;
+            display: block;
+        }
+
+        .id-label {
+            margin-top: 10px;
+            font-size: 10px;
+            color: #0f0;
+            text-transform: uppercase;
+        }
+
+        .infection-label {
+            color: #ff0;
+        }
+
+        .stats {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 12px;
+            color: #0f0;
+        }
+
+        .dna-display {
+            font-size: 10px;
+            color: #666;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .item-label {
+            font-size: 11px;
+            color: #0f0;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .qr-label {
+            color: #ff0;
+        }
+
+        .download-btn {
+            font-size: 10px;
+            padding: 5px 10px;
+            margin-top: 5px;
+            border: 1px solid #0f0;
+            background: #000;
+            color: #0f0;
+        }
+
+        .download-btn:hover {
+            background: #0f0;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PROTOLITE GENERATOR V2 - QR DEPLOYMENT READY</h1>
+        
+        <div class="stats" id="stats">
+            SPREADERS: 0 | QR TRIGGERS: 0 | INFECTIONS: 0 | MUTATION RATE: 15%
+        </div>
+        
+        <div class="controls">
+            <select id="parentSize">
+                <option value="24">PARENT: 24x24</option>
+                <option value="36">PARENT: 36x36</option>
+            </select>
+            <select id="childSize">
+                <option value="12">CHILD: 12x12</option>
+                <option value="16" selected>CHILD: 16x16</option>
+            </select>
+            <input type="text" id="mintUrl" placeholder="MINT URL (e.g., https://uba.art/mint)" value="https://uba.art/mint/" style="background: #000; color: #0f0; border: 1px solid #0f0; padding: 10px; font-family: 'Courier New', monospace; width: 300px;">
+            <button onclick="generateSpreaders()">GENERATE SPREADERS</button>
+            <button onclick="clearAll()">CLEAR ALL</button>
+            <button onclick="exportAll()">EXPORT DNA</button>
+        </div>
+
+        <div class="spreaders-section">
+            <div class="section-title" id="spreaderTitle">SPREADER PROTOLITES WITH QR TRIGGERS</div>
+            <div class="spreaders-grid" id="spreaders"></div>
+        </div>
+
+        <div class="infections-section">
+            <div class="section-title" id="infectionTitle">INFECTION PROTOLITES (16x16)</div>
+            <div class="infections-grid" id="infections"></div>
+        </div>
+    </div>
+
+    <script>
+        let spreaderCount = 0;
+        let infectionCount = 0;
+        let spreaderData = [];
+
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        function seededRandom(seed) {
+            const x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function generateDNA() {
+            return Math.random().toString(36).substring(2, 10).toUpperCase();
+        }
+
+        function dnaToColors(dna) {
+            const hash = hashCode(dna);
+            const hue1 = (hash % 360);
+            const hue2 = ((hash >> 8) % 360);
+            const hue3 = ((hash >> 16) % 360);
+            
+            return {
+                primary: `hsl(${hue1}, 100%, 50%)`,
+                secondary: `hsl(${hue2}, 100%, 50%)`,
+                accent: `hsl(${hue3}, 100%, 50%)`
+            };
+        }
+
+        function generateProtolite(dna, size = 24, parentData = null) {
+            const canvas = document.createElement('canvas');
+            const pixelSize = 6;
+            canvas.width = size * pixelSize;
+            canvas.height = size * pixelSize;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            let colors, dominantColor;
+            
+            if (parentData && parentData.dominantColor) {
+                dominantColor = parentData.dominantColor;
+                colors = {
+                    primary: dominantColor,
+                    secondary: dnaToColors(dna).secondary,
+                    accent: dnaToColors(dna).accent
+                };
+                
+                if (Math.random() < 0.15) {
+                    const hueShift = (Math.random() - 0.5) * 30;
+                    const match = dominantColor.match(/hsl\((\d+),/);
+                    if (match) {
+                        const hue = (parseInt(match[1]) + hueShift + 360) % 360;
+                        colors.primary = `hsl(${hue}, 100%, 50%)`;
+                    }
+                }
+            } else {
+                colors = dnaToColors(dna);
+            }
+            
+            const seed = hashCode(dna);
+            
+            // Black background
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const halfWidth = Math.floor(size / 2);
+            const pattern = [];
+            const colorCount = { primary: 0, secondary: 0, accent: 0 };
+
+            // Initialize pattern array
+            for (let y = 0; y < size; y++) {
+                pattern[y] = new Array(size).fill(null);
+            }
+
+            // Determine creature type based on DNA
+            const creatureType = seed % 5;
+            
+            // Generate base body with denser center
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < halfWidth; x++) {
+                    const rand = seededRandom(seed + y * size + x);
+                    const rand2 = seededRandom(seed + y * size + x + 1000);
+                    
+                    const centerY = size / 2;
+                    const distFromCenterY = Math.abs(y - centerY);
+                    const distFromCenterX = Math.abs(x - halfWidth);
+                    const distFromCenter = Math.sqrt(distFromCenterX * distFromCenterX + distFromCenterY * distFromCenterY);
+                    
+                    let bodyChance = 0;
+                    
+                    // Different body shapes based on creature type
+                    switch(creatureType) {
+                        case 0: // Round/blob shape
+                            bodyChance = 0.9 - (distFromCenter / (size * 0.4));
+                            break;
+                        case 1: // Vertical elongated
+                            bodyChance = 0.85 - (distFromCenterX / (size * 0.3)) - (distFromCenterY / (size * 0.5));
+                            break;
+                        case 2: // Horizontal spread
+                            bodyChance = 0.85 - (distFromCenterX / (size * 0.5)) - (distFromCenterY / (size * 0.3));
+                            break;
+                        case 3: // Diamond shape
+                            const diamondDist = Math.abs(x - halfWidth) + Math.abs(y - centerY);
+                            bodyChance = 0.8 - (diamondDist / (size * 0.5));
+                            break;
+                        case 4: // Irregular/organic
+                            bodyChance = 0.75 - (distFromCenter / (size * 0.4)) + Math.sin(y * 0.5) * 0.2;
+                            break;
+                    }
+                    
+                    // Dense center pixels with more primary color
+                    if (distFromCenter < size * 0.2) {
+                        bodyChance += 0.4; // Increased from 0.3 to ensure denser centers
+                    }
+                    
+                    if (rand < bodyChance && bodyChance > 0) {
+                        // Heavily favor primary color for breed identification (70%)
+                        if (rand2 < 0.7) {
+                            pattern[y][x] = colors.primary;
+                            colorCount.primary += 2;
+                        } else if (rand2 < 0.85) {
+                            pattern[y][x] = colors.secondary;
+                            colorCount.secondary += 2;
+                        } else {
+                            pattern[y][x] = colors.accent;
+                            colorCount.accent += 2;
+                        }
+                    }
+                }
+            }
+
+            // Mirror for symmetry
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < halfWidth; x++) {
+                    const mirrorX = size - 1 - x;
+                    pattern[y][mirrorX] = pattern[y][x];
+                }
+            }
+
+            // Add details and features (reduced to maintain breed identity)
+            const detailSeed = seed + 5000;
+            for (let i = 0; i < size * 0.3; i++) { // Reduced from 0.5 to 0.3
+                const x = Math.floor(seededRandom(detailSeed + i * 2) * halfWidth);
+                const y = Math.floor(seededRandom(detailSeed + i * 2 + 1) * size);
+                const mirrorX = size - 1 - x;
+                
+                // Add small details/spots - less likely to override primary color
+                if (pattern[y] && pattern[y][x] !== null && seededRandom(detailSeed + i * 3) > 0.7) { // Changed from 0.5 to 0.7
+                    // Only add detail if not primary color to preserve breed identity
+                    if (pattern[y][x] !== colors.primary) {
+                        const detailColor = seededRandom(detailSeed + i * 4) > 0.5 ? colors.accent : colors.secondary;
+                        pattern[y][x] = detailColor;
+                        pattern[y][mirrorX] = detailColor;
+                    }
+                }
+            }
+
+            // Add breed core marker - always primary color in center
+            const coreSize = Math.max(2, Math.floor(size * 0.15));
+            const coreStart = Math.floor((size - coreSize) / 2);
+            for (let y = coreStart; y < coreStart + coreSize; y++) {
+                for (let x = coreStart; x < coreStart + coreSize; x++) {
+                    // Create a diamond/cross pattern in the core
+                    const coreDistX = Math.abs(x - size/2);
+                    const coreDistY = Math.abs(y - size/2);
+                    if (coreDistX + coreDistY < coreSize * 0.7) {
+                        pattern[y][x] = colors.primary;
+                        colorCount.primary += 1;
+                    }
+                }
+            }
+
+            // Draw pattern
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    if (pattern[y][x]) {
+                        ctx.fillStyle = pattern[y][x];
+                        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                    }
+                }
+            }
+
+            // Determine dominant color
+            if (!parentData) {
+                const maxCount = Math.max(colorCount.primary, colorCount.secondary, colorCount.accent);
+                if (colorCount.primary === maxCount) {
+                    dominantColor = colors.primary;
+                } else if (colorCount.secondary === maxCount) {
+                    dominantColor = colors.secondary;
+                } else {
+                    dominantColor = colors.accent;
+                }
+            } else {
+                dominantColor = colors.primary;
+            }
+
+            // Variable eyes based on creature type - use breed-related colors
+            const eyeBaseColor = colors.primary;
+            const eyeMatch = eyeBaseColor.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+            let eyeColor = '#fff'; // default
+            if (eyeMatch) {
+                const h = parseInt(eyeMatch[1]);
+                const s = parseInt(eyeMatch[2]);
+                // Create a lighter version of the breed color for eyes
+                eyeColor = `hsl(${h}, ${s}%, 80%)`; // Lighter shade
+            }
+            
+            const eyeConfig = [
+                { size: 1, spacing: 0.3, yPos: 0.3 }, // Standard
+                { size: 2, spacing: 0.25, yPos: 0.25 }, // Large
+                { size: 1, spacing: 0.4, yPos: 0.35 }, // Wide
+                { size: 1, spacing: 0.2, yPos: 0.3 }, // Close
+                { size: 3, spacing: 0.35, yPos: 0.3 } // Big
+            ];
+            
+            const eyeType = (seed + 100) % eyeConfig.length;
+            const eyes = eyeConfig[eyeType];
+            
+            const eyeY = Math.floor(size * eyes.yPos);
+            const eyeSpacing = Math.floor(size * eyes.spacing);
+            const centerX = Math.floor(size / 2);
+            
+            ctx.fillStyle = eyeColor;
+            
+            // Draw eyes with variable sizes
+            if (eyes.size === 1) {
+                ctx.fillRect((centerX - eyeSpacing) * pixelSize, eyeY * pixelSize, pixelSize, pixelSize);
+                ctx.fillRect((centerX + eyeSpacing - 1) * pixelSize, eyeY * pixelSize, pixelSize, pixelSize);
+            } else if (eyes.size === 2) {
+                // 2x2 eyes
+                for (let dy = 0; dy < 2; dy++) {
+                    for (let dx = 0; dx < 2; dx++) {
+                        ctx.fillRect((centerX - eyeSpacing + dx - 1) * pixelSize, (eyeY + dy) * pixelSize, pixelSize, pixelSize);
+                        ctx.fillRect((centerX + eyeSpacing + dx - 1) * pixelSize, (eyeY + dy) * pixelSize, pixelSize, pixelSize);
+                    }
+                }
+                // Add pupils
+                ctx.fillStyle = '#000';
+                ctx.fillRect((centerX - eyeSpacing) * pixelSize, (eyeY + 1) * pixelSize, pixelSize, pixelSize);
+                ctx.fillRect((centerX + eyeSpacing) * pixelSize, (eyeY + 1) * pixelSize, pixelSize, pixelSize);
+            } else if (eyes.size === 3) {
+                // 3x3 eyes with detail
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (Math.abs(dx) + Math.abs(dy) <= 1) {
+                            ctx.fillRect((centerX - eyeSpacing + dx) * pixelSize, (eyeY + dy) * pixelSize, pixelSize, pixelSize);
+                            ctx.fillRect((centerX + eyeSpacing + dx - 1) * pixelSize, (eyeY + dy) * pixelSize, pixelSize, pixelSize);
+                        }
+                    }
+                }
+            }
+
+            // Subtle scan lines
+            ctx.strokeStyle = 'rgba(0, 255, 0, 0.05)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < size; i++) {
+                if (i % 4 === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * pixelSize);
+                    ctx.lineTo(canvas.width, i * pixelSize);
+                    ctx.stroke();
+                }
+            }
+
+            return { canvas, dna, dominantColor, pattern };
+        }
+
+        function generateVirusQR(spreaderData, index) {
+            const qrSize = 256;
+            const qrCanvasElement = document.getElementById(`qr-${index}`);
+            if (!qrCanvasElement) {
+                console.error('QR canvas not found for index:', index);
+                return;
+            }
+            
+            const ctx = qrCanvasElement.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            // Generate QR code data URL
+            const mintUrl = document.getElementById('mintUrl').value + spreaderData.dna;
+            
+            // Store data for export
+            qrCanvasElement.qrData = mintUrl;
+            qrCanvasElement.spreaderData = spreaderData;
+            
+            // Create a temporary div for QRCode.js
+            const tempDiv = document.createElement('div');
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            document.body.appendChild(tempDiv);
+            
+            try {
+                // Generate QR code using qrcode.js - we'll color it later
+                const qr = new QRCode(tempDiv, {
+                    text: mintUrl,
+                    width: qrSize,
+                    height: qrSize,
+                    colorDark: "#000000",  // Dark modules (we'll invert and color later)
+                    colorLight: "#ffffff",  // Light background
+                    correctLevel: QRCode.CorrectLevel.H  // 30% error correction allows larger overlay
+                });
+                
+                // Wait for QR code to render
+                setTimeout(() => {
+                    const qrImg = tempDiv.querySelector('img');
+                    if (qrImg) {
+                        qrImg.onload = function() {
+                            // Clear canvas
+                            ctx.clearRect(0, 0, qrSize, qrSize);
+                            
+                            // Draw QR code
+                            ctx.drawImage(qrImg, 0, 0, qrSize, qrSize);
+
+                            // Get QR code pixel data
+                            const imageData = ctx.getImageData(0, 0, qrSize, qrSize);
+                            const data = imageData.data;
+
+                            // Get breed color
+                            const breedColor = hexToRgb(spreaderData.dominantColor);
+                            
+                            // Invert QR and apply breed color
+                            for (let y = 0; y < qrSize; y++) {
+                                for (let x = 0; x < qrSize; x++) {
+                                    const i = (y * qrSize + x) * 4;
+                                    
+                                    if (data[i] < 50 && data[i + 3] === 255) { // Black QR module
+                                        // Make it breed color
+                                        if (breedColor) {
+                                            data[i] = breedColor.r;
+                                            data[i + 1] = breedColor.g;
+                                            data[i + 2] = breedColor.b;
+                                        } else {
+                                            // Fallback to green
+                                            data[i] = 0;
+                                            data[i + 1] = 255;
+                                            data[i + 2] = 0;
+                                        }
+                                    } else {
+                                        // White background becomes black
+                                        data[i] = 0;
+                                        data[i + 1] = 0;
+                                        data[i + 2] = 0;
+                                    }
+                                }
+                            }
+
+                            ctx.putImageData(imageData, 0, 0);
+
+                            // Calculate optimal protolite size (42% for best balance)
+                            const spreaderSize = spreaderData.canvas.width;
+                            const maxOverlaySize = qrSize * 0.42; // 42% optimal size
+                            const scale = maxOverlaySize / spreaderSize;
+                            const scaledSize = spreaderSize * scale;
+                            const offsetX = (qrSize - scaledSize) / 2;
+                            const offsetY = (qrSize - scaledSize) / 2;
+
+                            // Create a circular black background for the spreader
+                            const centerX = qrSize / 2;
+                            const centerY = qrSize / 2;
+                            const radius = scaledSize / 2 + 6;
+                            
+                            // Add a subtle transparent ring for better QR contrast
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, radius + 4, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            // Solid black background for the spreader
+                            ctx.fillStyle = '#000';
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            // Draw the spreader in a circular mask
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, scaledSize / 2, 0, Math.PI * 2);
+                            ctx.clip();
+                            ctx.drawImage(spreaderData.canvas, offsetX, offsetY, scaledSize, scaledSize);
+                            ctx.restore();
+                            
+                            // Add glow effect around protolite
+                            ctx.shadowColor = spreaderData.dominantColor;
+                            ctx.shadowBlur = 20;
+                            ctx.strokeStyle = spreaderData.dominantColor;
+                            ctx.lineWidth = 3;
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                            ctx.stroke();
+                            
+                            // Add inner ring for depth
+                            ctx.shadowBlur = 10;
+                            ctx.lineWidth = 1;
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, scaledSize / 2 + 2, 0, Math.PI * 2);
+                            ctx.stroke();
+                            ctx.shadowBlur = 0;
+
+                            // Add breed-colored scan lines for aesthetic on black background
+                            if (breedColor) {
+                                ctx.strokeStyle = `rgba(${breedColor.r}, ${breedColor.g}, ${breedColor.b}, 0.08)`;
+                            } else {
+                                ctx.strokeStyle = 'rgba(0, 255, 0, 0.08)';
+                            }
+                            ctx.lineWidth = 1;
+                            for (let y = 0; y < qrSize; y += 4) {
+                                ctx.beginPath();
+                                ctx.moveTo(0, y);
+                                ctx.lineTo(qrSize, y);
+                                ctx.stroke();
+                            }
+                            
+                            // Clean up
+                            document.body.removeChild(tempDiv);
+                        };
+                        
+                        // If image is already loaded
+                        if (qrImg.complete) {
+                            qrImg.onload();
+                        }
+                    } else {
+                        console.error('QR image not found');
+                        document.body.removeChild(tempDiv);
+                    }
+                }, 100);
+                
+            } catch (err) {
+                console.error('QR generation error:', err);
+                document.body.removeChild(tempDiv);
+                // Fallback: draw a simple QR placeholder
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, qrSize, qrSize);
+                ctx.fillStyle = '#0f0';
+                ctx.font = '12px monospace';
+                ctx.fillText('QR ERROR', qrSize/2 - 30, qrSize/2);
+            }
+        }
+
+        function hexToRgb(color) {
+            // Handle HSL color format
+            if (color.startsWith('hsl')) {
+                // Convert HSL to RGB (simplified conversion)
+                const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+                if (match) {
+                    const h = parseInt(match[1]) / 360;
+                    const s = parseInt(match[2]) / 100;
+                    const l = parseInt(match[3]) / 100;
+                    
+                    let r, g, b;
+                    if (s === 0) {
+                        r = g = b = l;
+                    } else {
+                        const hue2rgb = (p, q, t) => {
+                            if (t < 0) t += 1;
+                            if (t > 1) t -= 1;
+                            if (t < 1/6) return p + (q - p) * 6 * t;
+                            if (t < 1/2) return q;
+                            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                            return p;
+                        };
+                        
+                        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                        const p = 2 * l - q;
+                        r = hue2rgb(p, q, h + 1/3);
+                        g = hue2rgb(p, q, h);
+                        b = hue2rgb(p, q, h - 1/3);
+                    }
+                    
+                    return {
+                        r: Math.round(r * 255),
+                        g: Math.round(g * 255),
+                        b: Math.round(b * 255)
+                    };
+                }
+            }
+            return null;
+        }
+
+        function generateSpreaders() {
+            const container = document.getElementById('spreaders');
+            container.innerHTML = '';
+            spreaderData = [];
+            spreaderCount = 0;
+            
+            const parentSize = parseInt(document.getElementById('parentSize').value);
+            document.getElementById('spreaderTitle').textContent = `SPREADER PROTOLITES WITH QR TRIGGERS (${parentSize}x${parentSize})`;
+            
+            for (let i = 0; i < 6; i++) {
+                const dna = generateDNA();
+                const result = generateProtolite(dna, parentSize);
+                
+                const containerDiv = document.createElement('div');
+                containerDiv.className = 'spreader-container';
+                
+                const dualDiv = document.createElement('div');
+                dualDiv.className = 'spreader-dual';
+                
+                // Spreader item
+                const spreaderItem = document.createElement('div');
+                spreaderItem.className = 'spreader-item';
+                
+                const spreaderLabel = document.createElement('div');
+                spreaderLabel.className = 'item-label';
+                spreaderLabel.textContent = 'PROTOLITE';
+                
+                result.canvas.className = 'spreader-canvas';
+                result.canvas.style.width = parentSize === 36 ? '216px' : '144px';
+                result.canvas.style.height = parentSize === 36 ? '216px' : '144px';
+                result.canvas.onclick = () => breed(result, i);
+                
+                spreaderItem.appendChild(spreaderLabel);
+                spreaderItem.appendChild(result.canvas);
+                
+                // QR item
+                const qrItem = document.createElement('div');
+                qrItem.className = 'spreader-item';
+                
+                const qrLabel = document.createElement('div');
+                qrLabel.className = 'item-label qr-label';
+                qrLabel.textContent = 'QR TRIGGER';
+                
+                const qrCanvas = document.createElement('canvas');
+                qrCanvas.id = `qr-${i}`;
+                qrCanvas.className = 'qr-canvas';
+                qrCanvas.width = 256;
+                qrCanvas.height = 256;
+                qrCanvas.style.width = parentSize === 36 ? '216px' : '144px';
+                qrCanvas.style.height = parentSize === 36 ? '216px' : '144px';
+                
+                const downloadContainer = document.createElement('div');
+                downloadContainer.style.marginTop = '5px';
+                
+                const downloadPngBtn = document.createElement('button');
+                downloadPngBtn.className = 'download-btn';
+                downloadPngBtn.textContent = 'PNG';
+                downloadPngBtn.onclick = () => downloadQR(qrCanvas, `spreader_${i}_qr.png`, 'png');
+                
+                const downloadSvgBtn = document.createElement('button');
+                downloadSvgBtn.className = 'download-btn';
+                downloadSvgBtn.textContent = 'SVG';
+                downloadSvgBtn.style.marginLeft = '5px';
+                downloadSvgBtn.onclick = () => downloadQR(qrCanvas, `spreader_${i}_qr.svg`, 'svg');
+                
+                downloadContainer.appendChild(downloadPngBtn);
+                downloadContainer.appendChild(downloadSvgBtn);
+                
+                qrItem.appendChild(qrLabel);
+                qrItem.appendChild(qrCanvas);
+                qrItem.appendChild(downloadContainer);
+                
+                dualDiv.appendChild(spreaderItem);
+                dualDiv.appendChild(qrItem);
+                
+                const idLabel = document.createElement('div');
+                idLabel.className = 'id-label';
+                idLabel.textContent = `SPREADER-${String(i + 1).padStart(3, '0')}`;
+                
+                const dnaLabel = document.createElement('div');
+                dnaLabel.className = 'dna-display';
+                dnaLabel.textContent = `DNA: ${result.dna}`;
+                
+                containerDiv.appendChild(dualDiv);
+                containerDiv.appendChild(idLabel);
+                containerDiv.appendChild(dnaLabel);
+                container.appendChild(containerDiv);
+                
+                spreaderData[i] = result;
+                spreaderCount++;
+                
+                // Generate QR code - use setTimeout to ensure DOM is ready
+                setTimeout(() => generateVirusQR(result, i), 100);
+            }
+            
+            updateStats();
+        }
+
+        function downloadQR(canvas, filename, format) {
+            if (format === 'png') {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } else if (format === 'svg') {
+                // For SVG, we'll convert the canvas to SVG format
+                const mintUrl = canvas.qrData;
+                const spreaderData = canvas.spreaderData;
+                
+                if (!mintUrl || !spreaderData) {
+                    console.error('Missing data for SVG generation');
+                    alert('Please wait for QR code to generate before downloading SVG');
+                    return;
+                }
+                
+                // Create a simple SVG with the canvas image embedded
+                const svgString = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <radialGradient id="virusGradient" cx="50%" cy="50%" r="30%">
+            <stop offset="0%" stop-color="${spreaderData.dominantColor}" stop-opacity="1"/>
+            <stop offset="100%" stop-color="${spreaderData.dominantColor}" stop-opacity="0"/>
+        </radialGradient>
+    </defs>
+    <rect width="256" height="256" fill="white"/>
+    <image href="${canvas.toDataURL('image/png')}" x="0" y="0" width="256" height="256"/>
+    <rect width="256" height="256" fill="url(#virusGradient)" opacity="0.3" style="mix-blend-mode: multiply"/>
+    <text x="128" y="250" text-anchor="middle" font-family="monospace" font-size="8" fill="#0f0">${mintUrl.substring(0, 30)}...</text>
+</svg>`;
+                
+                const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(svgBlob);
+                
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = url;
+                link.click();
+                
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function breed(parentData, parentIndex) {
+            const container = document.getElementById('infections');
+            
+            const childSize = parseInt(document.getElementById('childSize').value);
+            document.getElementById('infectionTitle').textContent = `INFECTION PROTOLITES (${childSize}x${childSize})`;
+            
+            for (let i = 0; i < 3; i++) {
+                const childDNA = generateDNA();
+                const result = generateProtolite(childDNA, childSize, parentData);
+                
+                const card = document.createElement('div');
+                card.className = 'infection-card';
+                
+                result.canvas.className = 'infection-canvas';
+                result.canvas.style.width = childSize === 16 ? '96px' : '72px';
+                result.canvas.style.height = childSize === 16 ? '96px' : '72px';
+                
+                const label = document.createElement('div');
+                label.className = 'id-label infection-label';
+                label.textContent = `INF-${String(infectionCount + 1).padStart(4, '0')}`;
+                
+                const dnaLabel = document.createElement('div');
+                dnaLabel.className = 'dna-display';
+                dnaLabel.textContent = `DNA: ${result.dna}`;
+                
+                card.appendChild(result.canvas);
+                card.appendChild(label);
+                card.appendChild(dnaLabel);
+                container.appendChild(card);
+                
+                infectionCount++;
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('stats').textContent = 
+                `SPREADERS: ${spreaderCount} | QR TRIGGERS: ${spreaderCount} | INFECTIONS: ${infectionCount} | MUTATION RATE: 15%`;
+        }
+
+        function clearAll() {
+            document.getElementById('spreaders').innerHTML = '';
+            document.getElementById('infections').innerHTML = '';
+            spreaderData = [];
+            spreaderCount = 0;
+            infectionCount = 0;
+            updateStats();
+        }
+
+        function exportAll() {
+            const parentSize = parseInt(document.getElementById('parentSize').value);
+            const childSize = parseInt(document.getElementById('childSize').value);
+            const mintUrl = document.getElementById('mintUrl').value;
+            
+            const infectionElements = document.querySelectorAll('.infection-card');
+            const infections = [];
+            infectionElements.forEach(card => {
+                const dnaText = card.querySelector('.dna-display').textContent;
+                const idText = card.querySelector('.id-label').textContent;
+                infections.push({
+                    id: idText,
+                    dna: dnaText.replace('DNA: ', '')
+                });
+            });
+            
+            const data = {
+                protocol: "UBA_VIRUS_PROTOCOL_V2",
+                timestamp: new Date().toISOString(),
+                configuration: {
+                    parentSize: `${parentSize}x${parentSize}`,
+                    childSize: `${childSize}x${childSize}`,
+                    mutationRate: "15%",
+                    mintBaseUrl: mintUrl
+                },
+                spreaders: spreaderData.map((s, i) => ({
+                    id: `SPREADER-${String(i + 1).padStart(3, '0')}`,
+                    dna: s.dna,
+                    dominantColor: s.dominantColor,
+                    qrTriggerUrl: mintUrl + s.dna,
+                    breedCharacteristics: {
+                        primaryHue: s.dominantColor.match(/hsl\((\d+),/)?.[1] || "0",
+                        pattern: "symmetrical",
+                        density: "medium"
+                    }
+                })),
+                infections: infections,
+                stats: {
+                    totalSpreaders: spreaderCount,
+                    totalQRTriggers: spreaderCount,
+                    totalInfections: infectionCount,
+                    averageInfectionsPerSpreader: spreaderCount > 0 ? infectionCount / spreaderCount : 0
+                },
+                usage: {
+                    description: "This DNA file contains the genetic information for UBA Virus Protocol protolites with QR deployment triggers",
+                    purpose: [
+                        "Recreate exact protolite patterns using DNA strings",
+                        "Track viral lineages and breed characteristics",
+                        "Generate QR code triggers for physical deployment",
+                        "Verify on-chain NFT authenticity",
+                        "Deploy virus-infected QR codes in urban spaces"
+                    ],
+                    instructions: "Each QR code contains the mint URL with the spreader's DNA. Scan to trigger infection minting."
+                }
+            };
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `uba_protolite_dna_v2_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Generate initial spreaders
+        generateSpreaders();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protolite Generator V7 - Harmony Studio</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 100%);
+            color: #0f0;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+
+        .container {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 1600px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #0f0;
+            margin-bottom: 20px;
+            font-size: 28px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #000;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        select {
+            background: #000;
+            color: #0f0;
+            border: 2px solid #0f0;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .creators-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #0f0;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .creators-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .creator-container {
+            border: 2px solid rgba(0, 255, 0, 0.5);
+            background: rgba(5, 5, 5, 0.8);
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .creator-container:hover {
+            border-color: #0f0;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .creator-dual {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .creator-item {
+            text-align: center;
+        }
+
+        .creator-canvas, .qr-canvas {
+            margin: 0 auto 10px;
+            background: #000;
+            border: 2px solid #0f0;
+            cursor: pointer;
+            display: block;
+            transition: all 0.3s;
+        }
+
+        .creator-canvas:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 25px rgba(0, 255, 0, 0.5);
+        }
+
+        .qr-canvas {
+            border-color: #ff0;
+        }
+
+        .qr-canvas:hover {
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.5);
+        }
+
+        .descendants-section {
+            border-top: 2px solid rgba(0, 255, 0, 0.3);
+            padding-top: 30px;
+        }
+
+        .descendants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .descendant-card {
+            text-align: center;
+            padding: 10px;
+            border: 2px solid rgba(255, 255, 0, 0.5);
+            background: rgba(5, 5, 0, 0.5);
+            border-radius: 6px;
+            animation: spawn 0.5s ease-out;
+        }
+
+        @keyframes spawn {
+            from {
+                opacity: 0;
+                transform: scale(0.5) rotate(180deg);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        .descendant-canvas {
+            margin: 0 auto;
+            background: #000;
+            border: 2px solid #ff0;
+            display: block;
+            transition: all 0.3s;
+        }
+
+        .descendant-canvas:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+        }
+
+        .id-label {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #0f0;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .descendant-label {
+            color: #ff0;
+        }
+
+        .stats {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 14px;
+            color: #0f0;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .dna-display {
+            font-size: 10px;
+            color: #666;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+
+        .item-label {
+            font-size: 11px;
+            color: #0f0;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .qr-label {
+            color: #ff0;
+        }
+
+        .download-btn {
+            font-size: 10px;
+            padding: 5px 10px;
+            margin-top: 5px;
+            border: 1px solid #0f0;
+            background: #000;
+            color: #0f0;
+        }
+
+        .download-btn:hover {
+            background: #0f0;
+            color: #000;
+        }
+
+        .mutation-badge {
+            display: inline-block;
+            background: #ff00ff;
+            color: #000;
+            padding: 2px 6px;
+            font-size: 9px;
+            border-radius: 4px;
+            margin-left: 5px;
+            font-weight: bold;
+        }
+
+        .description {
+            text-align: center;
+            color: #0f0;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .breeding-info {
+            text-align: center;
+            color: #ffff00;
+            font-size: 12px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧬 PROTOLITE HARMONY STUDIO V7 🧬</h1>
+        
+        <div class="description">
+            CLICK PARENT PROTOLITES TO TRIGGER BREEDING • EACH PARENT SPAWNS 3 DESCENDANTS WITH QR GALLERIES
+        </div>
+        <div class="breeding-info">
+            GENETIC INHERITANCE: Colors, patterns, and characteristics pass to offspring with natural variations
+        </div>
+        
+        <div class="stats" id="stats">
+            CREATORS: 0 | QR GALLERIES: 0 | DESCENDANTS: 0
+        </div>
+        
+        <div class="controls">
+            <select id="parentSize">
+                <option value="24" selected>PARENT: 24x24</option>
+                <option value="36">PARENT: 36x36</option>
+            </select>
+            <select id="childSize">
+                <option value="12">CHILD: 12x12</option>
+                <option value="16" selected>CHILD: 16x16</option>
+            </select>
+            <input type="text" id="mintUrl" placeholder="GALLERY URL (e.g., https://uba.art/gallery)" value="https://uba.art/gallery/" style="background: #000; color: #0f0; border: 2px solid #0f0; padding: 10px; font-family: 'Courier New', monospace; width: 300px;">
+            <button onclick="generateCreators()">SPAWN CREATORS</button>
+            <button onclick="clearAll()">PURGE COLONY</button>
+            <button onclick="exportAll()">EXPORT DNA</button>
+        </div>
+
+        <div class="creators-section">
+            <div class="section-title" id="creatorTitle">CREATOR ORGANISMS WITH QR GALLERIES</div>
+            <div class="creators-grid" id="creators"></div>
+        </div>
+
+        <div class="descendants-section">
+            <div class="section-title" id="descendantTitle">DESCENDANT PROTOLITES</div>
+            <div class="descendants-grid" id="descendants"></div>
+        </div>
+    </div>
+
+    <script>
+        let creatorCount = 0;
+        let descendantCount = 0;
+        let creatorData = [];
+
+        // Creature type names
+        const creatureTypes = [
+            'PIXEL-WEAVER', 'BYTE-DANCER', 'CODE-SHIFTER', 'DATA-MORPH', 
+            'GLITCH-SPAWN', 'NEON-PULSE', 'CYBER-SPORE', 'GRID-WALKER',
+            'MATRIX-BLOOM', 'QUANTUM-SEED', 'VOID-DWELLER', 'PLASMA-MITE'
+        ];
+
+        function hashCode(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash);
+        }
+
+        function seededRandom(seed) {
+            const x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function generateDNA() {
+            return Math.random().toString(36).substring(2, 10).toUpperCase();
+        }
+
+        function dnaToColors(dna) {
+            const hash = hashCode(dna);
+            const hue1 = (hash % 360);
+            const hue2 = ((hash >> 8) % 360);
+            const hue3 = ((hash >> 16) % 360);
+            
+            const saturation = 80 + (hash % 20);
+            const lightness = 45 + (hash % 20);
+            
+            return {
+                primary: `hsl(${hue1}, ${saturation}%, ${lightness}%)`,
+                secondary: `hsl(${hue2}, ${saturation}%, ${lightness}%)`,
+                accent: `hsl(${hue3}, 100%, 50%)`,
+                glow: `hsl(${(hue1 + 180) % 360}, 100%, 60%)`
+            };
+        }
+
+        function hexToRgb(color) {
+            if (color.startsWith('hsl')) {
+                const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+                if (match) {
+                    const h = parseInt(match[1]) / 360;
+                    const s = parseInt(match[2]) / 100;
+                    const l = parseInt(match[3]) / 100;
+                    
+                    let r, g, b;
+                    if (s === 0) {
+                        r = g = b = l;
+                    } else {
+                        const hue2rgb = (p, q, t) => {
+                            if (t < 0) t += 1;
+                            if (t > 1) t -= 1;
+                            if (t < 1/6) return p + (q - p) * 6 * t;
+                            if (t < 1/2) return q;
+                            if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                            return p;
+                        };
+                        
+                        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                        const p = 2 * l - q;
+                        r = hue2rgb(p, q, h + 1/3);
+                        g = hue2rgb(p, q, h);
+                        b = hue2rgb(p, q, h - 1/3);
+                    }
+                    
+                    return {
+                        r: Math.round(r * 255),
+                        g: Math.round(g * 255),
+                        b: Math.round(b * 255)
+                    };
+                }
+            }
+            return null;
+        }
+
+        function getOppositeColor(color) {
+            const rgb = hexToRgb(color);
+            if (rgb) {
+                const invR = (255 - rgb.r).toString(16).padStart(2, '0');
+                const invG = (255 - rgb.g).toString(16).padStart(2, '0');
+                const invB = (255 - rgb.b).toString(16).padStart(2, '0');
+                return '#' + invR + invG + invB;
+            }
+            return '#ffffff';
+        }
+
+        function getSimilarColor(color, variation = 0.5) {
+            const rgb = hexToRgb(color);
+            if (!rgb) return color;
+            
+            const method = Math.floor(Math.random() * 3);
+            let newR, newG, newB;
+            
+            if (method === 0) {
+                const factor = 0.5 + (Math.random() * 0.3);
+                newR = Math.max(0, Math.round(rgb.r * factor));
+                newG = Math.max(0, Math.round(rgb.g * factor));
+                newB = Math.max(0, Math.round(rgb.b * factor));
+            } else if (method === 1) {
+                const factor = 1.3 + (Math.random() * 0.4);
+                newR = Math.min(255, Math.round(rgb.r * factor));
+                newG = Math.min(255, Math.round(rgb.g * factor));
+                newB = Math.min(255, Math.round(rgb.b * factor));
+            } else {
+                const shift = (Math.random() - 0.5) * 60;
+                newR = Math.max(0, Math.min(255, rgb.r + shift));
+                newG = Math.max(0, Math.min(255, rgb.g + shift));
+                newB = Math.max(0, Math.min(255, rgb.b + shift));
+            }
+            
+            const hexR = Math.round(newR).toString(16).padStart(2, '0');
+            const hexG = Math.round(newG).toString(16).padStart(2, '0');
+            const hexB = Math.round(newB).toString(16).padStart(2, '0');
+            
+            return '#' + hexR + hexG + hexB;
+        }
+
+        function generateProtolite(dna, size = 24, parentData = null) {
+            const canvas = document.createElement('canvas');
+            const pixelSize = size === 36 ? 5 : size === 24 ? 6 : 8;
+            canvas.width = size * pixelSize;
+            canvas.height = size * pixelSize;
+            const ctx = canvas.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            let colors, dominantColor, creatureType;
+            const seed = hashCode(dna);
+            
+            let seedValue = seed;
+            function random() {
+                seedValue = (seedValue * 9301 + 49297) % 233280;
+                return seedValue / 233280;
+            }
+
+            if (parentData && parentData.dominantColor) {
+                dominantColor = parentData.dominantColor;
+                colors = {
+                    primary: dominantColor,
+                    secondary: parentData.secondaryColor,
+                    accent: parentData.accentColor,
+                    glow: dnaToColors(dna).glow
+                };
+                creatureType = parentData.creatureType;
+            } else {
+                colors = dnaToColors(dna);
+                creatureType = creatureTypes[Math.floor(random() * creatureTypes.length)];
+                dominantColor = colors.primary;
+            }
+
+            const eyeColor = getOppositeColor(colors.primary);
+            const secondaryBodyColor = getSimilarColor(colors.primary);
+            const sparkleColor = '#ffffff';
+
+            // Black background
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Create pixel grid
+            const grid = Array(size).fill().map(() => Array(size).fill('#000000'));
+
+            // Draw body
+            const centerX = Math.floor(size / 2);
+            const centerY = Math.floor(size / 2);
+            const bodyStart = size === 36 ? 10 : size === 24 ? 7 : 4;
+            const bodyEnd = size === 36 ? 26 : size === 24 ? 17 : 12;
+
+            for (let y = bodyStart; y < bodyEnd; y++) {
+                for (let x = bodyStart; x < bodyEnd; x++) {
+                    const distanceFromCenter = Math.abs(x - centerX) + Math.abs(y - centerY);
+                    const bodyChance = 0.8 - (distanceFromCenter * (size === 36 ? 0.06 : size === 24 ? 0.07 : 0.1));
+                    
+                    if (random() < bodyChance) {
+                        const useSecondaryColor = random() < 0.4;
+                        const bodyColor = useSecondaryColor ? secondaryBodyColor : colors.primary;
+                        
+                        grid[y][x] = bodyColor;
+                        if (x !== centerX) {
+                            const mirrorX = centerX - (x - centerX);
+                            if (mirrorX >= 0 && mirrorX < size) {
+                                grid[y][mirrorX] = bodyColor;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Eye configurations
+            const eyeConfig = [
+                { type: 'sparkly', size: 3, yPos: 0.35 },
+                { type: 'round', size: 3, yPos: 0.35 },
+                { type: 'closed', size: 2, yPos: 0.35 },
+                { type: 'starry', size: 2, yPos: 0.35 },
+                { type: 'antenna', size: 2, yPos: 0.35 },
+                { type: 'bug', size: 4, yPos: 0.35 }
+            ];
+
+            const eyeType = (seed + 100) % eyeConfig.length;
+            const eyes = eyeConfig[eyeType];
+            const eyeY = Math.floor(size * eyes.yPos);
+            const eyeSpacing = Math.floor(size * 0.25);
+
+            // Draw eyes based on type
+            if (eyes.type === 'sparkly') {
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing - 1;
+                    
+                    if (size >= 24) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (eyeX + dx >= 0 && eyeX + dx < size && eyeY + dy >= 0 && eyeY + dy < size) {
+                                    grid[eyeY + dy][eyeX + dx] = '#ffffff';
+                                }
+                            }
+                        }
+                        
+                        if (eyeX >= 0 && eyeX + 1 < size && eyeY >= 0 && eyeY + 1 < size) {
+                            grid[eyeY][eyeX] = eyeColor;
+                            grid[eyeY][eyeX + 1] = eyeColor;
+                            grid[eyeY + 1][eyeX] = eyeColor;
+                            grid[eyeY + 1][eyeX + 1] = eyeColor;
+                        }
+                        
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                    } else {
+                        if (eyeX >= 0 && eyeX < size && eyeY >= 0 && eyeY < size) {
+                            grid[eyeY][eyeX] = eyeColor;
+                            if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX] = sparkleColor;
+                        }
+                    }
+                }
+            } else if (eyes.type === 'round') {
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing - 1;
+                    
+                    if (size >= 24) {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (Math.abs(dx) + Math.abs(dy) <= 2) {
+                                    if (eyeX + dx >= 0 && eyeX + dx < size && eyeY + dy >= 0 && eyeY + dy < size) {
+                                        grid[eyeY + dy][eyeX + dx] = '#ffffff';
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (eyeX >= 0 && eyeX < size && eyeY >= 0 && eyeY < size) {
+                            grid[eyeY][eyeX] = eyeColor;
+                        }
+                        
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) {
+                            grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                        }
+                    } else {
+                        if (eyeX >= 0 && eyeX < size && eyeY >= 0 && eyeY < size) {
+                            grid[eyeY][eyeX] = eyeColor;
+                            if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX] = sparkleColor;
+                        }
+                    }
+                }
+            } else if (eyes.type === 'closed') {
+                const leftEyeX = centerX - eyeSpacing;
+                const rightEyeX = centerX + eyeSpacing;
+                
+                if (size >= 24) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (leftEyeX + dx >= 0 && leftEyeX + dx < size && eyeY >= 0 && eyeY < size) {
+                            grid[eyeY][leftEyeX + dx] = eyeColor;
+                        }
+                        if (rightEyeX + dx >= 0 && rightEyeX + dx < size && eyeY >= 0 && eyeY < size) {
+                            grid[eyeY][rightEyeX + dx] = eyeColor;
+                        }
+                    }
+                } else {
+                    if (leftEyeX >= 0 && leftEyeX + 1 < size && eyeY >= 0 && eyeY < size) {
+                        grid[eyeY][leftEyeX] = eyeColor;
+                        grid[eyeY][leftEyeX + 1] = eyeColor;
+                    }
+                    if (rightEyeX >= 0 && rightEyeX + 1 < size && eyeY >= 0 && eyeY < size) {
+                        grid[eyeY][rightEyeX] = eyeColor;
+                        grid[eyeY][rightEyeX + 1] = eyeColor;
+                    }
+                }
+            } else if (eyes.type === 'starry') {
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing;
+                    
+                    if (eyeX >= 0 && eyeX < size && eyeY >= 0 && eyeY < size) {
+                        grid[eyeY][eyeX] = sparkleColor;
+                        if (eyeX - 1 >= 0) grid[eyeY][eyeX - 1] = sparkleColor;
+                        if (eyeX + 1 < size) grid[eyeY][eyeX + 1] = sparkleColor;
+                        if (eyeY - 1 >= 0) grid[eyeY - 1][eyeX] = sparkleColor;
+                        if (eyeY + 1 < size) grid[eyeY + 1][eyeX] = sparkleColor;
+                    }
+                }
+            } else if (eyes.type === 'antenna') {
+                const maxAntennaSpacing = size === 36 ? 8 : size === 24 ? 6 : 4;
+                const limitedEyeSpacing = Math.min(eyeSpacing, maxAntennaSpacing);
+                
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - limitedEyeSpacing : centerX + limitedEyeSpacing;
+                    const bodyTopY = Math.floor(size * 0.28);
+                    
+                    for (let dy = 0; dy < (size === 36 ? 7 : size === 24 ? 5 : 3); dy++) {
+                        const stalkY = bodyTopY - dy;
+                        if (eyeX >= 0 && eyeX < size && stalkY >= 0) {
+                            const useSecondaryColor = random() < 0.3;
+                            grid[stalkY][eyeX] = useSecondaryColor ? secondaryBodyColor : colors.primary;
+                        }
+                    }
+                    
+                    const eyeTopY = bodyTopY - (size === 36 ? 7 : size === 24 ? 5 : 3);
+                    if (eyeTopY >= 0 && eyeTopY + 2 < size) {
+                        for (let dy = 0; dy < 3; dy++) {
+                            for (let dx = 0; dx < 3; dx++) {
+                                if (eyeX - 1 + dx >= 0 && eyeX - 1 + dx < size) {
+                                    grid[eyeTopY + dy][eyeX - 1 + dx] = eyeColor;
+                                }
+                            }
+                        }
+                        if (eyeX >= 0 && eyeX + 1 < size) {
+                            grid[eyeTopY][eyeX] = sparkleColor;
+                            grid[eyeTopY][eyeX + 1] = sparkleColor;
+                        }
+                    }
+                }
+            } else if (eyes.type === 'bug') {
+                for (let eye = 0; eye < 2; eye++) {
+                    const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing;
+                    
+                    if (size >= 24) {
+                        for (let dy = -2; dy <= 1; dy++) {
+                            for (let dx = -2; dx <= 1; dx++) {
+                                const distance = Math.sqrt(dx * dx + dy * dy * 0.8);
+                                if (distance <= 2.2) {
+                                    if (eyeX + dx >= 0 && eyeX + dx < size && eyeY + dy >= 0 && eyeY + dy < size) {
+                                        grid[eyeY + dy][eyeX + dx] = eyeColor;
+                                    }
+                                }
+                            }
+                        }
+                        
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                        if (eyeX >= 0 && eyeY >= 0) grid[eyeY][eyeX] = sparkleColor;
+                    } else {
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (eyeX + dx >= 0 && eyeX + dx < size && eyeY + dy >= 0 && eyeY + dy < size) {
+                                    grid[eyeY + dy][eyeX + dx] = eyeColor;
+                                }
+                            }
+                        }
+                        if (eyeX - 1 >= 0 && eyeY - 1 >= 0) grid[eyeY - 1][eyeX - 1] = sparkleColor;
+                    }
+                }
+            }
+
+            // Add mouth
+            const mouthTypes = ['dot', 'line', 'w', 'o', 'triangle'];
+            const mouthType = mouthTypes[(seed + 50) % mouthTypes.length];
+            const mouthY = Math.floor(size * 0.55);
+            
+            if (mouthType === 'dot') {
+                if (centerX >= 0 && centerX < size && mouthY >= 0 && mouthY < size) {
+                    grid[mouthY][centerX] = eyeColor;
+                }
+            } else if (mouthType === 'line') {
+                const mouthWidth = size === 36 ? 3 : 2;
+                for (let dx = -Math.floor(mouthWidth/2); dx <= Math.floor(mouthWidth/2); dx++) {
+                    if (centerX + dx >= 0 && centerX + dx < size && mouthY >= 0 && mouthY < size) {
+                        grid[mouthY][centerX + dx] = eyeColor;
+                    }
+                }
+            } else if (mouthType === 'w') {
+                if (size >= 24) {
+                    if (mouthY >= 0 && mouthY < size) {
+                        if (centerX - 2 >= 0) grid[mouthY][centerX - 2] = eyeColor;
+                        if (centerX >= 0) grid[mouthY][centerX] = eyeColor;
+                        if (centerX + 2 < size) grid[mouthY][centerX + 2] = eyeColor;
+                    }
+                } else {
+                    if (mouthY >= 0 && mouthY < size && centerX >= 0 && centerX < size) {
+                        grid[mouthY][centerX] = eyeColor;
+                        if (centerX - 1 >= 0) grid[mouthY][centerX - 1] = eyeColor;
+                        if (centerX + 1 < size) grid[mouthY][centerX + 1] = eyeColor;
+                    }
+                }
+            }
+
+            // Add tail
+            const hasTail = (seed + 200) % 3 === 0;
+            if (hasTail) {
+                const tailTypes = ['curved', 'straight', 'forked'];
+                const tailType = tailTypes[(seed + 300) % tailTypes.length];
+                const tailStartY = Math.floor(size * 0.7);
+                
+                if (tailType === 'curved') {
+                    const tailLength = size === 36 ? 8 : size === 24 ? 6 : 4;
+                    const tailDirection = (seed % 2 === 0) ? 1 : -1;
+                    
+                    for (let i = 0; i < tailLength; i++) {
+                        const progress = i / (tailLength - 1);
+                        const tailX = centerX + Math.floor(tailDirection * progress * (size === 36 ? 6 : 4));
+                        const tailY = tailStartY + Math.floor(progress * progress * (size === 36 ? 6 : 4));
+                        
+                        if (tailX >= 0 && tailX < size && tailY >= 0 && tailY < size) {
+                            const useSecondaryColor = random() < 0.4;
+                            const tailColor = useSecondaryColor ? secondaryBodyColor : colors.primary;
+                            grid[tailY][tailX] = tailColor;
+                        }
+                    }
+                } else if (tailType === 'straight') {
+                    const tailLength = size === 36 ? 6 : size === 24 ? 4 : 3;
+                    
+                    for (let i = 0; i < tailLength; i++) {
+                        const tailY = tailStartY + i;
+                        
+                        if (centerX >= 0 && centerX < size && tailY >= 0 && tailY < size) {
+                            const useSecondaryColor = random() < 0.4;
+                            const tailColor = useSecondaryColor ? secondaryBodyColor : colors.primary;
+                            grid[tailY][centerX] = tailColor;
+                        }
+                    }
+                } else if (tailType === 'forked') {
+                    const tailLength = size === 36 ? 5 : size === 24 ? 4 : 3;
+                    
+                    for (let i = 0; i < 2; i++) {
+                        const tailY = tailStartY + i;
+                        if (centerX >= 0 && centerX < size && tailY >= 0 && tailY < size) {
+                            const useSecondaryColor = random() < 0.4;
+                            const tailColor = useSecondaryColor ? secondaryBodyColor : colors.primary;
+                            grid[tailY][centerX] = tailColor;
+                        }
+                    }
+                    
+                    for (let i = 2; i < tailLength; i++) {
+                        const branchSpread = i - 1;
+                        const leftX = centerX - branchSpread;
+                        const rightX = centerX + branchSpread;
+                        const tailY = tailStartY + i;
+                        
+                        if (tailY >= 0 && tailY < size) {
+                            if (leftX >= 0 && leftX < size) {
+                                const useSecondaryColor = random() < 0.4;
+                                const tailColor = useSecondaryColor ? secondaryBodyColor : colors.primary;
+                                grid[tailY][leftX] = tailColor;
+                            }
+                            if (rightX >= 0 && rightX < size) {
+                                const useSecondaryColor = random() < 0.4;
+                                const tailColor = useSecondaryColor ? secondaryBodyColor : colors.primary;
+                                grid[tailY][rightX] = tailColor;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add cosmic dust
+            const sparkCount = size === 36 ? 15 : size === 24 ? 12 : 8;
+            for (let i = 0; i < sparkCount; i++) {
+                const sparkX = Math.floor(random() * size);
+                const sparkY = Math.floor(random() * size);
+                
+                if (grid[sparkY] && grid[sparkY][sparkX] === '#000000') {
+                    if (random() < 0.5) {
+                        const dustType = random();
+                        let sparkColor;
+                        
+                        if (dustType < 0.1) {
+                            sparkColor = '#aaaaaa';
+                        } else if (dustType < 0.3) {
+                            sparkColor = '#666666';
+                        } else if (dustType < 0.6) {
+                            sparkColor = '#444444';
+                        } else {
+                            sparkColor = '#222222';
+                        }
+                        
+                        grid[sparkY][sparkX] = sparkColor;
+                    }
+                }
+            }
+
+            // Render grid to canvas
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    ctx.fillStyle = grid[y][x];
+                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                }
+            }
+
+            // Add scanlines
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            const scanlineSpacing = 2;
+            for (let y = 0; y < canvas.height; y += scanlineSpacing) {
+                ctx.fillRect(0, y, canvas.width, 1);
+            }
+
+            return { 
+                canvas, 
+                dna, 
+                dominantColor: dominantColor,
+                secondaryColor: secondaryBodyColor,
+                accentColor: colors.accent,
+                pattern: grid, 
+                eyeType: eyes.type,
+                creatureType,
+                bodyType: 0,
+                mouthType,
+                hasTail
+            };
+        }
+
+        function generateArtQR(creatorData, index) {
+            const qrSize = 256;
+            const qrCanvasElement = document.getElementById(`qr-${index}`);
+            if (!qrCanvasElement) {
+                console.error('QR canvas not found for index:', index);
+                return;
+            }
+            
+            const ctx = qrCanvasElement.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+
+            const galleryUrl = document.getElementById('mintUrl').value + creatorData.dna;
+            
+            qrCanvasElement.qrData = galleryUrl;
+            qrCanvasElement.creatorData = creatorData;
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            document.body.appendChild(tempDiv);
+            
+            try {
+                const qr = new QRCode(tempDiv, {
+                    text: galleryUrl,
+                    width: qrSize,
+                    height: qrSize,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                setTimeout(() => {
+                    const qrImg = tempDiv.querySelector('img');
+                    if (qrImg) {
+                        qrImg.onload = function() {
+                            ctx.clearRect(0, 0, qrSize, qrSize);
+                            ctx.drawImage(qrImg, 0, 0, qrSize, qrSize);
+
+                            const imageData = ctx.getImageData(0, 0, qrSize, qrSize);
+                            const data = imageData.data;
+
+                            const breedColor = hexToRgb(creatorData.dominantColor);
+                            
+                            for (let y = 0; y < qrSize; y++) {
+                                for (let x = 0; x < qrSize; x++) {
+                                    const i = (y * qrSize + x) * 4;
+                                    
+                                    if (data[i] < 50 && data[i + 3] === 255) {
+                                        if (breedColor) {
+                                            data[i] = breedColor.r;
+                                            data[i + 1] = breedColor.g;
+                                            data[i + 2] = breedColor.b;
+                                        } else {
+                                            data[i] = 0;
+                                            data[i + 1] = 255;
+                                            data[i + 2] = 0;
+                                        }
+                                    } else {
+                                        data[i] = 0;
+                                        data[i + 1] = 0;
+                                        data[i + 2] = 0;
+                                    }
+                                }
+                            }
+
+                            ctx.putImageData(imageData, 0, 0);
+
+                            const creatorSize = creatorData.canvas.width;
+                            const maxOverlaySize = qrSize * 0.42;
+                            const scale = maxOverlaySize / creatorSize;
+                            const scaledSize = creatorSize * scale;
+                            const offsetX = (qrSize - scaledSize) / 2;
+                            const offsetY = (qrSize - scaledSize) / 2;
+
+                            const centerX = qrSize / 2;
+                            const centerY = qrSize / 2;
+                            const radius = scaledSize / 2 + 6;
+                            
+                            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, radius + 4, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            ctx.fillStyle = '#000';
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                            ctx.fill();
+                            
+                            ctx.save();
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, scaledSize / 2, 0, Math.PI * 2);
+                            ctx.clip();
+                            ctx.drawImage(creatorData.canvas, offsetX, offsetY, scaledSize, scaledSize);
+                            ctx.restore();
+                            
+                            ctx.shadowColor = creatorData.dominantColor;
+                            ctx.shadowBlur = 15;
+                            ctx.strokeStyle = creatorData.dominantColor;
+                            ctx.lineWidth = 2;
+                            ctx.beginPath();
+                            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                            ctx.stroke();
+
+                            if (breedColor) {
+                                ctx.strokeStyle = `rgba(${breedColor.r}, ${breedColor.g}, ${breedColor.b}, 0.08)`;
+                            } else {
+                                ctx.strokeStyle = 'rgba(0, 255, 0, 0.08)';
+                            }
+                            ctx.lineWidth = 1;
+                            for (let y = 0; y < qrSize; y += 4) {
+                                ctx.beginPath();
+                                ctx.moveTo(0, y);
+                                ctx.lineTo(qrSize, y);
+                                ctx.stroke();
+                            }
+                            
+                            document.body.removeChild(tempDiv);
+                        };
+                        
+                        if (qrImg.complete) {
+                            qrImg.onload();
+                        }
+                    } else {
+                        console.error('QR image not found');
+                        document.body.removeChild(tempDiv);
+                    }
+                }, 100);
+                
+            } catch (err) {
+                console.error('QR generation error:', err);
+                document.body.removeChild(tempDiv);
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, qrSize, qrSize);
+                ctx.fillStyle = '#0f0';
+                ctx.font = '12px monospace';
+                ctx.fillText('QR ERROR', qrSize/2 - 30, qrSize/2);
+            }
+        }
+
+        function generateCreators() {
+            const container = document.getElementById('creators');
+            container.innerHTML = '';
+            creatorData = [];
+            creatorCount = 0;
+            
+            const parentSize = parseInt(document.getElementById('parentSize').value);
+            document.getElementById('creatorTitle').textContent = `CREATOR ORGANISMS WITH QR GALLERIES (${parentSize}x${parentSize})`;
+            
+            for (let i = 0; i < 6; i++) {
+                const dna = generateDNA();
+                const result = generateProtolite(dna, parentSize);
+                
+                const containerDiv = document.createElement('div');
+                containerDiv.className = 'creator-container';
+                
+                const dualDiv = document.createElement('div');
+                dualDiv.className = 'creator-dual';
+                
+                const creatorItem = document.createElement('div');
+                creatorItem.className = 'creator-item';
+                
+                const creatorLabel = document.createElement('div');
+                creatorLabel.className = 'item-label';
+                creatorLabel.textContent = 'PROTOLITE';
+                
+                result.canvas.className = 'creator-canvas';
+                result.canvas.style.width = parentSize === 36 ? '216px' : '144px';
+                result.canvas.style.height = parentSize === 36 ? '216px' : '144px';
+                result.canvas.onclick = () => breed(result, i);
+                
+                creatorItem.appendChild(creatorLabel);
+                creatorItem.appendChild(result.canvas);
+                
+                const qrItem = document.createElement('div');
+                qrItem.className = 'creator-item';
+                
+                const qrLabel = document.createElement('div');
+                qrLabel.className = 'item-label qr-label';
+                qrLabel.textContent = 'QR GALLERY';
+                
+                const qrCanvas = document.createElement('canvas');
+                qrCanvas.id = `qr-${i}`;
+                qrCanvas.className = 'qr-canvas';
+                qrCanvas.width = 256;
+                qrCanvas.height = 256;
+                qrCanvas.style.width = parentSize === 36 ? '216px' : '144px';
+                qrCanvas.style.height = parentSize === 36 ? '216px' : '144px';
+                
+                const downloadContainer = document.createElement('div');
+                downloadContainer.style.marginTop = '5px';
+                
+                const downloadPngBtn = document.createElement('button');
+                downloadPngBtn.className = 'download-btn';
+                downloadPngBtn.textContent = 'PNG';
+                downloadPngBtn.onclick = () => downloadQR(qrCanvas, `creator_${i}_qr.png`, 'png');
+                
+                const downloadSvgBtn = document.createElement('button');
+                downloadSvgBtn.className = 'download-btn';
+                downloadSvgBtn.textContent = 'SVG';
+                downloadSvgBtn.style.marginLeft = '5px';
+                downloadSvgBtn.onclick = () => downloadQR(qrCanvas, `creator_${i}_qr.svg`, 'svg');
+                
+                downloadContainer.appendChild(downloadPngBtn);
+                downloadContainer.appendChild(downloadSvgBtn);
+                
+                qrItem.appendChild(qrLabel);
+                qrItem.appendChild(qrCanvas);
+                qrItem.appendChild(downloadContainer);
+                
+                dualDiv.appendChild(creatorItem);
+                dualDiv.appendChild(qrItem);
+                
+                const idLabel = document.createElement('div');
+                idLabel.className = 'id-label';
+                idLabel.innerHTML = `${result.creatureType}`;
+                
+                const dnaLabel = document.createElement('div');
+                dnaLabel.className = 'dna-display';
+                dnaLabel.textContent = `DNA: ${result.dna} | EYES: ${result.eyeType.toUpperCase()}`;
+                
+                containerDiv.appendChild(dualDiv);
+                containerDiv.appendChild(idLabel);
+                containerDiv.appendChild(dnaLabel);
+                container.appendChild(containerDiv);
+                
+                creatorData[i] = result;
+                creatorCount++;
+                
+                setTimeout(() => generateArtQR(result, i), 100);
+            }
+            
+            updateStats();
+        }
+
+        function downloadQR(canvas, filename, format) {
+            if (format === 'png') {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } else if (format === 'svg') {
+                const galleryUrl = canvas.qrData;
+                const creatorData = canvas.creatorData;
+                
+                if (!galleryUrl || !creatorData) {
+                    console.error('Missing data for SVG generation');
+                    alert('Please wait for QR code to generate before downloading SVG');
+                    return;
+                }
+                
+                const svgString = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="256" height="256" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <radialGradient id="artGradient" cx="50%" cy="50%" r="30%">
+            <stop offset="0%" stop-color="${creatorData.dominantColor}" stop-opacity="1"/>
+            <stop offset="100%" stop-color="${creatorData.dominantColor}" stop-opacity="0"/>
+        </radialGradient>
+    </defs>
+    <rect width="256" height="256" fill="white"/>
+    <image href="${canvas.toDataURL('image/png')}" x="0" y="0" width="256" height="256"/>
+    <rect width="256" height="256" fill="url(#artGradient)" opacity="0.3" style="mix-blend-mode: multiply"/>
+    <text x="128" y="250" text-anchor="middle" font-family="monospace" font-size="8" fill="#0f0">${galleryUrl.substring(0, 30)}...</text>
+</svg>`;
+                
+                const svgBlob = new Blob([svgString], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(svgBlob);
+                
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = url;
+                link.click();
+                
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        function breed(parentData, parentIndex) {
+            const container = document.getElementById('descendants');
+            
+            const childSize = parseInt(document.getElementById('childSize').value);
+            document.getElementById('descendantTitle').textContent = `DESCENDANT PROTOLITES (${childSize}x${childSize})`;
+            
+            for (let i = 0; i < 3; i++) {
+                const childDNA = generateDNA();
+                const result = generateProtolite(childDNA, childSize, parentData);
+                
+                const card = document.createElement('div');
+                card.className = 'descendant-card';
+                
+                result.canvas.className = 'descendant-canvas';
+                result.canvas.style.width = childSize === 16 ? '96px' : '72px';
+                result.canvas.style.height = childSize === 16 ? '96px' : '72px';
+                
+                const label = document.createElement('div');
+                label.className = 'id-label descendant-label';
+                let labelText = `${result.creatureType}-JR${i + 1}`;
+                
+                if (result.creatureType !== parentData.creatureType) {
+                    labelText += '<span class="mutation-badge">MUTANT</span>';
+                }
+                
+                label.innerHTML = labelText;
+                
+                const dnaLabel = document.createElement('div');
+                dnaLabel.className = 'dna-display';
+                dnaLabel.textContent = `DNA: ${result.dna}`;
+                
+                card.appendChild(result.canvas);
+                card.appendChild(label);
+                card.appendChild(dnaLabel);
+                container.appendChild(card);
+                
+                descendantCount++;
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('stats').textContent = 
+                `CREATORS: ${creatorCount} | QR GALLERIES: ${creatorCount} | DESCENDANTS: ${descendantCount}`;
+        }
+
+        function clearAll() {
+            document.getElementById('creators').innerHTML = '';
+            document.getElementById('descendants').innerHTML = '';
+            creatorData = [];
+            creatorCount = 0;
+            descendantCount = 0;
+            updateStats();
+        }
+
+        function exportAll() {
+            const parentSize = parseInt(document.getElementById('parentSize').value);
+            const childSize = parseInt(document.getElementById('childSize').value);
+            const galleryUrl = document.getElementById('mintUrl').value;
+            
+            const descendantElements = document.querySelectorAll('.descendant-card');
+            const descendants = [];
+            descendantElements.forEach(card => {
+                const dnaText = card.querySelector('.dna-display').textContent;
+                const idText = card.querySelector('.id-label').innerText;
+                descendants.push({
+                    id: idText,
+                    dna: dnaText.replace('DNA: ', '')
+                });
+            });
+            
+            const data = {
+                protocol: "UBA_ART_PROTOCOL_V7_HARMONY",
+                timestamp: new Date().toISOString(),
+                configuration: {
+                    parentSize: `${parentSize}x${parentSize}`,
+                    childSize: `${childSize}x${childSize}`,
+                    evolutionRate: "natural",
+                    galleryBaseUrl: galleryUrl
+                },
+                creators: creatorData.map((s, i) => ({
+                    id: `CREATOR-${String(i + 1).padStart(3, '0')}`,
+                    type: s.creatureType,
+                    dna: s.dna,
+                    dominantColor: s.dominantColor,
+                    secondaryColor: s.secondaryColor,
+                    accentColor: s.accentColor,
+                    eyeType: s.eyeType,
+                    mouthType: s.mouthType,
+                    hasTail: s.hasTail,
+                    qrGalleryUrl: galleryUrl + s.dna,
+                    genetics: {
+                        primaryHue: s.dominantColor.match(/hsl\((\d+),/)?.[1] || "0",
+                        pattern: "harmonious",
+                        density: "balanced"
+                    }
+                })),
+                descendants: descendants,
+                stats: {
+                    totalCreators: creatorCount,
+                    totalQRGalleries: creatorCount,
+                    totalDescendants: descendantCount,
+                    averageDescendantsPerCreator: creatorCount > 0 ? descendantCount / creatorCount : 0
+                },
+                usage: {
+                    description: "V7 Harmony Protocol - Natural evolution with stable inheritance",
+                    features: [
+                        "Stable genetic inheritance from parents to children",
+                        "Natural color variations using HSL color system",
+                        "6 different eye types with size-appropriate rendering",
+                        "5 mouth types for personality",
+                        "3 tail variants appearing in 33% of creatures",
+                        "Cosmic dust background effects",
+                        "QR gallery integration with creature overlay"
+                    ],
+                    instructions: "Click on parent creatures to breed descendants. Each parent creates 3 offspring with inherited traits."
+                }
+            };
+            
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `uba_protolite_dna_v7_harmony_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Generate initial creators
+        generateCreators();
+    </script>
+</body>
+</html>

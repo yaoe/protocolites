@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viral Breeding Colony</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a0f1a 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            animation: subtle-pulse 8s ease-in-out infinite;
+        }
+        
+        @keyframes subtle-pulse {
+            0%, 100% { background: linear-gradient(135deg, #0a0a1a 0%, #1a0f1a 100%); }
+            50% { background: linear-gradient(135deg, #0f0a1a 0%, #1a101a 100%); }
+        }
+
+        .container {
+            background: rgba(20, 20, 20, 0.95);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff00;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #000;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+        }
+
+        button:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .parents-section {
+            margin-bottom: 40px;
+        }
+
+        .section-title {
+            color: #00ff00;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .parents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .parent-creature {
+            text-align: center;
+            padding: 15px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 50, 0, 0.2);
+        }
+
+        .parent-identicon {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto;
+            background: #000;
+            border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .parent-identicon:hover {
+            transform: scale(1.05);
+            border-color: #00ff41;
+            box-shadow: 0 0 25px rgba(0, 255, 65, 0.6);
+            animation: viral-pulse 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes viral-pulse {
+            0%, 100% { box-shadow: 0 0 25px rgba(0, 255, 65, 0.6); }
+            50% { box-shadow: 0 0 35px rgba(0, 255, 65, 0.8); }
+        }
+
+        .children-section {
+            border-top: 2px solid rgba(0, 255, 0, 0.3);
+            padding-top: 30px;
+        }
+
+        .children-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .child-creature {
+            text-align: center;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(50, 50, 0, 0.2);
+            animation: spawn 0.5s ease-out;
+        }
+
+        @keyframes spawn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .child-identicon {
+            width: 128px;
+            height: 128px;
+            margin: 0 auto;
+            background: #000;
+            border: 2px solid #333;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .child-identicon:hover {
+            transform: scale(1.1);
+            border-color: #ffff00;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.3);
+        }
+
+        .creature-type {
+            margin-top: 10px;
+            font-size: 11px;
+            color: #00ff00;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .child-type {
+            color: #ffff00;
+        }
+
+        .description {
+            text-align: center;
+            color: #00ff00;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.6;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .breeding-info {
+            text-align: center;
+            color: #ffff00;
+            font-size: 12px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧬 ART BREEDING COLONY 🧬</h1>
+        <div class="description">
+            CLICK PARENT ORGANISMS TO TRIGGER ASEXUAL REPRODUCTION • 36x36 SPAWNERS GENERATE 16x16 OFFSPRING
+        </div>
+        <div class="breeding-info">
+            GENETIC INHERITANCE: Colors, patterns, and artistic characteristics pass to offspring with mutations
+        </div>
+        
+        <div class="controls">
+            <button onclick="generateParents()">SPAWN PARENTS</button>
+            <button onclick="clearAll()">STERILIZE COLONY</button>
+        </div>
+
+        <div class="parents-section">
+            <div class="section-title">Parent Organisms (36x36) - Click to Breed</div>
+            <div class="parents-grid" id="parents"></div>
+        </div>
+
+        <div class="children-section">
+            <div class="section-title">Offspring Colony (16x16)</div>
+            <div class="children-grid" id="children"></div>
+        </div>
+    </div>
+
+    <script>
+        const creatureTypes = [
+            'a', 'x', 'F', 'N', 
+            'MA', 'TISS', 'VEIN', 'CEL',
+            'OR', 'BRAIN', 'SPINE', 'SKIN'
+        ];
+
+        let parentData = []; // Store parent genetic information
+
+        function generateCreatureIcon(seed, type, size = 36, parentGenetics = null) {
+            const canvas = document.createElement('canvas');
+            const pixelSize = size === 36 ? 5 : size === 16 ? 8 : 8;
+            const gridSize = size;
+            canvas.width = gridSize * pixelSize;
+            canvas.height = gridSize * pixelSize;
+            const ctx = canvas.getContext('2d');
+            
+            // Disable anti-aliasing for crisp pixels
+            ctx.imageSmoothingEnabled = false;
+            
+            // Seeded random function
+            let seedValue = seed;
+            function random() {
+                seedValue = (seedValue * 9301 + 49297) % 233280;
+                return seedValue / 233280;
+            }
+
+            // Viral/bacterial color palette
+            const colors = [
+                '#00ff41', '#41ff00', '#00ffff', '#ffff41', '#ff4100', '#ff00ff',
+                '#ff8041', '#8041ff', '#ff4180', '#80ff41', '#4180ff', '#ff8080',
+                '#41ff80', '#8080ff', '#ff4141', '#80ff80', '#4141ff', '#ffff80'
+            ];
+
+            let primaryColor, secondaryColor, accentColor;
+
+            if (parentGenetics) {
+                // Inherit colors from parent with potential mutations
+                primaryColor = random() > 0.8 ? colors[Math.floor(random() * colors.length)] : parentGenetics.primaryColor;
+                secondaryColor = random() > 0.8 ? colors[Math.floor(random() * colors.length)] : parentGenetics.secondaryColor;
+                accentColor = random() > 0.8 ? colors[Math.floor(random() * colors.length)] : parentGenetics.accentColor;
+            } else {
+                primaryColor = colors[Math.floor(random() * colors.length)];
+                secondaryColor = colors[Math.floor(random() * colors.length)];
+                accentColor = colors[Math.floor(random() * colors.length)];
+            }
+
+            // Create a pixel grid
+            const grid = Array(gridSize).fill().map(() => Array(gridSize).fill('#000000'));
+
+            // Draw pixelated main body (symmetrical)
+            const centerX = Math.floor(gridSize / 2);
+            const centerY = Math.floor(gridSize / 2);
+
+            // Adjust body size based on grid size
+            const bodyStart = size === 36 ? 10 : size === 16 ? 4 : 3;
+            const bodyEnd = size === 36 ? 26 : size === 16 ? 12 : 9;
+
+            for (let y = bodyStart; y < bodyEnd; y++) {
+                for (let x = bodyStart; x < bodyEnd; x++) {
+                    const distanceFromCenter = Math.abs(x - centerX) + Math.abs(y - centerY);
+                    const bodyChance = 0.8 - (distanceFromCenter * (size === 36 ? 0.06 : size === 16 ? 0.1 : 0.15));
+                    
+                    if (random() < bodyChance) {
+                        grid[y][x] = primaryColor;
+                        // Mirror horizontally for symmetry
+                        if (x !== centerX) {
+                            const mirrorX = centerX - (x - centerX);
+                            if (mirrorX >= 0 && mirrorX < gridSize) {
+                                grid[y][mirrorX] = primaryColor;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add alien/viral eyes (scaled for size)
+            if (size === 36) {
+                const eyeY = 14;
+                const eyeX1 = 13;
+                const eyeX2 = 22;
+                // Larger compound eyes for 36x36
+                for (let dy = 0; dy < 3; dy++) {
+                    for (let dx = 0; dx < 3; dx++) {
+                        grid[eyeY + dy][eyeX1 + dx] = '#00ff41';
+                        grid[eyeY + dy][eyeX2 + dx] = '#00ff41';
+                    }
+                }
+                // Glowing centers
+                grid[eyeY + 1][eyeX1 + 1] = '#ffffff';
+                grid[eyeY + 1][eyeX2 + 1] = '#ffffff';
+                // Add scanning lines
+                grid[eyeY][eyeX1] = '#ff4100';
+                grid[eyeY][eyeX2] = '#ff4100';
+                grid[eyeY + 2][eyeX1 + 2] = '#ff4100';
+                grid[eyeY + 2][eyeX2 + 2] = '#ff4100';
+            } else if (size === 16) {
+                const eyeY = 6;
+                const eyeX1 = 6;
+                const eyeX2 = 9;
+                // Medium compound eyes for 16x16
+                grid[eyeY][eyeX1] = '#00ff41';
+                grid[eyeY][eyeX2] = '#00ff41';
+                grid[eyeY + 1][eyeX1] = '#00ff41';
+                grid[eyeY + 1][eyeX2] = '#00ff41';
+                grid[eyeY][eyeX1] = '#ffffff';
+                grid[eyeY][eyeX2] = '#ffffff';
+                // Scanning effect
+                grid[eyeY - 1][eyeX1] = '#ff4100';
+                grid[eyeY - 1][eyeX2] = '#ff4100';
+            } else {
+                const eyeY = 4;
+                const eyeX1 = 4;
+                const eyeX2 = 7;
+                grid[eyeY][eyeX1] = '#00ff41';
+                grid[eyeY][eyeX2] = '#00ff41';
+            }
+
+            // Add viral spikes/tentacles (scaled for size)
+            const spikeCount = size === 36 ? 18 : size === 16 ? 12 : 8;
+            const spikeDistance = size === 36 ? [8, 17] : size === 16 ? [3, 7] : [1, 10];
+            
+            for (let i = 0; i < spikeCount; i++) {
+                const angle = (i / spikeCount) * Math.PI * 2;
+                const distance = spikeDistance[0] + random() * (spikeDistance[1] - spikeDistance[0]);
+                const x = Math.round(centerX + Math.cos(angle) * distance);
+                const y = Math.round(centerY + Math.sin(angle) * distance);
+                
+                if (x >= 0 && x < gridSize && y >= 0 && y < gridSize && random() > 0.25) {
+                    grid[y][x] = secondaryColor;
+                    
+                    // Add pulsing tendrils
+                    if (size >= 16 && random() > 0.4) {
+                        const extendLength = size === 36 ? 4 : 2;
+                        for (let ext = 1; ext <= extendLength; ext++) {
+                            const extendX = Math.round(x + Math.cos(angle) * ext);
+                            const extendY = Math.round(y + Math.sin(angle) * ext);
+                            if (extendX >= 0 && extendX < gridSize && extendY >= 0 && extendY < gridSize) {
+                                const intensity = 1 - (ext / extendLength);
+                                if (random() < intensity) {
+                                    grid[extendY][extendX] = ext % 2 === 0 ? secondaryColor : accentColor;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Add membrane receptors and viral nodes
+            const receptorCount = size === 36 ? 40 : size === 16 ? 18 : 10;
+            for (let i = 0; i < receptorCount; i++) {
+                const x = Math.floor(random() * gridSize);
+                const y = Math.floor(random() * gridSize);
+                
+                const distanceFromCenter = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                const minDist = size === 36 ? 5 : size === 16 ? 2 : 1;
+                const maxDist = size === 36 ? 16 : size === 16 ? 7 : 5;
+                
+                if (distanceFromCenter > minDist && distanceFromCenter < maxDist && random() > 0.6) {
+                    // Create small receptor clusters
+                    grid[y][x] = accentColor;
+                    if (size === 36) {
+                        // Add neighboring pixels for larger receptors
+                        if (x + 1 < gridSize && random() > 0.7) grid[y][x + 1] = accentColor;
+                        if (y + 1 < gridSize && random() > 0.7) grid[y + 1][x] = accentColor;
+                    }
+                }
+            }
+
+            // Add special patterns based on type
+            if (type.includes('BRAIN')) {
+                const patternSize = size === 36 ? 8 : size === 16 ? 4 : 2;
+                const startX = centerX - Math.floor(patternSize / 2);
+                const startY = centerY - Math.floor(patternSize / 2);
+                
+                for (let y = 0; y < patternSize; y++) {
+                    for (let x = 0; x < patternSize; x++) {
+                        if (startX + x >= 0 && startX + x < gridSize && startY + y >= 0 && startY + y < gridSize) {
+                            grid[startY + y][startX + x] = '#ff00ff';
+                        }
+                    }
+                }
+                
+                // Add brain wrinkles for larger sizes
+                if (size >= 16) {
+                    const wrinkleCount = size === 36 ? 6 : 3;
+                    for (let i = 0; i < wrinkleCount; i++) {
+                        const wrinkleX = startX + 1 + (i % (patternSize - 2));
+                        const wrinkleY = startY + 1 + Math.floor(i / (patternSize - 2));
+                        if (wrinkleX < startX + patternSize - 1 && wrinkleY < startY + patternSize - 1) {
+                            grid[wrinkleY][wrinkleX] = '#ffffff';
+                        }
+                    }
+                }
+            }
+
+            // Render the grid to canvas
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    ctx.fillStyle = grid[y][x];
+                    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                }
+            }
+
+            // Add CRT scanlines and glow effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            const scanlineSpacing = size === 36 ? 3 : size === 16 ? 4 : 5;
+            for (let y = 0; y < canvas.height; y += scanlineSpacing) {
+                ctx.fillRect(0, y, canvas.width, 1);
+            }
+            
+            // Add subtle glow around the creature
+            ctx.shadowBlur = size === 36 ? 8 : size === 16 ? 5 : 3;
+            ctx.shadowColor = primaryColor;
+
+            // Store genetics for inheritance
+            const genetics = {
+                primaryColor,
+                secondaryColor,
+                accentColor,
+                seed,
+                type
+            };
+
+            return { canvas, genetics };
+        }
+
+        function generateParents() {
+            const container = document.getElementById('parents');
+            container.innerHTML = '';
+            parentData = [];
+            
+            for (let i = 0; i < 6; i++) {
+                const seed = Math.floor(Math.random() * 10000);
+                const type = creatureTypes[Math.floor(Math.random() * creatureTypes.length)];
+                
+                const result = generateCreatureIcon(seed, type, 36);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'parent-creature';
+                
+                result.canvas.className = 'parent-identicon';
+                result.canvas.onclick = () => breed(result.genetics, i);
+                
+                const label = document.createElement('div');
+                label.className = 'creature-type';
+                label.textContent = type;
+                
+                wrapper.appendChild(result.canvas);
+                wrapper.appendChild(label);
+                container.appendChild(wrapper);
+                
+                // Store parent genetics
+                parentData[i] = result.genetics;
+            }
+        }
+
+        function breed(parentGenetics, parentIndex) {
+            const childrenContainer = document.getElementById('children');
+            
+            // Generate 3 offspring
+            for (let i = 0; i < 3; i++) {
+                const childSeed = parentGenetics.seed + (i + 1) * 1000 + Math.floor(Math.random() * 100);
+                
+                // Potential mutation in type
+                let childType = parentGenetics.type;
+                if (Math.random() > 0.7) {
+                    childType = creatureTypes[Math.floor(Math.random() * creatureTypes.length)];
+                }
+                
+                const result = generateCreatureIcon(childSeed, childType, 16, parentGenetics);
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'child-creature';
+                
+                result.canvas.className = 'child-identicon';
+                
+                const label = document.createElement('div');
+                label.className = 'creature-type child-type';
+                label.textContent = `${childType}-JR${i + 1}`;
+                
+                wrapper.appendChild(result.canvas);
+                wrapper.appendChild(label);
+                childrenContainer.appendChild(wrapper);
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('parents').innerHTML = '';
+            document.getElementById('children').innerHTML = '';
+            parentData = [];
+        }
+
+        // Generate initial parents
+        generateParents();
+    </script>
+</body>
+</html>
