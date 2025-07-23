@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Protocolite Demo</title>
+    <style>
+        body { 
+            background: black; 
+            color: lime; 
+            font-family: monospace; 
+            padding: 20px; 
+            text-align: center;
+        }
+        canvas { 
+            image-rendering: pixelated; 
+            border: 2px solid lime; 
+            margin: 10px;
+            background: black;
+        }
+        button {
+            background: black;
+            color: lime;
+            border: 1px solid lime;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        button:hover { background: lime; color: black; }
+    </style>
+</head>
+<body>
+    <h1>🧬 PROTOCOLITE DEMO 🧬</h1>
+    <p>Click to generate different Protocolites!</p>
+    
+    <button onclick="generateParent()">Generate Parent (24x24)</button>
+    <button onclick="generateKid()">Generate Kid (12x12)</button>
+    <button onclick="clearAll()">Clear All</button>
+    
+    <div id="output"></div>
+
+    <script>
+        let counter = 0;
+
+        function generateParent() {
+            const dna = '0x' + Math.random().toString(16).substr(2, 16);
+            createProtocolite(dna, false, '0x0', 24);
+        }
+
+        function generateKid() {
+            // Use the last parent's DNA if available
+            const parents = document.querySelectorAll('[data-parent="true"]');
+            const parentDna = parents.length > 0 ? 
+                parents[parents.length - 1].dataset.dna : 
+                '0x1234567890abcdef';
+            
+            const kidDna = '0x' + Math.random().toString(16).substr(2, 16);
+            createProtocolite(kidDna, true, parentDna, 12);
+        }
+
+        function createProtocolite(dna, isKid, parentDna, size) {
+            const canvas = document.createElement('canvas');
+            const pixelSize = size === 24 ? 8 : 10;
+            canvas.width = size * pixelSize;
+            canvas.height = size * pixelSize;
+            canvas.dataset.dna = dna;
+            canvas.dataset.parent = !isKid;
+            
+            const container = document.createElement('div');
+            container.style.display = 'inline-block';
+            container.style.margin = '10px';
+            container.innerHTML = `
+                <h3>${isKid ? 'Kid' : 'Parent'} #${++counter}</h3>
+                <div>DNA: ${dna.substr(0, 10)}...</div>
+                ${isKid ? `<div>Parent: ${parentDna.substr(0, 10)}...</div>` : ''}
+                <div>Size: ${size}x${size}</div>
+            `;
+            container.appendChild(canvas);
+            document.getElementById('output').appendChild(container);
+
+            drawProtocolite(canvas, dna, isKid, parentDna, size);
+        }
+
+        function drawProtocolite(canvas, dna, isKid, parentDna, size) {
+            const ctx = canvas.getContext('2d');
+            const pixelSize = canvas.width / size;
+            ctx.imageSmoothingEnabled = false;
+
+            // Generate colors from DNA
+            const hash = parseInt(dna.slice(2, 10), 16);
+            const useParentColors = isKid && parentDna !== '0x0';
+            const colorHash = useParentColors ? parseInt(parentDna.slice(2, 10), 16) : hash;
+            
+            const hue = colorHash % 360;
+            const sat = 70 + (colorHash % 30);
+            const light = 40 + (colorHash % 30);
+            const bodyColor = `hsl(${hue}, ${sat}%, ${light}%)`;
+
+            // Seeded random
+            let seed = parseInt(dna.slice(2, 10), 16);
+            function random() {
+                seed = (seed * 9301 + 49297) % 233280;
+                return seed / 233280;
+            }
+
+            // Draw background
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw body
+            const centerX = Math.floor(size / 2);
+            const centerY = Math.floor(size / 2);
+            const bodyRadius = size === 24 ? 5 : 3;
+
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    const dx = x - centerX;
+                    const dy = y - centerY;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist <= bodyRadius && random() < 0.8) {
+                        ctx.fillStyle = bodyColor;
+                        ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+                    }
+                }
+            }
+
+            // Draw eyes
+            const eyeY = Math.floor(size * 0.35);
+            const eyeSpacing = Math.floor(size * 0.2);
+            
+            ctx.fillStyle = 'white';
+            // Left eye
+            ctx.fillRect((centerX - eyeSpacing) * pixelSize, eyeY * pixelSize, pixelSize, pixelSize);
+            // Right eye  
+            ctx.fillRect((centerX + eyeSpacing) * pixelSize, eyeY * pixelSize, pixelSize, pixelSize);
+            
+            // Eye pupils
+            ctx.fillStyle = 'black';
+            if (size === 24) {
+                ctx.fillRect((centerX - eyeSpacing) * pixelSize + pixelSize/4, eyeY * pixelSize + pixelSize/4, pixelSize/2, pixelSize/2);
+                ctx.fillRect((centerX + eyeSpacing) * pixelSize + pixelSize/4, eyeY * pixelSize + pixelSize/4, pixelSize/2, pixelSize/2);
+            }
+
+            // Draw mouth
+            const mouthY = Math.floor(size * 0.6);
+            ctx.fillStyle = 'white';
+            ctx.fillRect(centerX * pixelSize, mouthY * pixelSize, pixelSize, pixelSize);
+
+            // Add some sparkles
+            ctx.fillStyle = '#333';
+            for (let i = 0; i < 5; i++) {
+                const sparkX = Math.floor(random() * size);
+                const sparkY = Math.floor(random() * size);
+                ctx.fillRect(sparkX * pixelSize, sparkY * pixelSize, pixelSize/2, pixelSize/2);
+            }
+        }
+
+        function clearAll() {
+            document.getElementById('output').innerHTML = '';
+            counter = 0;
+        }
+
+        // Generate initial examples
+        window.onload = function() {
+            generateParent();
+            setTimeout(() => generateKid(), 100);
+        };
+    </script>
+</body>
+</html>

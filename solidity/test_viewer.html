@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Protocolite Viewer</title>
+    <style>
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .protocolite {
+            display: inline-block;
+            margin: 20px;
+            text-align: center;
+            border: 2px solid #0f0;
+            padding: 10px;
+        }
+        iframe {
+            width: 300px;
+            height: 300px;
+            border: 1px solid #0f0;
+            background: #000;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        input, button {
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 5px 10px;
+            font-family: monospace;
+        }
+        button:hover {
+            background: #0f0;
+            color: #000;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Protocolite Test Viewer</h1>
+        
+        <div class="controls">
+            <h2>Test Parent (24x24)</h2>
+            <label>Token ID: <input type="number" id="parentTokenId" value="1"></label>
+            <label>DNA: <input type="text" id="parentDna" value="0x1234567890abcdef" size="40"></label>
+            <button onclick="renderParent()">Render Parent</button>
+        </div>
+
+        <div class="controls">
+            <h2>Test Kid (12x12)</h2>
+            <label>Token ID: <input type="number" id="kidTokenId" value="2"></label>
+            <label>DNA: <input type="text" id="kidDna" value="0xfedcba0987654321" size="40"></label>
+            <label>Parent DNA: <input type="text" id="kidParentDna" value="0x1234567890abcdef" size="40"></label>
+            <button onclick="renderKid()">Render Kid</button>
+        </div>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        // This is the same rendering script from your contract
+        const renderScript = `
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+            const pixelSize = size === 24 ? 6 : 8;
+            canvas.width = size * pixelSize;
+            canvas.height = size * pixelSize;
+            ctx.imageSmoothingEnabled = false;
+            
+            function dnaToColors(dna) {
+              const hash = parseInt(dna.slice(2, 10), 16);
+              const hue1 = hash % 360;
+              const hue2 = (hash >> 8) % 360;
+              const hue3 = (hash >> 16) % 360;
+              const sat = 80 + (hash % 20);
+              const light = 45 + (hash % 20);
+              return {
+                primary: \\\`hsl(\\\${hue1}, \\\${sat}%, \\\${light}%)\\\`,
+                secondary: \\\`hsl(\\\${hue2}, \\\${sat}%, \\\${light}%)\\\`,
+                accent: \\\`hsl(\\\${hue3}, 100%, 50%)\\\`
+              };
+            }
+            
+            const colors = isKid && parentDna !== "0x0" ? dnaToColors(parentDna) : dnaToColors(dna);
+            const seed = parseInt(dna.slice(2, 10), 16);
+            let seedValue = seed;
+            function random() { seedValue = (seedValue * 9301 + 49297) % 233280; return seedValue / 233280; }
+            
+            const grid = Array(size).fill().map(() => Array(size).fill("#000"));
+            
+            const centerX = Math.floor(size / 2);
+            const centerY = Math.floor(size / 2);
+            const bodyStart = size === 24 ? 7 : 4;
+            const bodyEnd = size === 24 ? 17 : 12;
+            
+            for (let y = bodyStart; y < bodyEnd; y++) {
+              for (let x = bodyStart; x < bodyEnd; x++) {
+                const dist = Math.abs(x - centerX) + Math.abs(y - centerY);
+                const chance = 0.8 - (dist * (size === 24 ? 0.07 : 0.1));
+                if (random() < chance) {
+                  grid[y][x] = colors.primary;
+                  if (x !== centerX) grid[y][centerX - (x - centerX)] = colors.primary;
+                }
+              }
+            }
+            
+            const eyeY = Math.floor(size * 0.35);
+            const eyeSpacing = Math.floor(size * 0.25);
+            const eyeColor = "#fff";
+            
+            if (size === 24) {
+              for (let eye = 0; eye < 2; eye++) {
+                const eyeX = eye === 0 ? centerX - eyeSpacing : centerX + eyeSpacing;
+                for (let dy = -1; dy <= 1; dy++) {
+                  for (let dx = -1; dx <= 1; dx++) {
+                    if (eyeX + dx >= 0 && eyeX + dx < size && eyeY + dy >= 0 && eyeY + dy < size) {
+                      grid[eyeY + dy][eyeX + dx] = eyeColor;
+                    }
+                  }
+                }
+                if (eyeX >= 0 && eyeX < size && eyeY >= 0 && eyeY < size) {
+                  grid[eyeY][eyeX] = "#000";
+                }
+              }
+            } else {
+              const kidEyeX1 = centerX - Math.floor(eyeSpacing * 0.7);
+              const kidEyeX2 = centerX + Math.floor(eyeSpacing * 0.7);
+              if (kidEyeX1 >= 0 && kidEyeX1 < size && eyeY >= 0 && eyeY < size) {
+                grid[eyeY][kidEyeX1] = eyeColor;
+              }
+              if (kidEyeX2 >= 0 && kidEyeX2 < size && eyeY >= 0 && eyeY < size) {
+                grid[eyeY][kidEyeX2] = eyeColor;
+              }
+            }
+            
+            const mouthY = Math.floor(size * 0.55);
+            const mouthTypes = ["dot", "line", "w"];
+            const mouthType = mouthTypes[seed % mouthTypes.length];
+            
+            if (mouthType === "dot") {
+              grid[mouthY][centerX] = "#fff";
+            } else if (mouthType === "line") {
+              const mouthWidth = size === 24 ? 3 : 2;
+              for (let dx = -Math.floor(mouthWidth/2); dx <= Math.floor(mouthWidth/2); dx++) {
+                if (centerX + dx >= 0 && centerX + dx < size) {
+                  grid[mouthY][centerX + dx] = "#fff";
+                }
+              }
+            } else if (mouthType === "w" && size === 24) {
+              if (centerX - 2 >= 0) grid[mouthY][centerX - 2] = "#fff";
+              grid[mouthY][centerX] = "#fff";
+              if (centerX + 2 < size) grid[mouthY][centerX + 2] = "#fff";
+            }
+            
+            const sparkCount = size === 24 ? 12 : 6;
+            for (let i = 0; i < sparkCount; i++) {
+              const sparkX = Math.floor(random() * size);
+              const sparkY = Math.floor(random() * size);
+              if (grid[sparkY][sparkX] === "#000") {
+                grid[sparkY][sparkX] = random() < 0.5 ? "#222" : "#444";
+              }
+            }
+            
+            for (let y = 0; y < size; y++) {
+              for (let x = 0; x < size; x++) {
+                ctx.fillStyle = grid[y][x];
+                ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+              }
+            }
+        `;
+
+        function createProtocoliteHTML(tokenId, dna, isKid, parentDna, size) {
+            // Need to properly escape the template literals in the render script
+            const escapedScript = renderScript.replace(/\\\\/g, '\\');
+            
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta name="viewport" content="width=device-width,user-scalable=no" />
+                </head>
+                <body>
+                    <style>
+                        html,body { background: black; } 
+                        body { overflow: hidden; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; } 
+                        canvas { image-rendering: pixelated; width: 100vmin; height: 100vmin; }
+                    </style>
+                    <canvas id="canvas"></canvas>
+                    <script>
+                        const tokenId = ${tokenId};
+                        const dna = "${dna}";
+                        const isKid = ${isKid};
+                        const parentDna = "${parentDna}";
+                        const size = ${size};
+                        ${escapedScript}
+                    </script>
+                </body>
+                </html>
+            `;
+        }
+
+        function renderParent() {
+            const tokenId = document.getElementById('parentTokenId').value;
+            const dna = document.getElementById('parentDna').value;
+            
+            const html = createProtocoliteHTML(tokenId, dna, false, "0x0", 24);
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = 'protocolite';
+            div.innerHTML = `
+                <h3>Parent #${tokenId}</h3>
+                <iframe src="${url}"></iframe>
+                <p>DNA: ${dna}</p>
+                <p>Size: 24x24</p>
+            `;
+            output.insertBefore(div, output.firstChild);
+        }
+
+        function renderKid() {
+            const tokenId = document.getElementById('kidTokenId').value;
+            const dna = document.getElementById('kidDna').value;
+            const parentDna = document.getElementById('kidParentDna').value;
+            
+            const html = createProtocoliteHTML(tokenId, dna, true, parentDna, 12);
+            const blob = new Blob([html], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = 'protocolite';
+            div.innerHTML = `
+                <h3>Kid #${tokenId}</h3>
+                <iframe src="${url}"></iframe>
+                <p>DNA: ${dna}</p>
+                <p>Parent DNA: ${parentDna}</p>
+                <p>Size: 12x12</p>
+            `;
+            output.insertBefore(div, output.firstChild);
+        }
+
+        // Render some examples on load
+        window.onload = function() {
+            // Generate some random DNAs
+            const randomDna = () => '0x' + Math.random().toString(16).substr(2, 16).padEnd(16, '0');
+            
+            document.getElementById('parentDna').value = randomDna();
+            document.getElementById('kidDna').value = randomDna();
+            document.getElementById('kidParentDna').value = document.getElementById('parentDna').value;
+            
+            renderParent();
+            
+            // Render a kid with same parent DNA
+            setTimeout(() => renderKid(), 100);
+        };
+    </script>
+</body>
+</html>

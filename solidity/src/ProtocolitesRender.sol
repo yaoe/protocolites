@@ -1,0 +1,117 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.13;
+
+import "solady/utils/Base64.sol";
+import "solady/utils/LibString.sol";
+import "solady/auth/Ownable.sol";
+import "./Protocolites.sol";
+
+contract ProtocolitesRender is Ownable {
+    
+    string public renderScript;
+    
+    constructor() {
+        _initializeOwner(msg.sender);
+        // Initialize with the default script
+        renderScript = defaultScript();
+    }
+    
+    function setRenderScript(string memory _script) external onlyOwner {
+        renderScript = _script;
+    }
+    
+    function tokenURI(uint256 tokenId, Protocolites.TokenData memory data) external view returns (string memory) {
+        return string.concat("data:application/json;base64,", Base64.encode(bytes(metadata(tokenId, data))));
+    }
+    
+    function metadata(uint256 tokenId, Protocolites.TokenData memory data) public view returns (string memory) {
+        bool isKid = data.isKid;
+        uint256 size = isKid ? 12 : 24;
+        
+        string memory animation = string.concat(
+            '<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,user-scalable=no" /></head><body>',
+            '<style>html,body { background: black; } body { overflow: hidden; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; } canvas { image-rendering: pixelated; width: 100vmin; height: 100vmin; }</style>',
+            '<canvas id="canvas"></canvas>',
+            '<script>',
+            'const tokenId = ', LibString.toString(tokenId), ';',
+            'const dna = "', LibString.toHexString(data.dna), '";',
+            'const isKid = ', isKid ? 'true' : 'false', ';',
+            'const parentDna = "', LibString.toHexString(data.parentDna), '";',
+            'const size = ', LibString.toString(size), ';',
+            renderScript,
+            '</script>',
+            '</body></html>'
+        );
+        
+        string memory attributes = string.concat(
+            '[{"trait_type":"Type","value":"', isKid ? 'Kid' : 'Parent', '"},',
+            '{"trait_type":"Size","value":"', LibString.toString(size), 'x', LibString.toString(size), '"},',
+            '{"trait_type":"DNA","value":"', LibString.toHexString(data.dna), '"},',
+            '{"trait_type":"Birth Block","value":', LibString.toString(data.birthBlock), '}',
+            isKid ? string.concat(',{"trait_type":"Parent DNA","value":"', LibString.toHexString(data.parentDna), '"}') : '',
+            ']'
+        );
+        
+        string memory json = string.concat(
+            '{"name":"Protocolite #', LibString.toString(tokenId),
+            isKid ? ' (Kid)' : ' (Parent)',
+            '",',
+            '"description":"Fully on-chain generative creatures that can breed kids or spawn new colonies.",',
+            '"animation_url":"data:text/html;base64,',
+            Base64.encode(bytes(animation)),
+            '",',
+            '"attributes":', attributes,
+            '}'
+        );
+        
+        return json;
+    }
+    
+    function getScript1() private pure returns (string memory) {
+        return string.concat(
+            'function hashCode(str){let hash=0;for(let i=0;i<str.length;i++){const char=str.charCodeAt(i);hash=((hash<<5)-hash)+char;hash=hash&hash;}return Math.abs(hash);}',
+            'function dnaToColors(dna){const hash=hashCode(dna);const hue1=(hash%360);const hue2=((hash>>8)%360);const hue3=((hash>>16)%360);const saturation=80+(hash%20);const lightness=45+(hash%20);return{primary:`hsl(${hue1},${saturation}%,${lightness}%)`,secondary:`hsl(${hue2},${saturation}%,${lightness}%)`,accent:`hsl(${hue3},100%,50%)`,glow:`hsl(${(hue1+180)%360},100%,60%)`};}',
+            'function hexToRgb(color){if(color.startsWith("hsl")){const match=color.match(/hsl\\((\\d+),\\s*(\\d+)%,\\s*(\\d+)%\\)/);if(match){const h=parseInt(match[1])/360;const s=parseInt(match[2])/100;const l=parseInt(match[3])/100;let r,g,b;if(s===0){r=g=b=l;}else{const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);}return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)};}}return null;}',
+            'function getOppositeColor(color){const rgb=hexToRgb(color);if(rgb){const invR=(255-rgb.r).toString(16).padStart(2,"0");const invG=(255-rgb.g).toString(16).padStart(2,"0");const invB=(255-rgb.b).toString(16).padStart(2,"0");return"#"+invR+invG+invB;}return"#ffffff";}',
+            'function getSimilarColor(color){const rgb=hexToRgb(color);if(!rgb)return color;const method=Math.floor(Math.random()*3);let newR,newG,newB;if(method===0){const factor=0.5+(Math.random()*0.3);newR=Math.max(0,Math.round(rgb.r*factor));newG=Math.max(0,Math.round(rgb.g*factor));newB=Math.max(0,Math.round(rgb.b*factor));}else if(method===1){const factor=1.3+(Math.random()*0.4);newR=Math.min(255,Math.round(rgb.r*factor));newG=Math.min(255,Math.round(rgb.g*factor));newB=Math.min(255,Math.round(rgb.b*factor));}else{const shift=(Math.random()-0.5)*60;newR=Math.max(0,Math.min(255,rgb.r+shift));newG=Math.max(0,Math.min(255,rgb.g+shift));newB=Math.max(0,Math.min(255,rgb.b+shift));}const hexR=Math.round(newR).toString(16).padStart(2,"0");const hexG=Math.round(newG).toString(16).padStart(2,"0");const hexB=Math.round(newB).toString(16).padStart(2,"0");return"#"+hexR+hexG+hexB;}'
+        );
+    }
+    
+    function getScript2() private pure returns (string memory) {
+        return string.concat(
+            'const canvas=document.getElementById("canvas");const ctx=canvas.getContext("2d");const pixelSize=size===24?6:8;canvas.width=size*pixelSize;canvas.height=size*pixelSize;ctx.imageSmoothingEnabled=false;',
+            'const seed=hashCode(dna);let seedValue=seed;function random(){seedValue=(seedValue*9301+49297)%233280;return seedValue/233280;}',
+            'const colors=isKid&&parentDna!=="0x0"?dnaToColors(parentDna):dnaToColors(dna);const eyeColor=getOppositeColor(colors.primary);const secondaryBodyColor=getSimilarColor(colors.primary);',
+            'ctx.fillStyle="#000";ctx.fillRect(0,0,canvas.width,canvas.height);const grid=Array(size).fill().map(()=>Array(size).fill("#000"));',
+            'const centerX=Math.floor(size/2);const centerY=Math.floor(size/2);const bodyStart=size===24?7:4;const bodyEnd=size===24?17:12;',
+            'for(let y=bodyStart;y<bodyEnd;y++){for(let x=bodyStart;x<bodyEnd;x++){const distanceFromCenter=Math.abs(x-centerX)+Math.abs(y-centerY);const bodyChance=0.8-(distanceFromCenter*(size===24?0.07:0.1));if(random()<bodyChance){const useSecondaryColor=random()<0.4;const bodyColor=useSecondaryColor?secondaryBodyColor:colors.primary;grid[y][x]=bodyColor;if(x!==centerX){const mirrorX=centerX-(x-centerX);if(mirrorX>=0&&mirrorX<size){grid[y][mirrorX]=bodyColor;}}}}}'
+        );
+    }
+    
+    function getScript3() private pure returns (string memory) {
+        return string.concat(
+            'const eyeTypes=["sparkly","round","closed","starry","antenna","bug"];const eyeType=(seed+100)%eyeTypes.length;const eyeY=Math.floor(size*0.35);const eyeSpacing=Math.floor(size*0.25);',
+            'if(eyeTypes[eyeType]==="sparkly"){for(let eye=0;eye<2;eye++){const eyeX=eye===0?centerX-eyeSpacing:centerX+eyeSpacing-1;if(size>=24){for(let dy=-1;dy<=1;dy++){for(let dx=-1;dx<=1;dx++){if(eyeX+dx>=0&&eyeX+dx<size&&eyeY+dy>=0&&eyeY+dy<size){grid[eyeY+dy][eyeX+dx]="#ffffff";}}}if(eyeX>=0&&eyeX+1<size&&eyeY>=0&&eyeY+1<size){grid[eyeY][eyeX]=eyeColor;grid[eyeY][eyeX+1]=eyeColor;grid[eyeY+1][eyeX]=eyeColor;grid[eyeY+1][eyeX+1]=eyeColor;}if(eyeX-1>=0&&eyeY-1>=0)grid[eyeY-1][eyeX-1]="#ffffff";}else{if(eyeX>=0&&eyeX<size&&eyeY>=0&&eyeY<size){grid[eyeY][eyeX]=eyeColor;if(eyeY-1>=0)grid[eyeY-1][eyeX]="#ffffff";}}}}',
+            'else if(eyeTypes[eyeType]==="round"){for(let eye=0;eye<2;eye++){const eyeX=eye===0?centerX-eyeSpacing:centerX+eyeSpacing-1;if(size>=24){for(let dy=-1;dy<=1;dy++){for(let dx=-1;dx<=1;dx++){if(Math.abs(dx)+Math.abs(dy)<=2&&eyeX+dx>=0&&eyeX+dx<size&&eyeY+dy>=0&&eyeY+dy<size){grid[eyeY+dy][eyeX+dx]="#ffffff";}}}if(eyeX>=0&&eyeX<size&&eyeY>=0&&eyeY<size){grid[eyeY][eyeX]=eyeColor;}if(eyeX-1>=0&&eyeY-1>=0){grid[eyeY-1][eyeX-1]="#ffffff";}}else{if(eyeX>=0&&eyeX<size&&eyeY>=0&&eyeY<size){grid[eyeY][eyeX]=eyeColor;if(eyeY-1>=0)grid[eyeY-1][eyeX]="#ffffff";}}}}'
+        );
+    }
+    
+    function getScript4() private pure returns (string memory) {
+        return string.concat(
+            'const mouthTypes=["dot","line","w"];const mouthType=mouthTypes[(seed+50)%mouthTypes.length];const mouthY=Math.floor(size*0.55);',
+            'if(mouthType==="dot"){if(centerX>=0&&centerX<size&&mouthY>=0&&mouthY<size){grid[mouthY][centerX]=eyeColor;}}else if(mouthType==="line"){const mouthWidth=size===24?3:2;for(let dx=-Math.floor(mouthWidth/2);dx<=Math.floor(mouthWidth/2);dx++){if(centerX+dx>=0&&centerX+dx<size&&mouthY>=0&&mouthY<size){grid[mouthY][centerX+dx]=eyeColor;}}}else if(mouthType==="w"){if(size>=24){if(mouthY>=0&&mouthY<size){if(centerX-2>=0)grid[mouthY][centerX-2]=eyeColor;if(centerX>=0)grid[mouthY][centerX]=eyeColor;if(centerX+2<size)grid[mouthY][centerX+2]=eyeColor;}}else{if(mouthY>=0&&mouthY<size&&centerX>=0&&centerX<size){grid[mouthY][centerX]=eyeColor;if(centerX-1>=0)grid[mouthY][centerX-1]=eyeColor;if(centerX+1<size)grid[mouthY][centerX+1]=eyeColor;}}}',
+            'const sparkCount=size===24?12:8;for(let i=0;i<sparkCount;i++){const sparkX=Math.floor(random()*size);const sparkY=Math.floor(random()*size);if(grid[sparkY]&&grid[sparkY][sparkX]==="#000"){if(random()<0.5){const dustType=random();let sparkColor;if(dustType<0.1){sparkColor="#aaa";}else if(dustType<0.3){sparkColor="#666";}else if(dustType<0.6){sparkColor="#444";}else{sparkColor="#222";}grid[sparkY][sparkX]=sparkColor;}}}',
+            'for(let y=0;y<size;y++){for(let x=0;x<size;x++){ctx.fillStyle=grid[y][x];ctx.fillRect(x*pixelSize,y*pixelSize,pixelSize,pixelSize);}}',
+            'ctx.fillStyle="rgba(0,0,0,0.1)";for(let y=0;y<canvas.height;y+=2){ctx.fillRect(0,y,canvas.width,1);}'
+        );
+    }
+
+    function defaultScript() private pure returns (string memory) {
+        return string.concat(
+            getScript1(),
+            getScript2(), 
+            getScript3(),
+            getScript4()
+        );
+    }
+}
