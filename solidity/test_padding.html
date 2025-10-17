@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,user-scalable=no" />
+    <style>
+        html, body { background: black; }
+        body { overflow: hidden; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        canvas { image-rendering: pixelated; width: 100vmin; height: 100vmin; border: 1px solid white; }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        // Test with a kid (12x12)
+        const tokenId = 1;
+        const dna = "0x1234567890abcdef";
+        const isKid = true;
+        const parentDna = "0xfedcba0987654321";
+        const size = 12;
+        
+        // Renderer code
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const pixelSize = 6;
+        const displaySize = 24;
+        canvas.width = displaySize * pixelSize;
+        canvas.height = displaySize * pixelSize;
+        ctx.imageSmoothingEnabled = false;
+        const padding = size === 12 ? (displaySize - size) / 2 * pixelSize : 0;
+        
+        console.log("Canvas size:", canvas.width, "x", canvas.height);
+        console.log("Pixel size:", pixelSize);
+        console.log("Grid size:", size);
+        console.log("Padding:", padding);
+        
+        // Fill background
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw a simple test pattern
+        const grid = Array(size).fill().map(() => Array(size).fill("#000"));
+        
+        // Draw a test square in the middle
+        for (let y = 4; y < 8; y++) {
+            for (let x = 4; x < 8; x++) {
+                grid[y][x] = "#ff0000";
+            }
+        }
+        
+        // Draw the grid with padding
+        for (let y = 0; y < size; y++) {
+            for (let x = 0; x < size; x++) {
+                ctx.fillStyle = grid[y][x];
+                ctx.fillRect(padding + x * pixelSize, padding + y * pixelSize, pixelSize, pixelSize);
+            }
+        }
+        
+        // Draw border to see canvas
+        ctx.strokeStyle = "#333";
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    </script>
+</body>
+</html>

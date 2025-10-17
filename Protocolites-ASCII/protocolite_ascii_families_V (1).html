@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロトコライト // ASCII PROTOCOLITE V</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1;
+            font-size: 12px;
+            font-weight: 200;
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            background: #fafafa;
+            border-bottom: 1px solid #e8e8e8;
+            padding: 30px;
+        }
+
+        h1 {
+            font-size: 13px;
+            font-weight: 200;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .subtitle {
+            font-size: 10px;
+            color: #666;
+            letter-spacing: 0.2em;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+
+        .sidebar {
+            width: 320px;
+            background: #fafafa;
+            border-right: 1px solid #e8e8e8;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #ffffff;
+        }
+
+        .control-section {
+            margin-bottom: 30px;
+        }
+
+        .control-title {
+            font-size: 10px;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .family-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .family-btn {
+            padding: 12px;
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #e0e0e0;
+            font-family: inherit;
+            font-size: 9px;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+
+        .family-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .family-btn.active {
+            background: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+
+        .family-btn[data-family="red"] { border-left: 3px solid #ff3333; }
+        .family-btn[data-family="green"] { border-left: 3px solid #33ff33; }
+        .family-btn[data-family="blue"] { border-left: 3px solid #3366ff; }
+        .family-btn[data-family="yellow"] { border-left: 3px solid #ffff33; }
+        .family-btn[data-family="purple"] { border-left: 3px solid #ff33ff; }
+        .family-btn[data-family="cyan"] { border-left: 3px solid #33ffff; }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid #000000;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: #000000;
+            border: 1px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #f8f8f8;
+            border-color: #000000;
+        }
+
+        .stats-panel {
+            background: #f8f8f8;
+            border: 1px solid #e8e8e8;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 10px;
+            color: #666;
+        }
+
+        .stat-value {
+            color: #000;
+            font-weight: 400;
+        }
+
+        .creatures-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            height: 100%;
+        }
+
+        .spreaders-panel {
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .children-panel {
+            background: #ffffff;
+            border: 1px solid #e8e8e8;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #666;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .spreader-card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .spreader-card:hover {
+            transform: translateX(5px);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.05);
+        }
+
+        .ascii-display {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            line-height: 10px;
+            letter-spacing: 0;
+            white-space: pre;
+            margin-bottom: 10px;
+        }
+
+        .spreader-ascii {
+            font-size: 9px;
+            line-height: 9px;
+        }
+
+        .child-ascii {
+            font-size: 8px;
+            line-height: 8px;
+        }
+
+        .creature-info {
+            font-size: 9px;
+            color: #999;
+            margin-top: 8px;
+        }
+
+        .children-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .child-card {
+            background: #fafafa;
+            border: 1px solid #e8e8e8;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .child-card:hover {
+            background: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        /* Family colors for ASCII - darker for visibility on white */
+        .ascii-red { color: #cc0000; }
+        .ascii-green { color: #008800; }
+        .ascii-blue { color: #0044cc; }
+        .ascii-yellow { color: #cc9900; }
+        .ascii-purple { color: #8800cc; }
+        .ascii-cyan { color: #0088aa; }
+
+        .dna-documentation {
+            background: #f8f8f8;
+            border: 1px solid #e8e8e8;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 9px;
+            line-height: 1.6;
+        }
+
+        .dna-doc-title {
+            font-weight: 400;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 8px;
+        }
+
+        .dna-section {
+            margin-bottom: 12px;
+        }
+
+        .dna-section-title {
+            font-weight: 400;
+            color: #000;
+            margin-bottom: 5px;
+            font-size: 9px;
+        }
+
+        .dna-item {
+            padding: 3px 0;
+            color: #666;
+            padding-left: 10px;
+        }
+
+        .dna-example {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            padding: 8px;
+            margin-top: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 8px;
+        }
+
+        .inheritance-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 4px;
+        }
+
+        .inherited-100 { background: #00cc00; }
+        .inherited-80 { background: #ffcc00; }
+        .inherited-random { background: #cc0000; }
+
+        .dna-traits {
+            font-size: 8px;
+            color: #999;
+            margin-top: 8px;
+            padding: 8px;
+            background: #f8f8f8;
+            border-radius: 3px;
+            line-height: 1.5;
+        }
+
+        .dna-trait {
+            display: inline-block;
+            margin-right: 8px;
+            padding: 2px 4px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 2px;
+        }
+
+        .dna-trait.inherited {
+            background: #e8ffe8;
+            border-color: #88cc88;
+        }
+
+        .dna-trait.mutated {
+            background: #ffe8e8;
+            border-color: #cc8888;
+        }
+
+        .parent-link {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #000;
+            color: #fff;
+            font-size: 8px;
+            border-radius: 2px;
+            margin-bottom: 5px;
+        }
+
+        .spreader-card.selected {
+            border: 2px solid #000;
+            background: #fffef0;
+        }
+
+        .child-card[data-parent-id] {
+            position: relative;
+        }
+
+        .child-card[data-parent-id]::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .child-card.highlight-parent::before {
+            border-color: #ffcc00;
+        }
+
+        /* Zoom Modal */
+        .zoom-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .zoom-modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .zoom-content {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 4px;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            position: relative;
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .zoom-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .zoom-close:hover {
+            background: #ff0000;
+            transform: rotate(90deg);
+        }
+
+        .zoom-ascii {
+            font-family: 'Courier New', monospace;
+            line-height: 1.2;
+            white-space: pre;
+            font-size: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .zoom-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e8e8e8;
+        }
+
+        .zoom-title {
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .zoom-id {
+            font-size: 11px;
+            color: #666;
+            letter-spacing: 0.1em;
+        }
+
+        .zoom-dna-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e8e8e8;
+        }
+
+        .zoom-dna-title {
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            color: #000;
+        }
+
+        .zoom-dna-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .zoom-dna-item {
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+
+        .zoom-dna-item.inherited {
+            background: #e8ffe8;
+            border-left: 3px solid #00cc00;
+        }
+
+        .zoom-dna-item.mutated {
+            background: #ffe8e8;
+            border-left: 3px solid #cc0000;
+        }
+
+        .zoom-dna-label {
+            font-weight: 400;
+            color: #666;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 0.1em;
+        }
+
+        .zoom-dna-value {
+            color: #000;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .zoom-btn {
+            padding: 6px 12px;
+            background: #000;
+            color: #fff;
+            border: none;
+            font-family: inherit;
+            font-size: 8px;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .zoom-btn:hover {
+            background: #666;
+        }
+
+        .spreader-card {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Zoom Modal -->
+    <div class="zoom-modal" id="zoomModal" onclick="closeZoom(event)">
+        <div class="zoom-content" onclick="event.stopPropagation()">
+            <button class="zoom-close" onclick="closeZoom()">&times;</button>
+            <div class="zoom-header">
+                <div class="zoom-title" id="zoomTitle">SPREADER</div>
+                <div class="zoom-id" id="zoomId">ID: ---</div>
+            </div>
+            <div class="zoom-ascii" id="zoomAscii"></div>
+            <div class="zoom-dna-section">
+                <div class="zoom-dna-title">DNA TRAITS</div>
+                <div class="zoom-dna-grid" id="zoomDnaGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header">
+        <h1>プロトコライト // ASCII PROTOCOLITE V</h1>
+        <div class="subtitle">ENHANCED DNA INHERITANCE SYSTEM — GENERATIVE ASCII ART PROTOCOL</div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="control-section">
+                <div class="control-title">Family Selection</div>
+                <div class="family-grid">
+                    <button class="family-btn" data-family="red" onclick="selectFamily('red')">RED<br>赤</button>
+                    <button class="family-btn" data-family="green" onclick="selectFamily('green')">GREEN<br>緑</button>
+                    <button class="family-btn" data-family="blue" onclick="selectFamily('blue')">BLUE<br>青</button>
+                    <button class="family-btn" data-family="yellow" onclick="selectFamily('yellow')">YELLOW<br>黄</button>
+                    <button class="family-btn" data-family="purple" onclick="selectFamily('purple')">PURPLE<br>紫</button>
+                    <button class="family-btn" data-family="cyan" onclick="selectFamily('cyan')">CYAN<br>水</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-title">Actions</div>
+                <div class="action-buttons">
+                    <button class="btn" onclick="generateSpreader()">GENERATE SPREADER</button>
+                    <button class="btn btn-secondary" onclick="clearFamily()">CLEAR FAMILY</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">CLEAR ALL</button>
+                    <button class="btn btn-secondary" onclick="exportData()">EXPORT DATA</button>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <span>Active Families:</span>
+                    <span class="stat-value" id="activeFamilies">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Spreaders:</span>
+                    <span class="stat-value" id="totalSpreaders">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Children:</span>
+                    <span class="stat-value" id="totalChildren">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Current Family:</span>
+                    <span class="stat-value" id="currentFamilyName">RED</span>
+                </div>
+            </div>
+
+            <div class="dna-documentation">
+                <div class="dna-doc-title">DNA System Documentation</div>
+
+                <div class="dna-section">
+                    <div class="dna-section-title">🧬 Color Inheritance</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-100"></span>Family color (100% inherited)</div>
+                    <div class="dna-item">• Children always match parent's family</div>
+                </div>
+
+                <div class="dna-section">
+                    <div class="dna-section-title">🎨 ASCII Attributes</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-100"></span>Body Type: 100% inherited</div>
+                    <div class="dna-item">• square, round, diamond, mushroom, etc.</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-80"></span>Body Char: 80% inherited</div>
+                    <div class="dna-item">• █ ▓ ▒ ░ (20% mutation chance)</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-80"></span>Eye Char: 80% inherited</div>
+                    <div class="dna-item">• ● ◉ ◎ ○ (always present!)</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-80"></span>Antenna Tip: 80% inherited</div>
+                    <div class="dna-item">• ● ◉ ○ ◎ ✦ ✧ ★</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-100"></span>Arm Style: 100% inherited</div>
+                    <div class="dna-item">• block (█) or line (─)</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-100"></span>Leg Style: 100% inherited</div>
+                    <div class="dna-item">• block (█) or line (│)</div>
+                </div>
+
+                <div class="dna-section">
+                    <div class="dna-section-title">✨ New Attributes (V)</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-80"></span>Hat: 80% inherited</div>
+                    <div class="dna-item">• ▀ ▄ ═ ╔╗ (if parent has hat)</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-random"></span>Cigarette: Random</div>
+                    <div class="dna-item">• ≈ ∼ ~ (10% chance)</div>
+                    <div class="dna-item"><span class="inheritance-indicator inherited-80"></span>Eye Size: 80% inherited</div>
+                    <div class="dna-item">• Regular or MEGA eyes</div>
+                </div>
+
+                <div class="dna-section">
+                    <div class="dna-section-title">📊 DNA Code Format</div>
+                    <div class="dna-example">[BODY-CHAR-EYE-ARM-LEG-HAT]<br>Example: [sq-█-●-blo-blo-▀]<br><br>sq = square body<br>█ = solid body fill<br>● = round eyes<br>blo = block limbs<br>▀ = top hat</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="creatures-grid">
+                <div class="spreaders-panel">
+                    <div class="panel-title">SPREADERS (24×24) — Click to breed</div>
+                    <div id="spreaders"></div>
+                </div>
+
+                <div class="children-panel">
+                    <div class="panel-title">CHILDREN (16×16)</div>
+                    <div class="children-grid" id="children"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const families = {
+            red: { name: 'RED', class: 'ascii-red' },
+            green: { name: 'GREEN', class: 'ascii-green' },
+            blue: { name: 'BLUE', class: 'ascii-blue' },
+            yellow: { name: 'YELLOW', class: 'ascii-yellow' },
+            purple: { name: 'PURPLE', class: 'ascii-purple' },
+            cyan: { name: 'CYAN', class: 'ascii-cyan' }
+        };
+
+        let currentFamily = 'red';
+        let familyData = {};
+
+        // Initialize family data
+        Object.keys(families).forEach(key => {
+            familyData[key] = { spreaders: [], children: [] };
+        });
+
+        function generateASCIICreature(size, family, seed = null, parentDNA = null) {
+            // If no seed provided, generate a truly unique one
+            if (seed === null) {
+                seed = Date.now() * Math.random() * 1000000;
+            }
+
+            // Seeded random
+            let s = seed;
+            function random() {
+                s = (s * 9301 + 49297) % 233280;
+                return s / 233280;
+            }
+
+            // DNA INHERITANCE SYSTEM
+            const isChild = size === 16;
+            let dna = {};
+
+            if (parentDNA) {
+                // CHILD: Inherit DNA from parent with mutations
+                dna.bodyType = parentDNA.bodyType; // 100% inherited
+                dna.armStyle = parentDNA.armStyle; // 100% inherited
+                dna.legStyle = parentDNA.legStyle; // 100% inherited
+
+                // Body character: 80% inherit, 20% mutate
+                if (random() < 0.8) {
+                    dna.bodyChar = parentDNA.bodyChar;
+                } else {
+                    const bodyChars = ['█', '▓', '▒', '░'];
+                    dna.bodyChar = bodyChars[Math.floor(random() * bodyChars.length)];
+                }
+
+                // Eye style: 80% inherit, 20% mutate
+                if (random() < 0.8) {
+                    dna.eyeChar = parentDNA.eyeChar;
+                } else {
+                    const eyeChars = ['●', '◉', '◎', '○'];
+                    dna.eyeChar = eyeChars[Math.floor(random() * eyeChars.length)];
+                }
+
+                // Eye size: 80% inherit, 20% mutate (NEW)
+                if (random() < 0.8) {
+                    dna.eyeSize = parentDNA.eyeSize;
+                } else {
+                    dna.eyeSize = random() > 0.5 ? 'normal' : 'mega';
+                }
+
+                // Antenna tip: 80% inherit, 20% mutate
+                if (random() < 0.8) {
+                    dna.antennaTip = parentDNA.antennaTip;
+                } else {
+                    const antennaTips = ['●', '◉', '○', '◎', '✦', '✧', '★'];
+                    dna.antennaTip = antennaTips[Math.floor(random() * antennaTips.length)];
+                }
+
+                // Hat: 80% inherit if parent has hat (NEW)
+                if (parentDNA.hatType && parentDNA.hatType !== 'none') {
+                    if (random() < 0.8) {
+                        dna.hatType = parentDNA.hatType;
+                    } else {
+                        const hatTypes = ['none', 'top', 'flat', 'double', 'fancy'];
+                        dna.hatType = hatTypes[Math.floor(random() * hatTypes.length)];
+                    }
+                } else {
+                    // Parent has no hat, small chance child gets one
+                    dna.hatType = random() < 0.15 ? ['top', 'flat', 'double', 'fancy'][Math.floor(random() * 4)] : 'none';
+                }
+
+                // Cigarette: Random 10% chance (NEW)
+                dna.hasCigarette = random() < 0.10;
+            } else {
+                // SPREADER: Generate random DNA
+                const bodyChars = ['█', '▓', '▒', '░'];
+                const eyeChars = ['●', '◉', '◎', '○'];
+                const antennaTips = ['●', '◉', '○', '◎', '✦', '✧', '★'];
+                const armStyles = ['block', 'line'];
+                const legStyles = ['block', 'line'];
+                const hatTypes = ['none', 'none', 'none', 'top', 'flat', 'double', 'fancy']; // mostly no hat
+
+                dna.bodyChar = bodyChars[Math.floor(random() * bodyChars.length)];
+                dna.eyeChar = eyeChars[Math.floor(random() * eyeChars.length)];
+                dna.eyeSize = random() > 0.7 ? 'mega' : 'normal'; // 30% chance of mega eyes
+                dna.antennaTip = antennaTips[Math.floor(random() * antennaTips.length)];
+                dna.armStyle = armStyles[Math.floor(random() * armStyles.length)];
+                dna.legStyle = legStyles[Math.floor(random() * legStyles.length)];
+                dna.hatType = hatTypes[Math.floor(random() * hatTypes.length)];
+                dna.hasCigarette = random() < 0.10; // 10% chance
+            }
+
+            // Create grid
+            const grid = Array(size).fill().map(() => Array(size).fill(' '));
+
+            // Center coordinates
+            const cx = Math.floor(size / 2);
+            const cy = Math.floor(size / 2);
+
+            // BODY TYPE - Inherited or random
+            let bodyType;
+            if (parentDNA && parentDNA.bodyType) {
+                // CHILD: 100% inherit parent's body type
+                bodyType = parentDNA.bodyType;
+            } else {
+                // SPREADER: Random body type
+                const bodyTypes = isChild ?
+                    ['square', 'round', 'diamond', 'mushroom'] :
+                    ['square', 'round', 'invader', 'mushroom', 'ghost', 'diamond'];
+                const bodyTypeIndex = Math.floor(random() * bodyTypes.length);
+                bodyType = bodyTypes[bodyTypeIndex];
+                dna.bodyType = bodyType; // Store in DNA
+            }
+
+            const bodyWidth = size === 24 ? 6 : 3;
+            const bodyHeight = size === 24 ? 8 : 4;
+            const bodyStartY = size === 24 ? 7 : 6;
+
+            // Draw solid body
+            for (let y = 0; y < bodyHeight; y++) {
+                for (let x = -bodyWidth; x <= bodyWidth; x++) {
+                    const posY = bodyStartY + y;
+                    const posX = cx + x;
+
+                    let inBody = false;
+                    const relX = x / bodyWidth;
+                    const relY = (y - bodyHeight/2) / (bodyHeight/2);
+
+                    switch(bodyType) {
+                        case 'square':
+                            inBody = true;
+                            break;
+
+                        case 'round':
+                            const dist = Math.sqrt(relX*relX + relY*relY);
+                            inBody = dist <= 1.0;
+                            break;
+
+                        case 'diamond':
+                            inBody = Math.abs(relX) + Math.abs(relY) <= 1.0;
+                            break;
+
+                        case 'mushroom':
+                            if (isChild) {
+                                if (relY < -0.2) {
+                                    inBody = true;
+                                } else {
+                                    inBody = Math.abs(relX) <= 0.7;
+                                }
+                            } else {
+                                if (relY < 0) {
+                                    inBody = true;
+                                } else {
+                                    inBody = Math.abs(relX) <= 0.6;
+                                }
+                            }
+                            break;
+
+                        case 'invader':
+                            if (relY < -0.3) {
+                                inBody = Math.abs(relX) <= 0.7;
+                            } else if (relY < 0.3) {
+                                inBody = true;
+                            } else {
+                                inBody = Math.abs(relX) <= 0.85;
+                            }
+                            break;
+
+                        case 'ghost':
+                            const distGhost = Math.sqrt(relX*relX + relY*relY);
+                            if (relY < 0.5) {
+                                inBody = distGhost <= 1.0;
+                            } else {
+                                inBody = Math.abs(relX) <= 0.9 && (Math.floor(x + bodyWidth) % 2 === 0 || relY < 0.8);
+                            }
+                            break;
+                    }
+
+                    if (inBody) {
+                        if (posX >= 0 && posX < size && posY >= 0 && posY < size) {
+                            grid[posY][posX] = dna.bodyChar;
+                        }
+                    }
+                }
+            }
+
+            // Helper to check if cell is body
+            const isBodyChar = (char) => ['█', '▓', '▒', '░'].includes(char);
+
+            // EYES - ALWAYS PRESENT (using DNA eye character and size)
+            const eyeY = bodyStartY + 1;
+            const hasMegaEyes = dna.eyeSize === 'mega';
+
+            if (isChild) {
+                // CHILDREN - Always have 1-3 eyes, bigger and more visible
+                const eyeCount = 1 + Math.floor(random() * 3);
+
+                if (eyeCount === 1) {
+                    // Single cyclops eye - ALWAYS BIG
+                    for (let dy = 0; dy < 2; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            if (isBodyChar(grid[eyeY + dy][cx + dx])) {
+                                grid[eyeY + dy][cx + dx] = ' ';
+                            }
+                        }
+                    }
+                    grid[eyeY][cx - 1] = dna.bodyChar;
+                    grid[eyeY][cx] = dna.eyeChar; // DNA eye char
+                    grid[eyeY][cx + 1] = dna.bodyChar;
+                    grid[eyeY + 1][cx] = dna.bodyChar;
+                } else if (eyeCount === 2) {
+                    // Two eyes - ALWAYS BIG AND VISIBLE
+                    const eyeSpacing = 1;
+                    for (let dy = 0; dy < 2; dy++) {
+                        for (let dx = 0; dx < 2; dx++) {
+                            if (isBodyChar(grid[eyeY + dy][cx - eyeSpacing - 1 + dx])) {
+                                grid[eyeY + dy][cx - eyeSpacing - 1 + dx] = ' ';
+                            }
+                            if (isBodyChar(grid[eyeY + dy][cx + eyeSpacing + dx])) {
+                                grid[eyeY + dy][cx + eyeSpacing + dx] = ' ';
+                            }
+                        }
+                    }
+                    // Left eye
+                    grid[eyeY][cx - eyeSpacing - 1] = dna.bodyChar;
+                    grid[eyeY][cx - eyeSpacing] = dna.eyeChar; // DNA eye char
+                    grid[eyeY + 1][cx - eyeSpacing - 1] = dna.bodyChar;
+                    grid[eyeY + 1][cx - eyeSpacing] = dna.bodyChar;
+
+                    // Right eye
+                    grid[eyeY][cx + eyeSpacing] = dna.eyeChar; // DNA eye char
+                    grid[eyeY][cx + eyeSpacing + 1] = dna.bodyChar;
+                    grid[eyeY + 1][cx + eyeSpacing] = dna.bodyChar;
+                    grid[eyeY + 1][cx + eyeSpacing + 1] = dna.bodyChar;
+                } else {
+                    // Three eyes - BIG
+                    for (let dx of [-2, 0, 2]) {
+                        if (isBodyChar(grid[eyeY][cx + dx])) grid[eyeY][cx + dx] = ' ';
+                        grid[eyeY][cx + dx] = dna.eyeChar;
+                    }
+                }
+            } else {
+                // SPREADERS - Always have BIG eyes (1-3 eyes, always prominent)
+                const eyeCount = 1 + Math.floor(random() * 3); // 1, 2, or 3 eyes
+
+                if (eyeCount === 1) {
+                    // Giant cyclops eye - MEGA
+                    for (let dy = 0; dy < 3; dy++) {
+                        for (let dx = -2; dx <= 2; dx++) {
+                            if (isBodyChar(grid[eyeY + dy][cx + dx])) {
+                                grid[eyeY + dy][cx + dx] = ' ';
+                            }
+                        }
+                    }
+                    for (let dx = -2; dx <= 2; dx++) {
+                        grid[eyeY][cx + dx] = dna.bodyChar;
+                        grid[eyeY + 2][cx + dx] = dna.bodyChar;
+                    }
+                    grid[eyeY + 1][cx - 2] = dna.bodyChar;
+                    grid[eyeY + 1][cx - 1] = dna.eyeChar; // DNA eye char
+                    grid[eyeY + 1][cx] = dna.eyeChar; // DNA eye char - DOUBLE for emphasis
+                    grid[eyeY + 1][cx + 1] = dna.eyeChar; // DNA eye char
+                    grid[eyeY + 1][cx + 2] = dna.bodyChar;
+                } else if (eyeCount === 2) {
+                    // Two BIG eyes - MEGA VISIBLE
+                    const blockSpacing = 2;
+                    for (let dy = 0; dy < 3; dy++) {
+                        for (let dx = 0; dx < 3; dx++) {
+                            if (isBodyChar(grid[eyeY + dy][cx - blockSpacing - 2 + dx])) {
+                                grid[eyeY + dy][cx - blockSpacing - 2 + dx] = ' ';
+                            }
+                            if (isBodyChar(grid[eyeY + dy][cx + blockSpacing + dx])) {
+                                grid[eyeY + dy][cx + blockSpacing + dx] = ' ';
+                            }
+                        }
+                    }
+                    // Left eye - all DNA eye chars
+                    for (let dy = 0; dy < 3; dy++) {
+                        for (let dx = 0; dx < 3; dx++) {
+                            const isCenter = (dy === 1 && dx === 1);
+                            const char = isCenter ? dna.eyeChar : dna.bodyChar; // Center is eye char
+                            grid[eyeY + dy][cx - blockSpacing - 2 + dx] = char;
+                        }
+                    }
+                    // Right eye - all DNA eye chars
+                    for (let dy = 0; dy < 3; dy++) {
+                        for (let dx = 0; dx < 3; dx++) {
+                            const isCenter = (dy === 1 && dx === 1);
+                            const char = isCenter ? dna.eyeChar : dna.bodyChar; // Center is eye char
+                            grid[eyeY + dy][cx + blockSpacing + dx] = char;
+                        }
+                    }
+                } else {
+                    // Three eyes - MEGA
+                    for (let i = -3; i <= 3; i += 3) {
+                        for (let dy = 0; dy < 2; dy++) {
+                            if (isBodyChar(grid[eyeY + dy][cx + i])) grid[eyeY + dy][cx + i] = ' ';
+                            if (isBodyChar(grid[eyeY + dy][cx + i - 1])) grid[eyeY + dy][cx + i - 1] = ' ';
+                            grid[eyeY + dy][cx + i] = dna.eyeChar;
+                            grid[eyeY + dy][cx + i - 1] = dna.eyeChar;
+                        }
+                    }
+                }
+            }
+
+            // MOUTH - Optional, simple
+            if (random() > 0.3) {
+                const mouthY = eyeY + (isChild ? 2 : 3);
+                if (mouthY < size && isBodyChar(grid[mouthY][cx])) {
+                    grid[mouthY][cx] = '─';
+                    if (random() > 0.5 && isBodyChar(grid[mouthY][cx - 1])) {
+                        grid[mouthY][cx - 1] = '─';
+                    }
+                    if (random() > 0.5 && isBodyChar(grid[mouthY][cx + 1])) {
+                        grid[mouthY][cx + 1] = '─';
+                    }
+                }
+            }
+
+            // CIGARETTE - Random placement near mouth (NEW)
+            if (dna.hasCigarette) {
+                const cigY = eyeY + (isChild ? 2 : 3);
+                const cigChars = ['≈', '∼', '~'];
+                const cigChar = cigChars[Math.floor(random() * cigChars.length)];
+                const cigX = cx + (random() > 0.5 ? 3 : -3);
+                if (cigX >= 0 && cigX < size && cigY >= 0 && cigY < size) {
+                    grid[cigY][cigX] = cigChar;
+                    // Add smoke
+                    if (cigX + 1 < size) grid[cigY][cigX + 1] = '∙';
+                }
+            }
+
+            // ARMS - ALWAYS PRESENT, using DNA arm style
+            const armCount = 1 + Math.floor(random() * 4);
+            const armLength = isChild ? (1 + Math.floor(random() * 2)) : (2 + Math.floor(random() * 4));
+            const armStyle = dna.armStyle;
+
+            for (let a = 0; a < armCount; a++) {
+                const currentArmY = bodyStartY + 2 + a * (isChild ? 1 : 2);
+                if (currentArmY >= bodyStartY + bodyHeight) break;
+
+                let leftBodyEdge = cx;
+                let rightBodyEdge = cx;
+
+                for (let x = cx; x >= 0; x--) {
+                    if (isBodyChar(grid[currentArmY][x])) {
+                        leftBodyEdge = x;
+                    } else {
+                        break;
+                    }
+                }
+
+                for (let x = cx; x < size; x++) {
+                    if (isBodyChar(grid[currentArmY][x])) {
+                        rightBodyEdge = x;
+                    } else {
+                        break;
+                    }
+                }
+
+                const armChar = armStyle === 'block' ? '█' : '─';
+                for (let i = 1; i <= armLength; i++) {
+                    if (leftBodyEdge - i >= 0) {
+                        grid[currentArmY][leftBodyEdge - i] = armChar;
+                    }
+                    if (rightBodyEdge + i < size) {
+                        grid[currentArmY][rightBodyEdge + i] = armChar;
+                    }
+                }
+            }
+
+            // LEGS - ALWAYS PRESENT, using DNA leg style
+            const legCount = 1 + Math.floor(random() * 4);
+            const legY = bodyStartY + bodyHeight;
+            const legLength = isChild ? (1 + Math.floor(random() * 2)) : (2 + Math.floor(random() * 3));
+            const legStyle = dna.legStyle;
+
+            const bodyBottomPositions = [];
+            for (let x = 0; x < size; x++) {
+                if (grid[legY - 1] && isBodyChar(grid[legY - 1][x])) {
+                    bodyBottomPositions.push(x);
+                }
+            }
+
+            const legPositions = [];
+            if (bodyBottomPositions.length > 0) {
+                if (legCount === 1) {
+                    legPositions.push(bodyBottomPositions[Math.floor(bodyBottomPositions.length / 2)]);
+                } else if (legCount === 2) {
+                    const leftPos = Math.floor(bodyBottomPositions.length * 0.25);
+                    const rightPos = Math.floor(bodyBottomPositions.length * 0.75);
+                    legPositions.push(bodyBottomPositions[leftPos]);
+                    legPositions.push(bodyBottomPositions[rightPos]);
+                } else if (legCount === 3) {
+                    legPositions.push(bodyBottomPositions[0]);
+                    legPositions.push(bodyBottomPositions[Math.floor(bodyBottomPositions.length / 2)]);
+                    legPositions.push(bodyBottomPositions[bodyBottomPositions.length - 1]);
+                } else {
+                    legPositions.push(bodyBottomPositions[0]);
+                    legPositions.push(bodyBottomPositions[Math.floor(bodyBottomPositions.length * 0.33)]);
+                    legPositions.push(bodyBottomPositions[Math.floor(bodyBottomPositions.length * 0.66)]);
+                    legPositions.push(bodyBottomPositions[bodyBottomPositions.length - 1]);
+                }
+            }
+
+            const legChar = legStyle === 'block' ? '█' : '│';
+            for (let legX of legPositions) {
+                if (legX >= 0 && legX < size) {
+                    for (let i = 0; i < legLength; i++) {
+                        if (legY + i < size) {
+                            grid[legY + i][legX] = legChar;
+                        }
+                    }
+                }
+            }
+
+            // ANTENNAS - ALWAYS PRESENT, using DNA antenna tip
+            const antennaCount = 1 + Math.floor(random() * 4);
+            const antennaLength = isChild ? 1 : (1 + Math.floor(random() * 2));
+
+            const bodyTopPositions = [];
+            for (let x = 0; x < size; x++) {
+                if (grid[bodyStartY] && isBodyChar(grid[bodyStartY][x])) {
+                    bodyTopPositions.push(x);
+                }
+            }
+
+            const antennaPositions = [];
+            if (bodyTopPositions.length > 0) {
+                if (antennaCount === 1) {
+                    antennaPositions.push(bodyTopPositions[Math.floor(bodyTopPositions.length / 2)]);
+                } else if (antennaCount === 2) {
+                    const leftPos = Math.floor(bodyTopPositions.length * 0.25);
+                    const rightPos = Math.floor(bodyTopPositions.length * 0.75);
+                    antennaPositions.push(bodyTopPositions[leftPos]);
+                    antennaPositions.push(bodyTopPositions[rightPos]);
+                } else if (antennaCount === 3) {
+                    antennaPositions.push(bodyTopPositions[0]);
+                    antennaPositions.push(bodyTopPositions[Math.floor(bodyTopPositions.length / 2)]);
+                    antennaPositions.push(bodyTopPositions[bodyTopPositions.length - 1]);
+                } else {
+                    antennaPositions.push(bodyTopPositions[0]);
+                    antennaPositions.push(bodyTopPositions[Math.floor(bodyTopPositions.length * 0.33)]);
+                    antennaPositions.push(bodyTopPositions[Math.floor(bodyTopPositions.length * 0.66)]);
+                    antennaPositions.push(bodyTopPositions[bodyTopPositions.length - 1]);
+                }
+            }
+
+            for (let antennaX of antennaPositions) {
+                for (let i = 1; i <= antennaLength; i++) {
+                    const antennaY = bodyStartY - i;
+                    if (antennaY >= 0) {
+                        grid[antennaY][antennaX] = i === antennaLength ? dna.antennaTip : '│';
+                    }
+                }
+            }
+
+            // HAT - Drawn above antennas (NEW)
+            if (dna.hatType && dna.hatType !== 'none') {
+                const hatY = bodyStartY - antennaLength - 1;
+                if (hatY >= 0) {
+                    switch(dna.hatType) {
+                        case 'top':
+                            // Top hat: ▀
+                            for (let dx = -2; dx <= 2; dx++) {
+                                if (cx + dx >= 0 && cx + dx < size) {
+                                    grid[hatY][cx + dx] = '▀';
+                                }
+                            }
+                            if (hatY + 1 < size) {
+                                grid[hatY + 1][cx] = '█';
+                            }
+                            break;
+                        case 'flat':
+                            // Flat cap: ═══
+                            for (let dx = -2; dx <= 2; dx++) {
+                                if (cx + dx >= 0 && cx + dx < size) {
+                                    grid[hatY][cx + dx] = '═';
+                                }
+                            }
+                            break;
+                        case 'double':
+                            // Double layer: ▄▄▄
+                            for (let dx = -2; dx <= 2; dx++) {
+                                if (cx + dx >= 0 && cx + dx < size && hatY - 1 >= 0) {
+                                    grid[hatY - 1][cx + dx] = '▀';
+                                    grid[hatY][cx + dx] = '▄';
+                                }
+                            }
+                            break;
+                        case 'fancy':
+                            // Fancy: ╔═╗
+                            if (cx - 2 >= 0 && cx + 2 < size) {
+                                grid[hatY][cx - 2] = '╔';
+                                grid[hatY][cx - 1] = '═';
+                                grid[hatY][cx] = '═';
+                                grid[hatY][cx + 1] = '═';
+                                grid[hatY][cx + 2] = '╗';
+                            }
+                            break;
+                    }
+                }
+            }
+
+            // Convert grid to string
+            const ascii = grid.map(row => row.join('')).join('\n');
+
+            return {
+                ascii,
+                family,
+                seed,
+                id: Math.random().toString(36).substr(2, 9),
+                dna: dna,
+                traits: {
+                    bodyType,
+                    armCount,
+                    legCount,
+                    antennaCount,
+                    armStyle,
+                    legStyle,
+                    hatType: dna.hatType,
+                    hasCigarette: dna.hasCigarette,
+                    eyeSize: dna.eyeSize
+                }
+            };
+        }
+
+        function selectFamily(family) {
+            currentFamily = family;
+
+            document.querySelectorAll('.family-btn').forEach(btn => {
+                if (btn.dataset.family === family) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            document.getElementById('currentFamilyName').textContent = families[family].name;
+
+            displayFamily(family);
+        }
+
+        let spreaderCounter = 0;
+
+        function generateSpreader() {
+            const uniqueSeed = (Date.now() + spreaderCounter) * 99991 +
+                              Math.random() * 10000000 +
+                              spreaderCounter++ * 314159;
+            const spreader = generateASCIICreature(24, currentFamily, uniqueSeed);
+            familyData[currentFamily].spreaders.push(spreader);
+            displayFamily(currentFamily);
+            updateStats();
+        }
+
+        function generateChildren(spreaderData, count = 3) {
+            for (let i = 0; i < count; i++) {
+                const childSeed = (spreaderData.seed % 1000000) * (i + 2) * 13337 +
+                                 Date.now() * (i + 1) +
+                                 Math.random() * 10000000 +
+                                 i * 987654;
+
+                const child = generateASCIICreature(16, spreaderData.family, childSeed, spreaderData.dna);
+                child.parentId = spreaderData.id;
+                familyData[spreaderData.family].children.push(child);
+            }
+            displayFamily(currentFamily);
+            updateStats();
+        }
+
+        function displayFamily(family) {
+            document.getElementById('spreaders').innerHTML = '';
+            document.getElementById('children').innerHTML = '';
+
+            // Display spreaders
+            familyData[family].spreaders.forEach(spreader => {
+                const card = document.createElement('div');
+                card.className = 'spreader-card';
+                card.dataset.spreaderId = spreader.id;
+                card.onclick = () => generateChildren(spreader);
+
+                // Hover effect to highlight children
+                card.onmouseenter = () => {
+                    document.querySelectorAll(`.child-card[data-parent-id="${spreader.id}"]`).forEach(c => {
+                        c.classList.add('highlight-parent');
+                    });
+                };
+                card.onmouseleave = () => {
+                    document.querySelectorAll('.child-card').forEach(c => {
+                        c.classList.remove('highlight-parent');
+                    });
+                };
+
+                const asciiDiv = document.createElement('div');
+                asciiDiv.className = `ascii-display spreader-ascii ${families[family].class}`;
+                asciiDiv.textContent = spreader.ascii;
+
+                const info = document.createElement('div');
+                info.className = 'creature-info';
+                info.textContent = `ID: ${spreader.id.substr(0,6)} | CLICK TO BREED`;
+
+                // DNA traits display
+                const traitsDiv = document.createElement('div');
+                traitsDiv.className = 'dna-traits';
+                traitsDiv.innerHTML = `
+                    <div class="dna-trait">Body: ${spreader.dna.bodyType}</div>
+                    <div class="dna-trait">Fill: ${spreader.dna.bodyChar}</div>
+                    <div class="dna-trait">Eyes: ${spreader.dna.eyeChar}</div>
+                    <div class="dna-trait">Arms: ${spreader.dna.armStyle}</div>
+                    <div class="dna-trait">Legs: ${spreader.dna.legStyle}</div>
+                    ${spreader.dna.hatType !== 'none' ? `<div class="dna-trait">Hat: ${spreader.dna.hatType}</div>` : ''}
+                    ${spreader.dna.hasCigarette ? `<div class="dna-trait">🚬</div>` : ''}
+                `;
+
+                // Zoom button
+                const zoomBtn = document.createElement('button');
+                zoomBtn.className = 'zoom-btn';
+                zoomBtn.textContent = '🔍 ZOOM';
+                zoomBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    openZoom(spreader, false);
+                };
+
+                card.appendChild(asciiDiv);
+                card.appendChild(info);
+                card.appendChild(traitsDiv);
+                card.appendChild(zoomBtn);
+                document.getElementById('spreaders').appendChild(card);
+            });
+
+            // Display children
+            familyData[family].children.forEach(child => {
+                const card = document.createElement('div');
+                card.className = 'child-card';
+                card.dataset.parentId = child.parentId;
+
+                // Find parent
+                const parent = familyData[family].spreaders.find(s => s.id === child.parentId);
+
+                const asciiDiv = document.createElement('div');
+                asciiDiv.className = `ascii-display child-ascii ${families[family].class}`;
+                asciiDiv.textContent = child.ascii;
+
+                // Click to zoom
+                card.onclick = () => {
+                    openZoom(child, true, parent);
+                };
+
+                // Hover on card to highlight parent
+                card.onmouseenter = () => {
+                    const parentCard = document.querySelector(`.spreader-card[data-spreader-id="${child.parentId}"]`);
+                    if (parentCard) {
+                        parentCard.classList.add('selected');
+                    }
+                };
+                card.onmouseleave = () => {
+                    document.querySelectorAll('.spreader-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                };
+
+                // Parent link
+                const parentLink = document.createElement('div');
+                parentLink.className = 'parent-link';
+                parentLink.textContent = `↑ ${child.parentId.substr(0,6)}`;
+
+                const info = document.createElement('div');
+                info.className = 'creature-info';
+                info.textContent = `ID: ${child.id.substr(0,6)}`;
+
+                // DNA traits with inheritance indicators
+                const traitsDiv = document.createElement('div');
+                traitsDiv.className = 'dna-traits';
+
+                if (parent) {
+                    // Compare DNA and show inheritance
+                    const bodyMatch = child.dna.bodyType === parent.dna.bodyType;
+                    const bodyCharMatch = child.dna.bodyChar === parent.dna.bodyChar;
+                    const eyeMatch = child.dna.eyeChar === parent.dna.eyeChar;
+                    const armMatch = child.dna.armStyle === parent.dna.armStyle;
+                    const legMatch = child.dna.legStyle === parent.dna.legStyle;
+                    const hatMatch = child.dna.hatType === parent.dna.hatType;
+
+                    traitsDiv.innerHTML = `
+                        <div class="dna-trait ${bodyMatch ? 'inherited' : 'mutated'}">Body: ${child.dna.bodyType.substr(0,4)}</div>
+                        <div class="dna-trait ${bodyCharMatch ? 'inherited' : 'mutated'}">Fill: ${child.dna.bodyChar}</div>
+                        <div class="dna-trait ${eyeMatch ? 'inherited' : 'mutated'}">Eye: ${child.dna.eyeChar}</div>
+                        <div class="dna-trait ${armMatch ? 'inherited' : 'mutated'}">Arm: ${child.dna.armStyle.substr(0,3)}</div>
+                        <div class="dna-trait ${legMatch ? 'inherited' : 'mutated'}">Leg: ${child.dna.legStyle.substr(0,3)}</div>
+                        ${child.dna.hatType !== 'none' ? `<div class="dna-trait ${hatMatch ? 'inherited' : 'mutated'}">Hat: ${child.dna.hatType.substr(0,3)}</div>` : ''}
+                        ${child.dna.hasCigarette ? `<div class="dna-trait mutated">🚬</div>` : ''}
+                    `;
+                } else {
+                    traitsDiv.innerHTML = `<div style="color: #cc0000;">Parent not found</div>`;
+                }
+
+                card.appendChild(parentLink);
+                card.appendChild(asciiDiv);
+                card.appendChild(info);
+                card.appendChild(traitsDiv);
+                document.getElementById('children').appendChild(card);
+            });
+        }
+
+        function clearFamily() {
+            familyData[currentFamily] = { spreaders: [], children: [] };
+            displayFamily(currentFamily);
+            updateStats();
+        }
+
+        function clearAll() {
+            Object.keys(families).forEach(key => {
+                familyData[key] = { spreaders: [], children: [] };
+            });
+            displayFamily(currentFamily);
+            updateStats();
+        }
+
+        function updateStats() {
+            let activeFamilies = 0;
+            let totalSpreaders = 0;
+            let totalChildren = 0;
+
+            Object.keys(familyData).forEach(key => {
+                if (familyData[key].spreaders.length > 0) activeFamilies++;
+                totalSpreaders += familyData[key].spreaders.length;
+                totalChildren += familyData[key].children.length;
+            });
+
+            document.getElementById('activeFamilies').textContent = activeFamilies;
+            document.getElementById('totalSpreaders').textContent = totalSpreaders;
+            document.getElementById('totalChildren').textContent = totalChildren;
+        }
+
+        function exportData() {
+            const data = {
+                protocol: 'ASCII_PROTOCOLITE_V',
+                version: '5.0',
+                timestamp: new Date().toISOString(),
+                families: {}
+            };
+
+            Object.keys(familyData).forEach(key => {
+                if (familyData[key].spreaders.length > 0) {
+                    data.families[key] = {
+                        spreaders: familyData[key].spreaders.map(s => ({
+                            id: s.id,
+                            seed: s.seed,
+                            ascii: s.ascii,
+                            dna: s.dna,
+                            traits: s.traits
+                        })),
+                        children: familyData[key].children.map(c => ({
+                            id: c.id,
+                            parentId: c.parentId,
+                            seed: c.seed,
+                            ascii: c.ascii,
+                            dna: c.dna,
+                            traits: c.traits
+                        }))
+                    };
+                }
+            });
+
+            const json = JSON.stringify(data, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ascii_protocolite_v5_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Zoom Modal Functions
+        function openZoom(creature, isChild = false, parent = null) {
+            const modal = document.getElementById('zoomModal');
+            const title = document.getElementById('zoomTitle');
+            const id = document.getElementById('zoomId');
+            const ascii = document.getElementById('zoomAscii');
+            const dnaGrid = document.getElementById('zoomDnaGrid');
+
+            // Set title and ID
+            title.textContent = isChild ? 'CHILD' : 'SPREADER';
+            id.textContent = `ID: ${creature.id}`;
+
+            // Set ASCII art with family color
+            ascii.textContent = creature.ascii;
+            ascii.className = `zoom-ascii ${families[creature.family].class}`;
+
+            // Build DNA traits grid
+            let dnaHtml = '';
+
+            if (isChild && parent) {
+                // Show inheritance comparison for children
+                const bodyMatch = creature.dna.bodyType === parent.dna.bodyType;
+                const bodyCharMatch = creature.dna.bodyChar === parent.dna.bodyChar;
+                const eyeMatch = creature.dna.eyeChar === parent.dna.eyeChar;
+                const armMatch = creature.dna.armStyle === parent.dna.armStyle;
+                const legMatch = creature.dna.legStyle === parent.dna.legStyle;
+                const hatMatch = creature.dna.hatType === parent.dna.hatType;
+
+                dnaHtml = `
+                    <div class="zoom-dna-item ${bodyMatch ? 'inherited' : 'mutated'}">
+                        <div class="zoom-dna-label">Body Type ${bodyMatch ? '✓ Inherited' : '✗ Mutated'}</div>
+                        <div class="zoom-dna-value">${creature.dna.bodyType}</div>
+                    </div>
+                    <div class="zoom-dna-item ${bodyCharMatch ? 'inherited' : 'mutated'}">
+                        <div class="zoom-dna-label">Body Fill ${bodyCharMatch ? '✓ Inherited' : '✗ Mutated'}</div>
+                        <div class="zoom-dna-value">${creature.dna.bodyChar}</div>
+                    </div>
+                    <div class="zoom-dna-item ${eyeMatch ? 'inherited' : 'mutated'}">
+                        <div class="zoom-dna-label">Eye Character ${eyeMatch ? '✓ Inherited' : '✗ Mutated'}</div>
+                        <div class="zoom-dna-value">${creature.dna.eyeChar}</div>
+                    </div>
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Eye Size</div>
+                        <div class="zoom-dna-value">${creature.dna.eyeSize || 'normal'}</div>
+                    </div>
+                    <div class="zoom-dna-item ${armMatch ? 'inherited' : 'mutated'}">
+                        <div class="zoom-dna-label">Arm Style ${armMatch ? '✓ Inherited' : '✗ Mutated'}</div>
+                        <div class="zoom-dna-value">${creature.dna.armStyle}</div>
+                    </div>
+                    <div class="zoom-dna-item ${legMatch ? 'inherited' : 'mutated'}">
+                        <div class="zoom-dna-label">Leg Style ${legMatch ? '✓ Inherited' : '✗ Mutated'}</div>
+                        <div class="zoom-dna-value">${creature.dna.legStyle}</div>
+                    </div>
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Antenna Tip</div>
+                        <div class="zoom-dna-value">${creature.dna.antennaTip}</div>
+                    </div>
+                    ${creature.dna.hatType !== 'none' ? `
+                    <div class="zoom-dna-item ${hatMatch ? 'inherited' : 'mutated'}">
+                        <div class="zoom-dna-label">Hat ${hatMatch ? '✓ Inherited' : '✗ Mutated'}</div>
+                        <div class="zoom-dna-value">${creature.dna.hatType}</div>
+                    </div>
+                    ` : ''}
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Cigarette</div>
+                        <div class="zoom-dna-value">${creature.dna.hasCigarette ? 'Yes 🚬' : 'No'}</div>
+                    </div>
+                    <div class="zoom-dna-item inherited" style="grid-column: 1 / -1;">
+                        <div class="zoom-dna-label">Parent ID</div>
+                        <div class="zoom-dna-value">${creature.parentId}</div>
+                    </div>
+                `;
+            } else {
+                // Show DNA for spreaders
+                dnaHtml = `
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Body Type</div>
+                        <div class="zoom-dna-value">${creature.dna.bodyType}</div>
+                    </div>
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Body Fill</div>
+                        <div class="zoom-dna-value">${creature.dna.bodyChar}</div>
+                    </div>
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Eye Character</div>
+                        <div class="zoom-dna-value">${creature.dna.eyeChar}</div>
+                    </div>
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Eye Size</div>
+                        <div class="zoom-dna-value">${creature.dna.eyeSize || 'normal'}</div>
+                    </div>
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Arm Style</div>
+                        <div class="zoom-dna-value">${creature.dna.armStyle}</div>
+                    </div>
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Leg Style</div>
+                        <div class="zoom-dna-value">${creature.dna.legStyle}</div>
+                    </div>
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Antenna Tip</div>
+                        <div class="zoom-dna-value">${creature.dna.antennaTip}</div>
+                    </div>
+                    ${creature.dna.hatType !== 'none' ? `
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Hat</div>
+                        <div class="zoom-dna-value">${creature.dna.hatType}</div>
+                    </div>
+                    ` : ''}
+                    <div class="zoom-dna-item">
+                        <div class="zoom-dna-label">Cigarette</div>
+                        <div class="zoom-dna-value">${creature.dna.hasCigarette ? 'Yes 🚬' : 'No'}</div>
+                    </div>
+                    <div class="zoom-dna-item" style="grid-column: 1 / -1;">
+                        <div class="zoom-dna-label">Seed</div>
+                        <div class="zoom-dna-value">${creature.seed}</div>
+                    </div>
+                `;
+            }
+
+            dnaGrid.innerHTML = dnaHtml;
+
+            // Show modal
+            modal.classList.add('active');
+
+            // Add escape key listener
+            document.addEventListener('keydown', handleEscapeKey);
+        }
+
+        function closeZoom(event) {
+            const modal = document.getElementById('zoomModal');
+            modal.classList.remove('active');
+            document.removeEventListener('keydown', handleEscapeKey);
+        }
+
+        function handleEscapeKey(event) {
+            if (event.key === 'Escape') {
+                closeZoom();
+            }
+        }
+
+        // Initialize
+        selectFamily('red');
+        updateStats();
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "Protocolite #1 (Kid)",
+  "description": "Fully on-chain generative creatures that can breed kids or spawn new colonies.",
+  "animation_url": "data:text/html;base64,PCFET0NUWVBFIGh0bWw+PGh0bWw+PGhlYWQ+PG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCx1c2VyLXNjYWxhYmxlPW5vIiAvPjwvaGVhZD48Ym9keT48c3R5bGU+aHRtbCxib2R5IHsgYmFja2dyb3VuZDogYmxhY2s7IH0gYm9keSB7IG92ZXJmbG93OiBoaWRkZW47IG1hcmdpbjogMDsgcGFkZGluZzogMDsgZGlzcGxheTogZmxleDsgYWxpZ24taXRlbXM6IGNlbnRlcjsganVzdGlmeS1jb250ZW50OiBjZW50ZXI7IGhlaWdodDogMTAwdmg7IH0gY2FudmFzIHsgaW1hZ2UtcmVuZGVyaW5nOiBwaXhlbGF0ZWQ7IHdpZHRoOiAxMDB2bWluOyBoZWlnaHQ6IDEwMHZtaW47IH08L3N0eWxlPjxjYW52YXMgaWQ9ImNhbnZhcyI+PC9jYW52YXM+PHNjcmlwdD5jb25zdCB0b2tlbklkID0gMTtjb25zdCBkbmEgPSAiMHg5MTUyMmZmZmFjMDVkMmY0MWFkMmViNTdlZmU2YjM4YjdmZDVkNWM1NWJiM2Y2MjZkZDljYzhlNWIzYTQ2YjUyIjtjb25zdCBpc0tpZCA9IHRydWU7Y29uc3QgcGFyZW50RG5hID0gIjB4ZjQ0YjJmZTk1NzFhNWE4YzljMzNhZmE2M2ZmN2RjZTE3NmEyYzU2YjRmZDY0ZTc5ZGUxYTg4YWFkNTcxOTNiYyI7Y29uc3Qgc2l6ZSA9IDEyOzwvc2NyaXB0PjwvYm9keT48L2h0bWw+",
+  "attributes": [
+    {
+      "trait_type": "Type",
+      "value": "Kid"
+    },
+    {
+      "trait_type": "Size",
+      "value": "12x12"
+    },
+    {
+      "trait_type": "DNA",
+      "value": "0x91522fffac05d2f41ad2eb57efe6b38b7fd5d5c55bb3f626dd9cc8e5b3a46b52"
+    },
+    {
+      "trait_type": "Birth Block",
+      "value": 8825729
+    },
+    {
+      "trait_type": "Parent DNA",
+      "value": "0xf44b2fe9571a5a8c9c33afa63ff7dce176a2c56b4fd64e79de1a88aad57193bc"
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,user-scalable=no" />
+</head>
+<body>
+    <style>
+        html,body { background: #222; } 
+        body { overflow: hidden; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; } 
+        canvas { image-rendering: pixelated; width: 100vmin; height: 100vmin; border: 1px solid white; }
+    </style>
+    <canvas id="canvas"></canvas>
+    <div style="position: absolute; top: 10px; left: 10px; color: white; font-family: monospace;">
+        <div id="debug"></div>
+    </div>
+    <script>
+        const debug = document.getElementById('debug');
+        
+        // Test with a kid
+        const tokenId = 2;
+        const dna = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+        const isKid = true;
+        const parentDna = "0xfedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321";
+        const size = 12;
+        
+        // Simple test first
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const pixelSize = 6;
+        canvas.width = 144;
+        canvas.height = 144;
+        ctx.imageSmoothingEnabled = false;
+        const drawOffset = size === 12 ? 36 : 0;
+        
+        debug.innerHTML = `
+            Canvas: ${canvas.width}x${canvas.height}<br>
+            Size: ${size}<br>
+            Draw offset: ${drawOffset}<br>
+            Pixel size: ${pixelSize}<br>
+        `;
+        
+        // Fill background with dark gray so we can see it
+        ctx.fillStyle = "#111";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw a simple test square in red
+        ctx.fillStyle = "#ff0000";
+        ctx.fillRect(drawOffset, drawOffset, size * pixelSize, size * pixelSize);
+        
+        // Draw a white square in the middle
+        ctx.fillStyle = "#ffffff";
+        const midX = drawOffset + (size/2 - 2) * pixelSize;
+        const midY = drawOffset + (size/2 - 2) * pixelSize;
+        ctx.fillRect(midX, midY, 4 * pixelSize, 4 * pixelSize);
+        
+        // Add some debug text
+        debug.innerHTML += `<br>Red square at: ${drawOffset}, ${drawOffset}<br>`;
+        debug.innerHTML += `White square at: ${midX}, ${midY}<br>`;
+        debug.innerHTML += `Total grid size: ${size * pixelSize}px`;
+    </script>
+</body>
+</html>

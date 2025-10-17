@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Protocolites Viewer - Sepolia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #00ff00;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 20px;
+            border-bottom: 2px solid #00ff00;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #00ff00;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            margin-bottom: 10px;
+        }
+
+        .network-info {
+            font-size: 12px;
+            color: #00ff88;
+            margin-top: 10px;
+        }
+
+        .contract-address {
+            font-size: 10px;
+            color: #888;
+            word-break: break-all;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #00ff00;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 600;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: #000;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        .btn.active {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 14px;
+            color: #00ff88;
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 12px;
+        }
+
+        .nfts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .nft-card {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .nft-card:hover {
+            border-color: #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .nft-preview {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #000;
+            border: 1px solid #00ff00;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nft-preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .nft-info {
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .nft-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00ff00;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .nft-detail {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.1);
+        }
+
+        .nft-label {
+            color: #888;
+        }
+
+        .nft-value {
+            color: #00ff88;
+            word-break: break-all;
+        }
+
+        .infection-contract {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffff00;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .children-section {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #00ff00;
+        }
+
+        .children-title {
+            font-size: 12px;
+            color: #ffff00;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .children-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .child-card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 9px;
+            text-align: center;
+        }
+
+        .child-preview {
+            width: 100%;
+            aspect-ratio: 1;
+            background: #000;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            margin-bottom: 5px;
+        }
+
+        .view-button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            background: transparent;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+        }
+
+        .view-button:hover {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #000;
+            border: 2px solid #00ff00;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow: auto;
+            padding: 0;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff0000;
+            color: #fff;
+            border: none;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            border-radius: 50%;
+        }
+
+        .modal-iframe {
+            width: 600px;
+            height: 600px;
+            aspect-ratio: 1;
+            border: 1px solid #00ff00;
+            margin: 0 auto;
+            display: block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .loading-dots::after {
+            content: '...';
+            animation: pulse 1.5s infinite;
+        }
+
+        .debug-info {
+            background: rgba(255, 255, 0, 0.1);
+            border: 1px solid #ffaa00;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 11px;
+            border-radius: 4px;
+        }
+
+        .debug-renderer {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+
+        .renderer-ascii {
+            background: #00ff00;
+            color: #000;
+        }
+
+        .renderer-pixel {
+            background: #ff0000;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 Live Protocolites Viewer 🧬</h1>
+            <div class="network-info">Sepolia Testnet</div>
+            <div class="contract-address">
+                Master: 0x8a94e7c81a4982a80405b5aead52155208b40d18
+            </div>
+        </div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalSupply">-</div>
+                <div class="stat-label">Total Parents</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalChildren">-</div>
+                <div class="stat-label">Total Children</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="activeInfections">-</div>
+                <div class="stat-label">Infection Contracts</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn active" onclick="loadAll()">Refresh All</button>
+            <button class="btn" onclick="viewFilter('parents')">Parents Only</button>
+            <button class="btn" onclick="viewFilter('with-children')">With Children</button>
+            <button class="btn" onclick="connectMetaMask()" id="metamaskBtn" style="display: none;">Connect MetaMask</button>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="loading-dots">Loading from blockchain</div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+
+        <div id="debugInfo" class="debug-info" style="display: none;"></div>
+
+        <div id="nftsContainer" class="nfts-grid"></div>
+    </div>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+            <iframe id="modalIframe" class="modal-iframe"></iframe>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        // Wait for ethers to load
+        window.addEventListener('load', function() {
+            if (typeof ethers === 'undefined') {
+                showError('Failed to load ethers.js library. Please check your internet connection and refresh.');
+                return;
+            }
+            init();
+        });
+
+        // Configuration
+        const CONFIG = {
+            // Using public Sepolia RPC endpoints (CORS-friendly)
+            RPC_URLS: [
+                'https://rpc.sepolia.org',
+                'https://ethereum-sepolia.publicnode.com',
+                'https://rpc2.sepolia.org'
+            ],
+            MASTER_ADDRESS: '0xC4DCD4D3e02FE4fF1dB15a3A3b5FB28727F87A0a',
+            CHAIN_ID: 11155111
+        };
+
+        // ABIs
+        const MASTER_ABI = [
+            'function totalSupply() view returns (uint256)',
+            'function tokenURI(uint256 tokenId) view returns (string)',
+            'function getInfectionContract(uint256 parentId) view returns (address)',
+            'function exists(uint256 tokenId) view returns (bool)'
+        ];
+
+        const INFECTION_ABI = [
+            'function totalSupply() view returns (uint256)',
+            'function tokenURI(uint256 tokenId) view returns (string)'
+        ];
+
+        // Global state
+        let provider;
+        let masterContract;
+        let allNFTs = [];
+
+        // Initialize
+        async function init() {
+            try {
+                // Try MetaMask first if available
+                if (typeof window.ethereum !== 'undefined') {
+                    console.log('MetaMask detected, using it as provider');
+                    provider = new ethers.providers.Web3Provider(window.ethereum);
+
+                    // Check if on correct network
+                    const network = await provider.getNetwork();
+                    if (network.chainId !== CONFIG.CHAIN_ID) {
+                        showError(`Please switch MetaMask to Sepolia testnet (Chain ID: ${CONFIG.CHAIN_ID})`);
+                        return;
+                    }
+                } else {
+                    // Try public RPC endpoints
+                    console.log('MetaMask not detected, trying public RPCs...');
+                    let connected = false;
+
+                    for (const rpcUrl of CONFIG.RPC_URLS) {
+                        try {
+                            console.log('Trying RPC:', rpcUrl);
+                            provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+
+                            // Test connection with timeout
+                            const networkPromise = provider.getNetwork();
+                            const timeoutPromise = new Promise((_, reject) =>
+                                setTimeout(() => reject(new Error('Timeout')), 5000)
+                            );
+
+                            const network = await Promise.race([networkPromise, timeoutPromise]);
+                            console.log('Connected to network:', network);
+                            connected = true;
+                            break;
+                        } catch (error) {
+                            console.log(`Failed to connect to ${rpcUrl}:`, error.message);
+                            continue;
+                        }
+                    }
+
+                    if (!connected) {
+                        showError('Could not connect to any public RPC. Please install MetaMask or use your own RPC URL.');
+                        return;
+                    }
+                }
+
+                // Initialize contract
+                masterContract = new ethers.Contract(
+                    CONFIG.MASTER_ADDRESS,
+                    MASTER_ABI,
+                    provider
+                );
+
+                // Load NFTs
+                await loadAll();
+            } catch (error) {
+                showError('Failed to initialize: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // Load all NFTs
+        async function loadAll() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('error').style.display = 'none';
+                document.getElementById('nftsContainer').innerHTML = '';
+
+                allNFTs = [];
+
+                // Get total supply
+                const totalSupply = await masterContract.totalSupply();
+                console.log('Total supply:', totalSupply.toString());
+
+                if (totalSupply.eq(0)) {
+                    showError('No Protocolites found. Deploy some first!');
+                    document.getElementById('loading').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('totalSupply').textContent = totalSupply.toString();
+
+                // Load each parent NFT
+                for (let i = 1; i <= totalSupply; i++) {
+                    try {
+                        const nft = await loadParentNFT(i);
+                        allNFTs.push(nft);
+                    } catch (error) {
+                        console.error(`Error loading NFT ${i}:`, error);
+                    }
+                }
+
+                // Calculate total children
+                const totalChildren = allNFTs.reduce((sum, nft) => sum + nft.children.length, 0);
+                document.getElementById('totalChildren').textContent = totalChildren;
+                document.getElementById('activeInfections').textContent = allNFTs.length;
+
+                // Display NFTs
+                displayNFTs(allNFTs);
+
+                document.getElementById('loading').style.display = 'none';
+            } catch (error) {
+                showError('Failed to load NFTs: ' + error.message);
+                console.error(error);
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        // Load a single parent NFT with its children
+        async function loadParentNFT(tokenId) {
+            console.log(`Loading parent #${tokenId}...`);
+
+            // Get parent metadata - FORCE FRESH CALL with blockTag
+            const tokenURI = await masterContract.tokenURI(tokenId, { blockTag: 'latest' });
+            const metadata = decodeTokenURI(tokenURI);
+
+            // DEBUG: Check what renderer type we got
+            if (metadata && metadata.animation_url) {
+                const html = decodeDataURI(metadata.animation_url);
+                const isASCII = html.includes('ascii-display') || html.includes('const grid=Array(size)');
+                const isPixelated = html.includes('canvas');
+                const rendererType = isASCII ? 'ASCII' : (isPixelated ? 'PIXELATED' : 'UNKNOWN');
+
+                console.log(`Token #${tokenId} renderer type:`, rendererType);
+                console.log(`HTML preview (first 200 chars):`, html.substring(0, 200));
+
+                // Show debug info on page
+                const debugDiv = document.getElementById('debugInfo');
+                debugDiv.style.display = 'block';
+
+                // Escape HTML for display
+                const htmlPreview = html.substring(0, 200).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+                debugDiv.innerHTML = `
+                    <strong>🔍 DEBUG INFO - Token #${tokenId}:</strong>
+                    <span class="debug-renderer ${isASCII ? 'renderer-ascii' : 'renderer-pixel'}">
+                        ${rendererType} RENDERER
+                    </span>
+                    <br>
+                    <small style="word-break: break-all; display: block; margin-top: 5px;">
+                        HTML starts with: ${htmlPreview}...
+                    </small>
+                    <br>
+                    <small>HTML length: ${html.length} characters</small>
+                `;
+            }
+
+            // Get infection contract
+            const infectionAddress = await masterContract.getInfectionContract(tokenId);
+
+            // Load children from infection contract
+            let children = [];
+            if (infectionAddress !== ethers.constants.AddressZero) {
+                children = await loadChildren(infectionAddress);
+            }
+
+            return {
+                tokenId,
+                metadata,
+                infectionAddress,
+                children
+            };
+        }
+
+        // Load children from infection contract
+        async function loadChildren(infectionAddress) {
+            try {
+                const infectionContract = new ethers.Contract(
+                    infectionAddress,
+                    INFECTION_ABI,
+                    provider
+                );
+
+                const totalSupply = await infectionContract.totalSupply();
+                console.log(`Infection contract ${infectionAddress} has ${totalSupply} children`);
+
+                const children = [];
+                for (let i = 1; i <= totalSupply; i++) {
+                    try {
+                        const tokenURI = await infectionContract.tokenURI(i);
+                        const metadata = decodeTokenURI(tokenURI);
+                        children.push({ tokenId: i, metadata });
+                    } catch (error) {
+                        console.error(`Error loading child ${i}:`, error);
+                    }
+                }
+
+                return children;
+            } catch (error) {
+                console.error('Error loading children:', error);
+                return [];
+            }
+        }
+
+        // Decode base64 tokenURI
+        function decodeTokenURI(uri) {
+            try {
+                const base64 = uri.split(',')[1];
+                const json = atob(base64);
+                return JSON.parse(json);
+            } catch (error) {
+                console.error('Error decoding tokenURI:', error);
+                return null;
+            }
+        }
+
+        // Decode data URI to get raw HTML (to bypass iframe cache)
+        function decodeDataURI(uri) {
+            try {
+                if (!uri || !uri.startsWith('data:')) return null;
+                const base64 = uri.split(',')[1];
+                return atob(base64);
+            } catch (error) {
+                console.error('Error decoding data URI:', error);
+                return null;
+            }
+        }
+
+        // Display NFTs
+        function displayNFTs(nfts) {
+            const container = document.getElementById('nftsContainer');
+
+            // COMPLETELY CLEAR AND RECREATE to avoid any caching
+            container.innerHTML = '';
+
+            // Force browser to acknowledge the clear
+            void container.offsetHeight;
+
+            nfts.forEach(nft => {
+                const card = createNFTCard(nft);
+                container.appendChild(card);
+            });
+        }
+
+        // Create NFT card
+        function createNFTCard(nft) {
+            const card = document.createElement('div');
+            card.className = 'nft-card';
+
+            const preview = document.createElement('div');
+            preview.className = 'nft-preview';
+
+            if (nft.metadata && nft.metadata.animation_url) {
+                // Decode HTML first
+                const html = decodeDataURI(nft.metadata.animation_url);
+
+                if (html) {
+                    // Create iframe
+                    const iframe = document.createElement('iframe');
+                    iframe.sandbox = 'allow-scripts allow-same-origin';
+                    iframe.setAttribute('data-nft', nft.tokenId);
+
+                    // Add to DOM first (required for some browsers)
+                    preview.appendChild(iframe);
+
+                    // Wait for iframe to be ready, then write content
+                    iframe.onload = function() {
+                        try {
+                            iframe.contentWindow.document.open();
+                            iframe.contentWindow.document.write(html);
+                            iframe.contentWindow.document.close();
+                        } catch (e) {
+                            console.error('Error writing to iframe:', e);
+                        }
+                    };
+
+                    // Trigger onload by setting src to about:blank first
+                    iframe.src = 'about:blank';
+                } else {
+                    // Fallback to data URI
+                    const iframe = document.createElement('iframe');
+                    iframe.src = nft.metadata.animation_url;
+                    iframe.sandbox = 'allow-scripts';
+                    preview.appendChild(iframe);
+                }
+            } else {
+                preview.textContent = 'No preview available';
+            }
+
+            const info = document.createElement('div');
+            info.className = 'nft-info';
+
+            const title = document.createElement('div');
+            title.className = 'nft-title';
+            title.textContent = nft.metadata?.name || `Protocolite #${nft.tokenId}`;
+
+            const details = `
+                <div class="nft-detail">
+                    <span class="nft-label">Token ID:</span>
+                    <span class="nft-value">#${nft.tokenId}</span>
+                </div>
+                <div class="nft-detail">
+                    <span class="nft-label">Type:</span>
+                    <span class="nft-value">Parent (24x24)</span>
+                </div>
+                <div class="nft-detail">
+                    <span class="nft-label">Children:</span>
+                    <span class="nft-value">${nft.children.length}</span>
+                </div>
+            `;
+
+            info.innerHTML = details;
+            info.insertBefore(title, info.firstChild);
+
+            if (nft.infectionAddress !== ethers.constants.AddressZero) {
+                const infectionDiv = document.createElement('div');
+                infectionDiv.className = 'infection-contract';
+                infectionDiv.innerHTML = `
+                    <div style="font-weight: 600; color: #ffff00; margin-bottom: 5px;">Infection Contract:</div>
+                    <div style="word-break: break-all; color: #ffaa00;">${nft.infectionAddress}</div>
+                `;
+                info.appendChild(infectionDiv);
+            }
+
+            // View button
+            const viewBtn = document.createElement('button');
+            viewBtn.className = 'view-button';
+            viewBtn.textContent = 'View Full Size';
+            viewBtn.onclick = () => openModal(nft.metadata.animation_url);
+            info.appendChild(viewBtn);
+
+            // Children section
+            if (nft.children.length > 0) {
+                const childrenSection = document.createElement('div');
+                childrenSection.className = 'children-section';
+
+                const childrenTitle = document.createElement('div');
+                childrenTitle.className = 'children-title';
+                childrenTitle.textContent = `Children (${nft.children.length})`;
+
+                const childrenGrid = document.createElement('div');
+                childrenGrid.className = 'children-grid';
+
+                nft.children.forEach(child => {
+                    const childCard = document.createElement('div');
+                    childCard.className = 'child-card';
+
+                    const childPreview = document.createElement('div');
+                    childPreview.className = 'child-preview';
+
+                    if (child.metadata && child.metadata.animation_url) {
+                        const html = decodeDataURI(child.metadata.animation_url);
+
+                        if (html) {
+                            const iframe = document.createElement('iframe');
+                            iframe.sandbox = 'allow-scripts allow-same-origin';
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100%';
+                            iframe.style.border = 'none';
+                            iframe.setAttribute('data-child', `${nft.tokenId}-${child.tokenId}`);
+                            childPreview.appendChild(iframe);
+
+                            // Wait for iframe to be ready
+                            iframe.onload = function() {
+                                try {
+                                    iframe.contentWindow.document.open();
+                                    iframe.contentWindow.document.write(html);
+                                    iframe.contentWindow.document.close();
+                                } catch (e) {
+                                    console.error('Error writing to child iframe:', e);
+                                }
+                            };
+
+                            iframe.src = 'about:blank';
+                        } else {
+                            const iframe = document.createElement('iframe');
+                            iframe.src = child.metadata.animation_url;
+                            iframe.sandbox = 'allow-scripts';
+                            iframe.style.width = '100%';
+                            iframe.style.height = '100%';
+                            iframe.style.border = 'none';
+                            childPreview.appendChild(iframe);
+                        }
+                    } else {
+                        childPreview.textContent = '?';
+                    }
+
+                    const childLabel = document.createElement('div');
+                    childLabel.textContent = `Child #${child.tokenId}`;
+
+                    childCard.appendChild(childPreview);
+                    childCard.appendChild(childLabel);
+                    childCard.onclick = () => openModal(child.metadata.animation_url);
+                    childrenGrid.appendChild(childCard);
+                });
+
+                childrenSection.appendChild(childrenTitle);
+                childrenSection.appendChild(childrenGrid);
+                info.appendChild(childrenSection);
+            }
+
+            card.appendChild(preview);
+            card.appendChild(info);
+
+            return card;
+        }
+
+        // Modal functions
+        function openModal(animationUrl) {
+            const modal = document.getElementById('modal');
+            const iframe = document.getElementById('modalIframe');
+
+            // Completely recreate iframe to avoid any caching
+            const newIframe = document.createElement('iframe');
+            newIframe.id = 'modalIframe';
+            newIframe.className = 'modal-iframe';
+            newIframe.sandbox = 'allow-scripts allow-same-origin';
+
+            iframe.parentNode.replaceChild(newIframe, iframe);
+
+            const html = decodeDataURI(animationUrl);
+            if (html) {
+                // Wait for iframe to be ready
+                newIframe.onload = function() {
+                    try {
+                        newIframe.contentWindow.document.open();
+                        newIframe.contentWindow.document.write(html);
+                        newIframe.contentWindow.document.close();
+                    } catch (e) {
+                        console.error('Error writing to modal iframe:', e);
+                    }
+                };
+                newIframe.src = 'about:blank';
+            } else {
+                newIframe.src = animationUrl;
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            const iframe = document.getElementById('modalIframe');
+            iframe.src = '';
+        }
+
+        // Filter functions
+        function viewFilter(type) {
+            let filtered = [];
+
+            switch(type) {
+                case 'parents':
+                    filtered = allNFTs;
+                    break;
+                case 'with-children':
+                    filtered = allNFTs.filter(nft => nft.children.length > 0);
+                    break;
+            }
+
+            displayNFTs(filtered);
+        }
+
+        // Show error
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+
+            // Show MetaMask button if available
+            if (typeof window.ethereum !== 'undefined') {
+                document.getElementById('metamaskBtn').style.display = 'inline-block';
+            }
+        }
+
+        // Connect MetaMask
+        async function connectMetaMask() {
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+                // Check network
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (parseInt(chainId, 16) !== CONFIG.CHAIN_ID) {
+                    // Try to switch network
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x' + CONFIG.CHAIN_ID.toString(16) }],
+                        });
+                    } catch (switchError) {
+                        showError('Please manually switch to Sepolia testnet in MetaMask');
+                        return;
+                    }
+                }
+
+                // Reload page to reinitialize
+                location.reload();
+            } catch (error) {
+                showError('Failed to connect MetaMask: ' + error.message);
+            }
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
+</body>
+</html>

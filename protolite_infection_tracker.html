@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧬 Protolite Global Infection Index</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 100%);
+            color: #0f0;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Scan lines effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                transparent 98%,
+                rgba(0, 255, 0, 0.03) 100%
+            );
+            background-size: 3px 3px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .main-header {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid rgba(0, 255, 0, 0.3);
+            padding: 15px 20px;
+            position: relative;
+            z-index: 100;
+        }
+
+        .title {
+            text-align: center;
+            color: #0f0;
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .stats-ticker {
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+            font-size: 12px;
+            color: #0f0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 200px);
+            position: relative;
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+            border-right: 2px solid rgba(0, 255, 0, 0.3);
+        }
+
+        #infection-map {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        .right-panel {
+            width: 350px;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            border-bottom: 2px solid rgba(0, 255, 0, 0.3);
+            padding: 20px;
+        }
+
+        .section-title {
+            color: #0f0;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .live-stats {
+            font-size: 11px;
+            line-height: 1.6;
+            color: #0f0;
+            text-align: center;
+        }
+
+        .leaderboard {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-category {
+            margin-bottom: 20px;
+        }
+
+        .category-title {
+            color: #ff0;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .player-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 10px;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.1);
+        }
+
+        .wallet-address {
+            color: #0ff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .infection-count {
+            color: #f0f;
+            font-weight: bold;
+        }
+
+        .location-detail {
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .location-detail.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-header {
+            color: #ff0;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .detail-info {
+            font-size: 11px;
+            line-height: 1.8;
+            color: #0f0;
+        }
+
+        .wallet-list {
+            margin: 10px 0;
+        }
+
+        .wallet-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.1);
+        }
+
+        .recognition-badge {
+            background: #ff0;
+            color: #000;
+            padding: 2px 6px;
+            font-size: 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .close-detail {
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 16px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 15px;
+            width: 100%;
+            transition: all 0.2s;
+        }
+
+        .close-detail:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .activity-feed {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 2px solid rgba(0, 255, 0, 0.6);
+            height: 120px;
+            overflow-y: auto;
+            padding: 15px 20px;
+            position: relative;
+            z-index: 50;
+            box-shadow: 0 -5px 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .feed-title {
+            color: #0f0;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .feed-item {
+            font-size: 10px;
+            color: #0f0;
+            margin-bottom: 5px;
+            opacity: 0;
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .timestamp {
+            color: #666;
+        }
+
+        .action-type {
+            color: #ff0;
+            font-weight: bold;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .search-btn {
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 8px 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .search-btn:hover {
+            background: #0f0;
+            color: #000;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: #000;
+            color: #0f0;
+            border: 1px solid #0f0;
+            padding: 4px 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 9px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: #0f0;
+            color: #000;
+        }
+
+        .filter-btn:hover {
+            background: #0f0;
+            color: #000;
+        }
+
+        /* Custom map styles */
+        .leaflet-container {
+            background: #000 !important;
+        }
+
+        .leaflet-tile {
+            filter: brightness(0.4) contrast(1.5) saturate(0.5);
+        }
+
+        /* Dark overlay for better cyberpunk effect */
+        .leaflet-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 10, 0.3);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .leaflet-control-zoom {
+            border: 2px solid #0f0 !important;
+            background: rgba(0, 0, 0, 0.9) !important;
+        }
+
+        .leaflet-control-zoom a {
+            background: rgba(0, 0, 0, 0.9) !important;
+            color: #0f0 !important;
+            border-bottom: 1px solid #0f0 !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background: #0f0 !important;
+            color: #000 !important;
+        }
+
+        /* Simplified protolite creature icon styles */
+        .protolite-creature-icon {
+            cursor: pointer;
+            border: none !important;
+            background: transparent !important;
+            overflow: visible !important;
+        }
+
+        .protolite-creature-icon:hover {
+            opacity: 0.8;
+        }
+
+        /* Enhanced tooltip styling */
+        .leaflet-tooltip {
+            background: rgba(0, 0, 0, 0.9) !important;
+            border: 2px solid #0f0 !important;
+            color: #0f0 !important;
+            font-family: 'Courier New', monospace !important;
+            font-size: 11px !important;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5) !important;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                height: calc(100vh - 180px);
+            }
+            
+            .map-container {
+                height: 60%;
+                border-right: none;
+                border-bottom: 2px solid rgba(0, 255, 0, 0.3);
+            }
+            
+            .right-panel {
+                width: 100%;
+                height: 40%;
+                border-right: none;
+                border-top: 2px solid rgba(0, 255, 0, 0.6);
+                flex-direction: row;
+                overflow-x: auto;
+                overflow-y: hidden;
+            }
+            
+            .panel-section {
+                min-width: 250px;
+                border-right: 2px solid rgba(0, 255, 0, 0.3);
+                border-bottom: none;
+            }
+            
+            .stats-ticker {
+                font-size: 9px;
+                gap: 8px;
+            }
+            
+            .stat-value {
+                font-size: 14px;
+            }
+            
+            .title {
+                font-size: 16px;
+                letter-spacing: 2px;
+            }
+            
+            .activity-feed {
+                height: 100px;
+                padding: 10px 15px;
+            }
+            
+            .feed-title {
+                font-size: 10px;
+            }
+            
+            .feed-item {
+                font-size: 9px;
+            }
+            
+            /* Enhanced touch targets for mobile */
+            .protolite-creature-icon {
+                min-width: 48px !important;
+                min-height: 48px !important;
+                touch-action: manipulation;
+            }
+            
+            /* Increase tooltip size for mobile */
+            .leaflet-tooltip {
+                font-size: 13px !important;
+                padding: 8px 12px !important;
+            }
+            
+            .search-btn, .filter-btn {
+                padding: 10px 15px;
+                font-size: 11px;
+                touch-action: manipulation;
+            }
+            
+            .search-input {
+                padding: 10px;
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-header {
+                padding: 10px 15px;
+            }
+            
+            .title {
+                font-size: 14px;
+                letter-spacing: 1px;
+            }
+            
+            .stats-ticker {
+                font-size: 8px;
+                gap: 5px;
+            }
+            
+            .stat-value {
+                font-size: 12px;
+            }
+            
+            .right-panel {
+                height: 45%;
+            }
+            
+            .map-container {
+                height: 55%;
+            }
+            
+            /* Extra large touch targets for small mobile */
+            .protolite-creature-icon {
+                min-width: 52px !important;
+                min-height: 52px !important;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #0f0;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Header -->
+    <header class="main-header">
+        <h1 class="title">🧬 PROTOLITE GLOBAL INFECTION INDEX 🧬</h1>
+        <div class="stats-ticker" id="statsticker">
+            <div class="stat-item">
+                <div class="stat-value" id="activeSpreaders">0</div>
+                <div>Active Spreaders</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalInfections">0</div>
+                <div>Total Infections</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="physicalDiscoveries">0</div>
+                <div>Physical Discoveries</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="globalReach">0</div>
+                <div>Countries</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="activeWallets">0</div>
+                <div>Active Wallets</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="infection-map"></div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <!-- Search Controls -->
+            <div class="panel-section">
+                <div class="section-title">Search & Filter</div>
+                <div class="search-controls">
+                    <input type="text" class="search-input" id="walletSearch" placeholder="Wallet address...">
+                    <button class="search-btn" onclick="searchWallet()">Search</button>
+                </div>
+                <div class="filter-controls">
+                    <button class="filter-btn active" onclick="filterInfections('all')">All</button>
+                    <button class="filter-btn" onclick="filterInfections('high')">High</button>
+                    <button class="filter-btn" onclick="filterInfections('medium')">Medium</button>
+                    <button class="filter-btn" onclick="filterInfections('low')">Low</button>
+                </div>
+            </div>
+
+            <!-- Live Stats -->
+            <div class="panel-section">
+                <div class="section-title">🧬 Infection Status 🧬</div>
+                <div class="live-stats" id="liveStats">
+                    <div>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                    <div>ACTIVE SPREADERS: <span id="statActiveSpreaders">47</span></div>
+                    <div>TOTAL INFECTIONS: <span id="statTotalInfections">12,847</span></div>
+                    <div>PHYSICAL DISCOVERIES: <span id="statPhysicalDiscoveries">156</span></div>
+                    <div>GLOBAL REACH: <span id="statGlobalReach">23</span> COUNTRIES</div>
+                    <div>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</div>
+                    <div style="margin-top: 10px; color: #ff0;">INFECTION RATE: +<span id="infectionRate">23</span>/MIN</div>
+                </div>
+            </div>
+
+            <!-- Leaderboards -->
+            <div class="panel-section">
+                <div class="section-title">🏆 Player Rankings</div>
+                <div class="leaderboard" id="leaderboard">
+                    <div class="leaderboard-category">
+                        <div class="category-title">🦠 Super Spreaders</div>
+                        <div id="superSpreaders"></div>
+                    </div>
+                    <div class="leaderboard-category">
+                        <div class="category-title">📡 Top Spreaders</div>
+                        <div id="topSpreaders"></div>
+                    </div>
+                    <div class="leaderboard-category">
+                        <div class="category-title">🔬 Super Infected</div>
+                        <div id="superInfected"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Location Detail Panel -->
+            <div class="panel-section location-detail" id="locationDetail">
+                <div class="detail-header" id="locationName">Location Details</div>
+                <div class="detail-info" id="locationInfo"></div>
+                <button class="close-detail" onclick="closeLocationDetail()">Close Details</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="activity-feed">
+        <div class="feed-title">🔴 Live Infection Feed</div>
+        <div id="activityFeed"></div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        // Global variables
+        let map;
+        let markers = [];
+        let mockData = {};
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            generateMockData();
+            initializeMap();
+            updateStats();
+            populateLeaderboards();
+            startLiveActivityFeed();
+            animateStats();
+        });
+
+        // Generate comprehensive mock data
+        function generateMockData() {
+            // Mock locations with spreader protolites
+            mockData.locations = [
+                {
+                    id: 'NYC001',
+                    city: 'New York',
+                    country: 'USA',
+                    lat: 40.7128,
+                    lng: -74.0060,
+                    spreaderCount: 3,
+                    infectionLevel: 'high',
+                    totalInfections: 2847,
+                    creatorWallet: '0x7a8b9c4f2d3e1a5f8b2c9d6e3f7a8b1c4d5e6f9a2b3c',
+                    discoveredBy: [
+                        { wallet: '0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d', recognition: 'FIRST_DISCOVERER' },
+                        { wallet: '0x9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c', recognition: 'GEOCACHE_MASTER' }
+                    ],
+                    createdDate: '2024-01-15',
+                    feedingHistory: ['PROTO_ZERO']
+                },
+                {
+                    id: 'LON001',
+                    city: 'London',
+                    country: 'UK',
+                    lat: 51.5074,
+                    lng: -0.1278,
+                    spreaderCount: 2,
+                    infectionLevel: 'high',
+                    totalInfections: 1923,
+                    creatorWallet: '0x2d4f6a8c1e5b9d7f3a6c8e1b4d7f9a2c5e8b1d4f7a9c',
+                    discoveredBy: [
+                        { wallet: '0x5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f', recognition: 'FIRST_DISCOVERER' }
+                    ],
+                    createdDate: '2024-01-18',
+                    feedingHistory: ['NYC001']
+                },
+                {
+                    id: 'TOK001',
+                    city: 'Tokyo',
+                    country: 'Japan',
+                    lat: 35.6762,
+                    lng: 139.6503,
+                    spreaderCount: 4,
+                    infectionLevel: 'high',
+                    totalInfections: 3156,
+                    creatorWallet: '0x8c2f5a9b3e6d1f4a7c0e5b8d2f6a9c3e7b0d4f8a1c5e',
+                    discoveredBy: [
+                        { wallet: '0x7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b', recognition: 'FIRST_DISCOVERER' },
+                        { wallet: '0xa3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4', recognition: 'GEOCACHE_MASTER' },
+                        { wallet: '0x6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c', recognition: 'VIRAL_CHAMPION' }
+                    ],
+                    createdDate: '2024-01-12',
+                    feedingHistory: ['PROTO_ZERO']
+                },
+                {
+                    id: 'PAR001',
+                    city: 'Paris',
+                    country: 'France',
+                    lat: 48.8566,
+                    lng: 2.3522,
+                    spreaderCount: 2,
+                    infectionLevel: 'medium',
+                    totalInfections: 1547,
+                    creatorWallet: '0x4a7b9c2e5f8d1a4c7f0b3e6a9c2f5b8e1d4a7c0f3b6a',
+                    discoveredBy: [
+                        { wallet: '0x2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f', recognition: 'FIRST_DISCOVERER' }
+                    ],
+                    createdDate: '2024-01-20',
+                    feedingHistory: ['LON001']
+                },
+                {
+                    id: 'BER001',
+                    city: 'Berlin',
+                    country: 'Germany',
+                    lat: 52.5200,
+                    lng: 13.4050,
+                    spreaderCount: 3,
+                    infectionLevel: 'medium',
+                    totalInfections: 1834,
+                    creatorWallet: '0x9e4a7b3c6f2d5a8c1e4b7f0a3c6f9b2e5a8d1f4c7b0e',
+                    discoveredBy: [
+                        { wallet: '0x8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a', recognition: 'FIRST_DISCOVERER' },
+                        { wallet: '0x0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c', recognition: 'GEOCACHE_MASTER' }
+                    ],
+                    createdDate: '2024-01-22',
+                    feedingHistory: ['PAR001']
+                },
+                {
+                    id: 'SYD001',
+                    city: 'Sydney',
+                    country: 'Australia',
+                    lat: -33.8688,
+                    lng: 151.2093,
+                    spreaderCount: 2,
+                    infectionLevel: 'medium',
+                    totalInfections: 1267,
+                    creatorWallet: '0x3f6a9c2e5b8d1f4a7c0e3b6a9c2f5b8e1d4a7c0f3b6a',
+                    discoveredBy: [
+                        { wallet: '0x1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b', recognition: 'FIRST_DISCOVERER' }
+                    ],
+                    createdDate: '2024-01-25',
+                    feedingHistory: ['TOK001']
+                },
+                {
+                    id: 'SAO001',
+                    city: 'São Paulo',
+                    country: 'Brazil',
+                    lat: -23.5558,
+                    lng: -46.6396,
+                    spreaderCount: 3,
+                    infectionLevel: 'high',
+                    totalInfections: 2134,
+                    creatorWallet: '0x6c9f2e5a8d1b4f7a0c3e6b9f2e5a8d1b4f7a0c3e6b9f',
+                    discoveredBy: [
+                        { wallet: '0x4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e', recognition: 'FIRST_DISCOVERER' },
+                        { wallet: '0x7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d', recognition: 'VIRAL_CHAMPION' }
+                    ],
+                    createdDate: '2024-01-28',
+                    feedingHistory: ['NYC001']
+                },
+                {
+                    id: 'SIN001',
+                    city: 'Singapore',
+                    country: 'Singapore',
+                    lat: 1.3521,
+                    lng: 103.8198,
+                    spreaderCount: 2,
+                    infectionLevel: 'low',
+                    totalInfections: 892,
+                    creatorWallet: '0x5b8e1d4a7c0f3b6a9c2f5b8e1d4a7c0f3b6a9c2f5b8e',
+                    discoveredBy: [
+                        { wallet: '0x9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d', recognition: 'FIRST_DISCOVERER' }
+                    ],
+                    createdDate: '2024-02-01',
+                    feedingHistory: ['SYD001']
+                }
+            ];
+
+            // Mock wallet data with classifications
+            mockData.wallets = [
+                {
+                    address: '0x7a8b9c4f2d3e1a5f8b2c9d6e3f7a8b1c4d5e6f9a2b3c',
+                    classification: 'SUPER_SPREADER',
+                    infectionCount: 2847,
+                    spreadersCreated: 3,
+                    locationsDiscovered: 2,
+                    recognitions: ['CREATOR', 'VIRAL_CHAMPION']
+                },
+                {
+                    address: '0x8c2f5a9b3e6d1f4a7c0e5b8d2f6a9c3e7b0d4f8a1c5e',
+                    classification: 'SUPER_SPREADER',
+                    infectionCount: 3156,
+                    spreadersCreated: 4,
+                    locationsDiscovered: 1,
+                    recognitions: ['CREATOR', 'VIRAL_CHAMPION']
+                },
+                {
+                    address: '0x6c9f2e5a8d1b4f7a0c3e6b9f2e5a8d1b4f7a0c3e6b9f',
+                    classification: 'SUPER_SPREADER',
+                    infectionCount: 2134,
+                    spreadersCreated: 3,
+                    locationsDiscovered: 1,
+                    recognitions: ['CREATOR', 'VIRAL_CHAMPION']
+                },
+                {
+                    address: '0x2d4f6a8c1e5b9d7f3a6c8e1b4d7f9a2c5e8b1d4f7a9c',
+                    classification: 'SPREADER',
+                    infectionCount: 1923,
+                    spreadersCreated: 2,
+                    locationsDiscovered: 0,
+                    recognitions: ['CREATOR']
+                },
+                {
+                    address: '0x9e4a7b3c6f2d5a8c1e4b7f0a3c6f9b2e5a8d1f4c7b0e',
+                    classification: 'SPREADER',
+                    infectionCount: 1834,
+                    spreadersCreated: 3,
+                    locationsDiscovered: 0,
+                    recognitions: ['CREATOR']
+                },
+                {
+                    address: '0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d',
+                    classification: 'SUPER_INFECTED',
+                    infectionCount: 756,
+                    spreadersCreated: 0,
+                    locationsDiscovered: 4,
+                    recognitions: ['FIRST_DISCOVERER', 'GEOCACHE_MASTER']
+                },
+                {
+                    address: '0xa3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4',
+                    classification: 'SUPER_INFECTED',
+                    infectionCount: 623,
+                    spreadersCreated: 0,
+                    locationsDiscovered: 3,
+                    recognitions: ['GEOCACHE_MASTER']
+                },
+                {
+                    address: '0x7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d',
+                    classification: 'SUPER_INFECTED',
+                    infectionCount: 534,
+                    spreadersCreated: 0,
+                    locationsDiscovered: 2,
+                    recognitions: ['VIRAL_CHAMPION']
+                }
+            ];
+
+            // Activity templates for live feed
+            mockData.activityTemplates = [
+                'DISCOVERED spreader in {city}',
+                'INFECTED {count} new wallets',
+                'New SPREADER created in {city}',
+                'FEEDING event completed in {city}',
+                'VIRAL OUTBREAK detected in {city}',
+                'GEOCACHE found in {city}',
+                'MUTATION detected in {city}',
+                'SUPER SPREADER status achieved'
+            ];
+        }
+
+        // Initialize the Leaflet map
+        function initializeMap() {
+            // Create map
+            map = L.map('infection-map', {
+                center: [20, 0],
+                zoom: 2,
+                zoomControl: true,
+                minZoom: 2,
+                maxZoom: 18
+            });
+
+            // Add custom dark tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '',
+                className: 'map-tiles'
+            }).addTo(map);
+
+            // Add markers for each location
+            console.log(`DEBUG: Total locations to process: ${mockData.locations.length}`);
+            mockData.locations.forEach(location => {
+                addLocationMarker(location);
+            });
+            console.log(`DEBUG: Finished adding all markers`);
+        }
+
+        // Add a location marker to the map (simplified approach)
+        function addLocationMarker(location) {
+            console.log(`DEBUG: Creating marker for ${location.city}, ${location.country}`);
+            console.log(`DEBUG: Coordinates: lat=${location.lat}, lng=${location.lng}`);
+            
+            // Ultra-basic icon creation for debugging
+            const protoliteIcon = L.divIcon({
+                className: '',
+                html: createProtoliteHTML(location.infectionLevel),
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+            });
+
+            console.log(`DEBUG: Icon created for ${location.city}`);
+
+            // Create marker with exact coordinates
+            const marker = L.marker([location.lat, location.lng], {
+                icon: protoliteIcon
+            }).addTo(map);
+
+            console.log(`DEBUG: Marker created and added to map for ${location.city}`);
+
+            // Simple click event
+            marker.on('click', function() {
+                showLocationDetail(location);
+            });
+
+            // Simple tooltip
+            marker.bindTooltip(
+                `<strong>${location.city}, ${location.country}</strong><br>
+                 Infections: ${location.totalInfections.toLocaleString()}<br>
+                 Level: ${location.infectionLevel.toUpperCase()}`,
+                { 
+                    permanent: false,
+                    direction: 'top'
+                }
+            );
+
+            markers.push(marker);
+            console.log(`DEBUG: Total markers array length: ${markers.length}`);
+        }
+
+        // Create ultra-basic protolite icon for debugging
+        function createProtoliteHTML(infectionLevel) {
+            // Ultra-basic marker - just a simple colored square
+            const color = {
+                high: '#ff0000',
+                medium: '#ffff00', 
+                low: '#00ff00'
+            }[infectionLevel] || '#00ff00';
+            
+            return `<div style="width:24px;height:24px;background:${color};border:2px solid #fff;"></div>`;
+        }
+
+
+        // Show location detail panel
+        function showLocationDetail(location) {
+            const detailPanel = document.getElementById('locationDetail');
+            const locationName = document.getElementById('locationName');
+            const locationInfo = document.getElementById('locationInfo');
+
+            locationName.textContent = `${location.city}, ${location.country}`;
+            
+            let discoverersList = '';
+            location.discoveredBy.forEach(discoverer => {
+                discoverersList += `
+                    <div class="wallet-item">
+                        <span class="wallet-address">${discoverer.wallet.substring(0, 12)}...${discoverer.wallet.substring(38)}</span>
+                        <span class="recognition-badge">${discoverer.recognition}</span>
+                    </div>
+                `;
+            });
+
+            locationInfo.innerHTML = `
+                <div><strong>Location ID:</strong> ${location.id}</div>
+                <div><strong>Total Infections:</strong> ${location.totalInfections.toLocaleString()}</div>
+                <div><strong>Infection Level:</strong> ${location.infectionLevel.toUpperCase()}</div>
+                <div><strong>Spreader Count:</strong> ${location.spreaderCount}</div>
+                <div><strong>Created:</strong> ${location.createdDate}</div>
+                <div><strong>Creator Wallet:</strong></div>
+                <div class="wallet-address" style="font-size: 9px; margin: 5px 0;">
+                    ${location.creatorWallet}
+                </div>
+                <div style="margin-top: 15px;"><strong>Physical Discoverers:</strong></div>
+                <div class="wallet-list">
+                    ${discoverersList}
+                </div>
+                <div style="margin-top: 15px;"><strong>Feeding History:</strong></div>
+                <div style="font-size: 10px; color: #ff0;">${location.feedingHistory.join(' → ')}</div>
+            `;
+
+            detailPanel.classList.add('active');
+        }
+
+        // Close location detail panel
+        function closeLocationDetail() {
+            document.getElementById('locationDetail').classList.remove('active');
+        }
+
+        // Update statistics
+        function updateStats() {
+            const totalSpreaders = mockData.locations.length;
+            const totalInfections = mockData.locations.reduce((sum, loc) => sum + loc.totalInfections, 0);
+            const totalDiscoveries = mockData.locations.reduce((sum, loc) => sum + loc.discoveredBy.length, 0);
+            const totalCountries = new Set(mockData.locations.map(loc => loc.country)).size;
+            const activeWallets = mockData.wallets.length;
+
+            // Update header stats
+            document.getElementById('activeSpreaders').textContent = totalSpreaders;
+            document.getElementById('totalInfections').textContent = totalInfections.toLocaleString();
+            document.getElementById('physicalDiscoveries').textContent = totalDiscoveries;
+            document.getElementById('globalReach').textContent = totalCountries;
+            document.getElementById('activeWallets').textContent = activeWallets;
+
+            // Update right panel stats
+            document.getElementById('statActiveSpreaders').textContent = totalSpreaders;
+            document.getElementById('statTotalInfections').textContent = totalInfections.toLocaleString();
+            document.getElementById('statPhysicalDiscoveries').textContent = totalDiscoveries;
+            document.getElementById('statGlobalReach').textContent = totalCountries;
+            document.getElementById('infectionRate').textContent = Math.floor(Math.random() * 50) + 10;
+        }
+
+        // Populate leaderboards
+        function populateLeaderboards() {
+            const superSpreaders = mockData.wallets.filter(w => w.classification === 'SUPER_SPREADER');
+            const spreaders = mockData.wallets.filter(w => w.classification === 'SPREADER');
+            const superInfected = mockData.wallets.filter(w => w.classification === 'SUPER_INFECTED');
+
+            populateLeaderboardSection('superSpreaders', superSpreaders);
+            populateLeaderboardSection('topSpreaders', spreaders);
+            populateLeaderboardSection('superInfected', superInfected);
+        }
+
+        // Populate a leaderboard section
+        function populateLeaderboardSection(elementId, wallets) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+
+            wallets.slice(0, 5).forEach(wallet => {
+                const entry = document.createElement('div');
+                entry.className = 'player-entry';
+                entry.innerHTML = `
+                    <span class="wallet-address">${wallet.address.substring(0, 8)}...${wallet.address.substring(36)}</span>
+                    <span class="infection-count">${wallet.infectionCount.toLocaleString()}</span>
+                `;
+                container.appendChild(entry);
+            });
+        }
+
+        // Start live activity feed
+        function startLiveActivityFeed() {
+            const feedContainer = document.getElementById('activityFeed');
+            
+            function addFeedItem() {
+                const template = mockData.activityTemplates[Math.floor(Math.random() * mockData.activityTemplates.length)];
+                const location = mockData.locations[Math.floor(Math.random() * mockData.locations.length)];
+                const wallet = mockData.wallets[Math.floor(Math.random() * mockData.wallets.length)];
+                
+                let message = template
+                    .replace('{city}', location.city.toUpperCase())
+                    .replace('{count}', Math.floor(Math.random() * 50) + 10);
+
+                const timestamp = new Date().toLocaleTimeString();
+                const feedItem = document.createElement('div');
+                feedItem.className = 'feed-item';
+                feedItem.innerHTML = `
+                    <span class="timestamp">[${timestamp}]</span> 
+                    <span class="wallet-address">${wallet.address.substring(0, 8)}...${wallet.address.substring(36)}</span> 
+                    <span class="action-type">${message}</span>
+                `;
+                
+                feedContainer.insertBefore(feedItem, feedContainer.firstChild);
+                
+                // Keep only the last 10 items
+                while (feedContainer.children.length > 10) {
+                    feedContainer.removeChild(feedContainer.lastChild);
+                }
+            }
+
+            // Add initial items
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => addFeedItem(), i * 200);
+            }
+
+            // Continue adding items
+            setInterval(addFeedItem, 3000 + Math.random() * 5000);
+        }
+
+        // Animate statistics
+        function animateStats() {
+            function animateValue(elementId, start, end, duration) {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+                
+                const startTime = performance.now();
+                
+                function update(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const current = Math.floor(start + (end - start) * progress);
+                    element.textContent = current.toLocaleString();
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(update);
+                    }
+                }
+                
+                requestAnimationFrame(update);
+            }
+
+            // Animate the main stats
+            const totalInfections = mockData.locations.reduce((sum, loc) => sum + loc.totalInfections, 0);
+            animateValue('totalInfections', 0, totalInfections, 2000);
+            animateValue('activeSpreaders', 0, mockData.locations.length, 1500);
+            animateValue('physicalDiscoveries', 0, mockData.locations.reduce((sum, loc) => sum + loc.discoveredBy.length, 0), 1800);
+            animateValue('globalReach', 0, new Set(mockData.locations.map(loc => loc.country)).size, 1200);
+            animateValue('activeWallets', 0, mockData.wallets.length, 1600);
+        }
+
+        // Search wallet function
+        function searchWallet() {
+            const searchTerm = document.getElementById('walletSearch').value.toLowerCase();
+            const wallet = mockData.wallets.find(w => w.address.toLowerCase().includes(searchTerm));
+            
+            if (wallet) {
+                alert(`Wallet Found!\nClassification: ${wallet.classification}\nInfections: ${wallet.infectionCount.toLocaleString()}\nSpreaders Created: ${wallet.spreadersCreated}\nLocations Discovered: ${wallet.locationsDiscovered}`);
+            } else {
+                alert('Wallet not found in the infection network.');
+            }
+        }
+
+        // Filter infections by level
+        function filterInfections(level) {
+            // Update filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Filter markers
+            markers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            markers = [];
+
+            const filteredLocations = level === 'all' 
+                ? mockData.locations 
+                : mockData.locations.filter(loc => loc.infectionLevel === level);
+
+            filteredLocations.forEach(location => {
+                addLocationMarker(location);
+            });
+        }
+
+        // Update infection rate periodically
+        setInterval(() => {
+            const newRate = Math.floor(Math.random() * 50) + 10;
+            document.getElementById('infectionRate').textContent = newRate;
+        }, 30000);
+
+        // Pulse effect for high infection areas
+        setInterval(() => {
+            const highInfectionLocations = mockData.locations.filter(loc => loc.infectionLevel === 'high');
+            highInfectionLocations.forEach(location => {
+                // Add visual pulse effect (this would be more elaborate in a real implementation)
+                console.log(`Pulsing ${location.city} - High infection zone`);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

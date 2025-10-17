@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Direct Render Test - No Cache</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #000;
+            color: #0f0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        #display {
+            width: 600px;
+            height: 600px;
+            border: 2px solid #0f0;
+            margin: 20px auto;
+            background: #fff;
+        }
+        #display iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        #info {
+            background: #111;
+            padding: 15px;
+            border: 1px solid #0f0;
+            margin-bottom: 20px;
+            white-space: pre-wrap;
+            font-size: 11px;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Direct Render Test - Token #1</h1>
+        <p>This directly injects the HTML from tokenURI into the page (no iframe, no cache)</p>
+
+        <button onclick="loadAndDisplay()">Load Fresh from Blockchain</button>
+        <button onclick="viewRawHTML()">View Raw HTML</button>
+
+        <div id="info">Loading...</div>
+
+        <div id="display"></div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        const MASTER_ADDRESS = '0x8a94e7c81a4982a80405b5aead52155208b40d18';
+        const RPC_URL = 'https://rpc.sepolia.org';
+
+        let currentHTML = '';
+
+        async function loadAndDisplay() {
+            const infoDiv = document.getElementById('info');
+            const displayDiv = document.getElementById('display');
+
+            try {
+                infoDiv.textContent = 'Fetching from blockchain...';
+
+                // Create fresh provider
+                const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+                const contract = new ethers.Contract(
+                    MASTER_ADDRESS,
+                    ['function tokenURI(uint256) view returns (string)'],
+                    provider
+                );
+
+                // Get tokenURI with fresh blockTag
+                const tokenURI = await contract.tokenURI(1, { blockTag: 'latest' });
+
+                // Decode JSON
+                const base64 = tokenURI.split(',')[1];
+                const json = atob(base64);
+                const metadata = JSON.parse(json);
+
+                // Decode HTML
+                const htmlBase64 = metadata.animation_url.split(',')[1];
+                currentHTML = atob(htmlBase64);
+
+                // Detect type
+                const isASCII = currentHTML.includes('ascii-display') || currentHTML.includes('const grid=Array(size)');
+                const isPixelated = currentHTML.includes('canvas');
+
+                infoDiv.textContent = `
+✓ Fetched from blockchain
+✓ TokenURI length: ${tokenURI.length} chars
+✓ Metadata name: ${metadata.name}
+✓ HTML length: ${currentHTML.length} chars
+
+Renderer Type: ${isASCII ? 'ASCII ✓✓✓' : (isPixelated ? 'PIXELATED (OLD)' : 'UNKNOWN')}
+
+HTML starts with:
+${currentHTML.substring(0, 300)}...
+
+Loading into iframe with fresh Blob URL (timestamp: ${Date.now()})
+                `;
+
+                // Use iframe with blob URL so scripts execute
+                displayDiv.innerHTML = '';
+                const iframe = document.createElement('iframe');
+                iframe.sandbox = 'allow-scripts';
+
+                // Create unique blob URL
+                const blob = new Blob([currentHTML], { type: 'text/html' });
+                const blobUrl = URL.createObjectURL(blob);
+                iframe.src = blobUrl;
+
+                iframe.onload = () => {
+                    URL.revokeObjectURL(blobUrl);
+                    console.log('Iframe loaded successfully');
+                };
+
+                displayDiv.appendChild(iframe);
+
+            } catch (error) {
+                infoDiv.textContent = 'Error: ' + error.message;
+                console.error(error);
+            }
+        }
+
+        function viewRawHTML() {
+            if (!currentHTML) {
+                alert('Load from blockchain first');
+                return;
+            }
+
+            const win = window.open('', '_blank');
+            win.document.write('<pre style="white-space: pre-wrap; word-wrap: break-word; font-size: 10px;">' +
+                currentHTML.replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+                '</pre>');
+        }
+
+        // Auto-load on page load
+        window.addEventListener('load', () => {
+            if (typeof ethers !== 'undefined') {
+                loadAndDisplay();
+            }
+        });
+    </script>
+</body>
+</html>

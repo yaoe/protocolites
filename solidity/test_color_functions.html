@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,user-scalable=no" />
+</head>
+<body style="background: #222; color: white; font-family: monospace; padding: 20px;">
+    <div id="output"></div>
+    <script>
+        const output = document.getElementById('output');
+        
+        // Test the color functions
+        function hashCode(str){let hash=0;for(let i=0;i<str.length;i++){const char=str.charCodeAt(i);hash=((hash<<5)-hash)+char;hash=hash&hash;}return Math.abs(hash);}
+        
+        function dnaToColors(dna){const hash=hashCode(dna);const hue1=(hash%360);const hue2=((hash>>8)%360);const hue3=((hash>>16)%360);const saturation=80+(hash%20);const lightness=45+(hash%20);return{primary:`hsl(${hue1},${saturation}%,${lightness}%)`,secondary:`hsl(${hue2},${saturation}%,${lightness}%)`,accent:`hsl(${hue3},100%,50%)`,glow:`hsl(${(hue1+180)%360},100%,60%)`};}
+        
+        function hexToRgb(color){if(color.startsWith("hsl")){const parts=color.match(/\d+/g);if(parts&&parts.length>=3){const h=parseInt(parts[0])/360;const s=parseInt(parts[1])/100;const l=parseInt(parts[2])/100;let r,g,b;if(s===0){r=g=b=l;}else{const hue2rgb=(p,q,t)=>{if(t<0)t+=1;if(t>1)t-=1;if(t<1/6)return p+(q-p)*6*t;if(t<1/2)return q;if(t<2/3)return p+(q-p)*(2/3-t)*6;return p;};const q=l<0.5?l*(1+s):l+s-l*s;const p=2*l-q;r=hue2rgb(p,q,h+1/3);g=hue2rgb(p,q,h);b=hue2rgb(p,q,h-1/3);}return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)};}}return null;}
+        
+        function getOppositeColor(color){const rgb=hexToRgb(color);if(rgb){const invR=(255-rgb.r).toString(16).padStart(2,"0");const invG=(255-rgb.g).toString(16).padStart(2,"0");const invB=(255-rgb.b).toString(16).padStart(2,"0");return"#"+invR+invG+invB;}return"#ffffff";}
+        
+        function getSimilarColor(color){const rgb=hexToRgb(color);if(!rgb)return color;const method=Math.floor(Math.random()*3);let newR,newG,newB;if(method===0){const factor=0.5+(Math.random()*0.3);newR=Math.max(0,Math.round(rgb.r*factor));newG=Math.max(0,Math.round(rgb.g*factor));newB=Math.max(0,Math.round(rgb.b*factor));}else if(method===1){const factor=1.3+(Math.random()*0.4);newR=Math.min(255,Math.round(rgb.r*factor));newG=Math.min(255,Math.round(rgb.g*factor));newB=Math.min(255,Math.round(rgb.b*factor));}else{const shift=(Math.random()-0.5)*60;newR=Math.max(0,Math.min(255,rgb.r+shift));newG=Math.max(0,Math.min(255,rgb.g+shift));newB=Math.max(0,Math.min(255,rgb.b+shift));}const hexR=Math.round(newR).toString(16).padStart(2,"0");const hexG=Math.round(newG).toString(16).padStart(2,"0");const hexB=Math.round(newB).toString(16).padStart(2,"0");return"#"+hexR+hexG+hexB;}
+        
+        // Test
+        const dna = "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+        const colors = dnaToColors(dna);
+        
+        output.innerHTML = '<h3>Color Test Results:</h3>';
+        output.innerHTML += `DNA: ${dna}<br><br>`;
+        
+        output.innerHTML += `<strong>dnaToColors:</strong><br>`;
+        output.innerHTML += `Primary: ${colors.primary} <span style="background:${colors.primary};padding:2px 20px;">&nbsp;</span><br>`;
+        output.innerHTML += `Secondary: ${colors.secondary} <span style="background:${colors.secondary};padding:2px 20px;">&nbsp;</span><br>`;
+        output.innerHTML += `Accent: ${colors.accent} <span style="background:${colors.accent};padding:2px 20px;">&nbsp;</span><br>`;
+        output.innerHTML += `Glow: ${colors.glow} <span style="background:${colors.glow};padding:2px 20px;">&nbsp;</span><br><br>`;
+        
+        const rgb = hexToRgb(colors.primary);
+        output.innerHTML += `<strong>hexToRgb(${colors.primary}):</strong><br>`;
+        output.innerHTML += `Result: ${JSON.stringify(rgb)}<br><br>`;
+        
+        const eyeColor = getOppositeColor(colors.primary);
+        output.innerHTML += `<strong>getOppositeColor(${colors.primary}):</strong><br>`;
+        output.innerHTML += `Result: ${eyeColor} <span style="background:${eyeColor};padding:2px 20px;">&nbsp;</span><br><br>`;
+        
+        const similarColor = getSimilarColor(colors.primary);
+        output.innerHTML += `<strong>getSimilarColor(${colors.primary}):</strong><br>`;
+        output.innerHTML += `Result: ${similarColor} <span style="background:${similarColor};padding:2px 20px;">&nbsp;</span><br>`;
+        
+        // Check for errors
+        if (!rgb) {
+            output.innerHTML += '<br><br><span style="color:red;">ERROR: hexToRgb returned null!</span>';
+        }
+        if (eyeColor === "#ffffff") {
+            output.innerHTML += '<br><span style="color:yellow;">WARNING: eyeColor defaulted to white</span>';
+        }
+    </script>
+</body>
+</html>

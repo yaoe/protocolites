@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,user-scalable=no" />
+</head>
+<body>
+    <style>html,body { background: black; } body { overflow: hidden; margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; } canvas { image-rendering: pixelated; } canvas.parent { width: 100vmin; height: 100vmin; } canvas.kid { width: 50vmin; height: 50vmin; }</style>
+    <canvas id="canvas" class="kid"></canvas>
+    <script>
+        const tokenId = 1;
+        const dna = "0xa8349620000000000000000000000000000000000000000000000000000000000";
+        const isKid = true;
+        const parentDna = "0xa8349620000000000000000000000000000000000000000000000000000000001";
+        const size = 12;
+        
+        // Test minimal rendering
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const pixelSize = size === 24 ? 6 : 8;
+        canvas.width = size * pixelSize;
+        canvas.height = size * pixelSize;
+        
+        console.log("Canvas size:", canvas.width, "x", canvas.height);
+        console.log("Size:", size, "Pixel size:", pixelSize);
+        
+        // Fill with red to test
+        ctx.fillStyle = "#ff0000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw a white square in center
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(20, 20, 40, 40);
+    </script>
+</body>
+</html>

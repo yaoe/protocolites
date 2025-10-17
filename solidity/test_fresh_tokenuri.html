@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Fresh TokenURI Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #output {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #preview {
+            margin-top: 20px;
+            border: 2px solid #333;
+        }
+        iframe {
+            width: 800px;
+            height: 600px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fresh TokenURI Test - Bypass All Caches</h1>
+    <p>This will fetch tokenURI directly from blockchain with no caching</p>
+
+    <input type="number" id="tokenId" value="1" min="1" placeholder="Token ID">
+    <button onclick="fetchFresh()">Fetch Fresh TokenURI</button>
+    <button onclick="clearAll()">Clear All Caches</button>
+
+    <div id="output">Click button to fetch...</div>
+    <div id="preview"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script>
+        const MASTER_ADDRESS = '0x8a94e7c81a4982a80405b5aead52155208b40d18';
+        const RPC_URL = 'https://rpc.sepolia.org';
+
+        async function fetchFresh() {
+            const output = document.getElementById('output');
+            const preview = document.getElementById('preview');
+            const tokenId = document.getElementById('tokenId').value;
+
+            try {
+                output.textContent = 'Fetching fresh data from blockchain...\n';
+
+                // Create fresh provider with no cache
+                const provider = new ethers.providers.JsonRpcProvider(
+                    RPC_URL + '?nocache=' + Date.now()
+                );
+
+                const contract = new ethers.Contract(
+                    MASTER_ADDRESS,
+                    ['function tokenURI(uint256) view returns (string)'],
+                    provider
+                );
+
+                // Fetch with timestamp to bust cache
+                const tokenURI = await contract.tokenURI(tokenId);
+
+                output.textContent += `✓ Fetched tokenURI\n`;
+                output.textContent += `Length: ${tokenURI.length} chars\n\n`;
+
+                // Decode the base64 JSON
+                const base64Data = tokenURI.split(',')[1];
+                const jsonString = atob(base64Data);
+                const metadata = JSON.parse(jsonString);
+
+                output.textContent += `Metadata:\n`;
+                output.textContent += `Name: ${metadata.name}\n`;
+                output.textContent += `Description: ${metadata.description}\n\n`;
+
+                // Check what renderer type is being used
+                const animationUrl = metadata.animation_url;
+                const htmlData = animationUrl.split(',')[1];
+                const html = atob(htmlData);
+
+                // Look for ASCII-specific markers
+                const hasAsciiClass = html.includes('ascii-display');
+                const hasPixelCanvas = html.includes('canvas');
+                const hasGridArray = html.includes('const grid=Array(size)');
+
+                output.textContent += `Renderer Detection:\n`;
+                output.textContent += `✓ ASCII markers: ${hasAsciiClass ? 'YES (ASCII)' : 'NO'}\n`;
+                output.textContent += `✓ Grid array: ${hasGridArray ? 'YES (ASCII)' : 'NO'}\n`;
+                output.textContent += `✓ Canvas element: ${hasPixelCanvas ? 'YES (Pixelated)' : 'NO'}\n\n`;
+
+                if (hasAsciiClass || hasGridArray) {
+                    output.textContent += '🎉 CONFIRMED: Using ASCII Renderer!\n';
+                } else if (hasPixelCanvas) {
+                    output.textContent += '⚠️  WARNING: Still using Pixelated Renderer\n';
+                } else {
+                    output.textContent += '❓ Unknown renderer type\n';
+                }
+
+                output.textContent += `\nFirst 500 chars of HTML:\n`;
+                output.textContent += html.substring(0, 500) + '...\n';
+
+                // Show live preview with cache-busting
+                preview.innerHTML = `
+                    <h3>Live Preview:</h3>
+                    <iframe sandbox="allow-scripts" srcdoc="${html.replace(/"/g, '&quot;')}"></iframe>
+                `;
+
+            } catch (error) {
+                output.textContent += `\n❌ Error: ${error.message}\n`;
+                console.error(error);
+            }
+        }
+
+        function clearAll() {
+            // Clear browser caches
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+
+            // Clear local storage
+            localStorage.clear();
+            sessionStorage.clear();
+
+            alert('Browser caches cleared! Now try Fetch Fresh TokenURI');
+        }
+
+        // Auto-fetch on load
+        window.addEventListener('load', () => {
+            if (typeof ethers !== 'undefined') {
+                fetchFresh();
+            }
+        });
+    </script>
+</body>
+</html>

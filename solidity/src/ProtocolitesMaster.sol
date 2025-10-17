@@ -9,10 +9,9 @@ import "./ProtocoliteFactoryNew.sol";
 import "./ProtocolitesRender.sol";
 
 contract ProtocolitesMaster is ERC721, Ownable {
-    
-    uint256 public constant SPAWN_COST = 0.01 ether;
+
     uint256 private _currentTokenId;
-    
+
     ProtocoliteFactoryNew public factory;
     ProtocolitesRender public renderer;
     
@@ -50,10 +49,20 @@ contract ProtocolitesMaster is ERC721, Ownable {
     function setRenderer(address _renderer) external onlyOwner {
         renderer = ProtocolitesRender(_renderer);
     }
-    
+
+    // Dynamic spawn cost: 0.001 ETH on Sepolia, 0.01 ETH on mainnet
+    function getSpawnCost() public view returns (uint256) {
+        // Sepolia testnet
+        if (block.chainid == 11155111) {
+            return 0.001 ether;
+        }
+        // Mainnet and all other networks
+        return 0.01 ether;
+    }
+
     // Receive function: handles ETH transactions
     receive() external payable {
-        if (msg.value >= SPAWN_COST) {
+        if (msg.value >= getSpawnCost()) {
             _spawnNewParent(msg.sender);
         } else {
             // Trigger random infection
@@ -75,7 +84,7 @@ contract ProtocolitesMaster is ERC721, Ownable {
     }
     
     function spawnParent() external payable {
-        require(msg.value >= SPAWN_COST, "Insufficient payment");
+        require(msg.value >= getSpawnCost(), "Insufficient payment");
         _spawnNewParent(msg.sender);
     }
     

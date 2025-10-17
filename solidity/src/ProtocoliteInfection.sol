@@ -6,31 +6,46 @@ import "solady/auth/Ownable.sol";
 import "solady/utils/LibString.sol";
 import "./ProtocolitesRender.sol";
 import "./Protocolites.sol";
+import "./DNAParser.sol";
+
+interface IMaster {
+    function renderer() external view returns (ProtocolitesRender);
+}
 
 contract ProtocoliteInfection is ERC721, Ownable {
-    
+
+    using DNAParser for uint256; // Attach library functions to uint256
+    using DNAParser for TokenTraits; // Attach library functions to the struct
+
+
     uint256 public immutable parentTokenId;
     uint256 public immutable parentDna;
     uint256 private _currentTokenId;
-    
-    ProtocolitesRender public renderer;
-    
+
+    // Store master contract address instead of renderer
+    // This way kids always use the same renderer as master
+    address public immutable masterContract;
+
     // Track kid NFT data
     struct KidData {
         uint256 dna;
         uint256 birthBlock;
         address infectedBy; // Who caused this infection
     }
-    
+
     mapping(uint256 => KidData) public kidData;
-    
+
     event Infection(uint256 indexed kidId, address indexed victim, address indexed infector);
-    
-    constructor(uint256 _parentTokenId, uint256 _parentDna, address _renderer) {
+
+    constructor(uint256 _parentTokenId, uint256 _parentDna, address _masterContract) {
         parentTokenId = _parentTokenId;
         parentDna = _parentDna;
-        renderer = ProtocolitesRender(_renderer);
-        _initializeOwner(msg.sender); // Master contract owns this
+        masterContract = _masterContract;
+
+        // Initialize ownership - factory will transfer to master after deployment
+        _initializeOwner(msg.sender);
+
+        // Kids will dynamically read renderer from masterContract
     }
     
     function name() public view override returns (string memory) {
@@ -69,6 +84,116 @@ contract ProtocoliteInfection is ERC721, Ownable {
     }
     
     function _infectVictim(address victim) internal {
+        _currentTokenId++;
+        uint256 kidId = _currentTokenId;
+
+        // 1. DECODE PARENT'S TRAITS
+        TokenTraits memory parentTraits = parentDna.decode();
+
+        // 2. GENERATE CHILD'S RANDOMNESS SEED
+        // This matches the HTML: unique seed per child
+        uint256 childSeed = uint256(keccak256(abi.encodePacked(
+            parentDna,
+            victim,
+            block.timestamp,
+            block.prevrandao,
+            kidId
+        )));
+
+        // 3. SEEDED PRNG (matches HTML's random() function exactly)
+        // HTML: s = (s * 9301 + 49297) % 233280; return s / 233280;
+        uint256 s = childSeed % 233280;
+
+        // 4. CONSTRUCT CHILD'S TRAITS using advancing PRNG
+        TokenTraits memory childTraits;
+
+        // == 100% INHERITANCE ==
+        childTraits.bodyType = parentTraits.bodyType;
+        childTraits.armStyle = parentTraits.armStyle;
+        childTraits.legStyle = parentTraits.legStyle;
+
+        // == 80% INHERITANCE / 20% MUTATION ==
+
+        // Body Character (80% chance to inherit)
+        s = (s * 9301 + 49297) % 233280;
+        if (s < 186624) { // 233280 * 0.8 = 186624
+            childTraits.bodyChar = parentTraits.bodyChar;
+        } else {
+            s = (s * 9301 + 49297) % 233280;
+            childTraits.bodyChar = uint8((s * 4) / 233280);
+        }
+
+        // Eye Character (80% chance)
+        s = (s * 9301 + 49297) % 233280;
+        if (s < 186624) {
+            childTraits.eyeChar = parentTraits.eyeChar;
+        } else {
+            s = (s * 9301 + 49297) % 233280;
+            childTraits.eyeChar = uint8((s * 4) / 233280);
+        }
+
+        // Eye Size (80% chance)
+        s = (s * 9301 + 49297) % 233280;
+        if (s < 186624) {
+            childTraits.eyeSize = parentTraits.eyeSize;
+        } else {
+            s = (s * 9301 + 49297) % 233280;
+            childTraits.eyeSize = s > 116640 ? 1 : 0; // >0.5 = mega
+        }
+
+        // Antenna Tip (80% chance)
+        s = (s * 9301 + 49297) % 233280;
+        if (s < 186624) {
+            childTraits.antennaTip = parentTraits.antennaTip;
+        } else {
+            s = (s * 9301 + 49297) % 233280;
+            childTraits.antennaTip = uint8((s * 7) / 233280);
+        }
+
+        // Hat Type (Complex logic - matches HTML lines 767-777)
+        if (parentTraits.hatType != 0) {
+            // Parent has hat: 80% chance to inherit
+            s = (s * 9301 + 49297) % 233280;
+            if (s < 186624) {
+                childTraits.hatType = parentTraits.hatType;
+            } else {
+                s = (s * 9301 + 49297) % 233280;
+                childTraits.hatType = uint8((s * 5) / 233280);
+            }
+        } else {
+            // Parent has no hat: 15% chance to get one
+            s = (s * 9301 + 49297) % 233280;
+            if (s < 34992) { // 233280 * 0.15 = 34992
+                s = (s * 9301 + 49297) % 233280;
+                childTraits.hatType = uint8(((s * 4) / 233280) + 1); // 1-4 (not none)
+            } else {
+                childTraits.hatType = 0; // none
+            }
+        }
+
+        // Cigarette (10% chance - matches HTML line 780)
+        s = (s * 9301 + 49297) % 233280;
+        childTraits.hasCigarette = s < 23328; // 233280 * 0.10 = 23328
+
+        // 5. ENCODE THE NEW TRAITS
+        uint256 kidDna = childTraits.encode(parentDna);
+
+        // 5. STORE AND MINT
+        // Store kid data
+        kidData[kidId] = KidData({
+            dna: kidDna,
+            birthBlock: block.number,
+            infectedBy: victim // Or however you track the parent
+        });
+        
+        // Mint soulbound NFT
+        _mint(victim, kidId);
+        
+        emit Infection(kidId, victim, victim); // Adjust event as needed
+    }
+
+
+    function _infectVictim2(address victim) internal {
         _currentTokenId++;
         uint256 kidId = _currentTokenId;
         
@@ -117,19 +242,21 @@ contract ProtocoliteInfection is ERC721, Ownable {
     
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(_exists(tokenId), "Token does not exist");
-        
+
         KidData memory data = kidData[tokenId];
-        
+
         // Create TokenData for renderer
         Protocolites.TokenData memory renderData = Protocolites.TokenData({
             dna: data.dna,
-            isKid: true, // Always true for infections  
+            isKid: true, // Always true for infections
             parentDna: parentDna,
             parentContract: address(this),
             birthBlock: data.birthBlock
         });
-        
-        return renderer.tokenURI(tokenId, renderData);
+
+        // Get renderer from master contract (so kids always use same renderer as master)
+        ProtocolitesRender currentRenderer = IMaster(masterContract).renderer();
+        return currentRenderer.tokenURI(tokenId, renderData);
     }
     
     function totalSupply() public view returns (uint256) {

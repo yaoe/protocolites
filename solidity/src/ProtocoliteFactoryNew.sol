@@ -27,21 +27,22 @@ contract ProtocoliteFactoryNew is Ownable {
         // Only allow the master contract to deploy infection contracts
         require(msg.sender == owner(), "Only master can deploy");
         require(infectionContracts[parentTokenId] == address(0), "Infection contract already exists");
-        
+
         // Deploy new infection contract
-        ProtocoliteInfection infection = new ProtocoliteInfection(parentTokenId, parentDna, renderer);
+        // Pass msg.sender (master) as the master contract address
+        ProtocoliteInfection infection = new ProtocoliteInfection(parentTokenId, parentDna, msg.sender);
         address infectionAddress = address(infection);
-        
+
         // Transfer ownership to the caller (master contract)
         infection.transferOwnership(msg.sender);
-        
+
         // Track the deployment
         infectionContracts[parentTokenId] = infectionAddress;
         allInfectionContracts.push(infectionAddress);
         deployedCount++;
-        
+
         emit InfectionContractDeployed(parentTokenId, infectionAddress, parentDna);
-        
+
         return infectionAddress;
     }
     
