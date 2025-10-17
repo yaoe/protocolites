@@ -101,8 +101,8 @@ contract ProtocoliteInfection is ERC721, Ownable {
         )));
 
         // 3. SEEDED PRNG (matches HTML's random() function exactly)
-        // HTML: s = (s * 9301 + 49297) % 233280; return s / 233280;
-        uint256 s = childSeed % 233280;
+        // HTML: let s = seed; (uses FULL seed value, modulo only happens inside random())
+        uint256 s = childSeed;
 
         // 4. CONSTRUCT CHILD'S TRAITS using advancing PRNG
         TokenTraits memory childTraits;
@@ -115,56 +115,56 @@ contract ProtocoliteInfection is ERC721, Ownable {
         // == 80% INHERITANCE / 20% MUTATION ==
 
         // Body Character (80% chance to inherit)
-        s = (s * 9301 + 49297) % 233280;
+        unchecked { s = (s * 9301 + 49297) % 233280; }
         if (s < 186624) { // 233280 * 0.8 = 186624
             childTraits.bodyChar = parentTraits.bodyChar;
         } else {
-            s = (s * 9301 + 49297) % 233280;
+            unchecked { s = (s * 9301 + 49297) % 233280; }
             childTraits.bodyChar = uint8((s * 4) / 233280);
         }
 
         // Eye Character (80% chance)
-        s = (s * 9301 + 49297) % 233280;
+        unchecked { s = (s * 9301 + 49297) % 233280; }
         if (s < 186624) {
             childTraits.eyeChar = parentTraits.eyeChar;
         } else {
-            s = (s * 9301 + 49297) % 233280;
+            unchecked { s = (s * 9301 + 49297) % 233280; }
             childTraits.eyeChar = uint8((s * 4) / 233280);
         }
 
         // Eye Size (80% chance)
-        s = (s * 9301 + 49297) % 233280;
+        unchecked { s = (s * 9301 + 49297) % 233280; }
         if (s < 186624) {
             childTraits.eyeSize = parentTraits.eyeSize;
         } else {
-            s = (s * 9301 + 49297) % 233280;
+            unchecked { s = (s * 9301 + 49297) % 233280; }
             childTraits.eyeSize = s > 116640 ? 1 : 0; // >0.5 = mega
         }
 
         // Antenna Tip (80% chance)
-        s = (s * 9301 + 49297) % 233280;
+        unchecked { s = (s * 9301 + 49297) % 233280; }
         if (s < 186624) {
             childTraits.antennaTip = parentTraits.antennaTip;
         } else {
-            s = (s * 9301 + 49297) % 233280;
+            unchecked { s = (s * 9301 + 49297) % 233280; }
             childTraits.antennaTip = uint8((s * 7) / 233280);
         }
 
         // Hat Type (Complex logic - matches HTML lines 767-777)
         if (parentTraits.hatType != 0) {
             // Parent has hat: 80% chance to inherit
-            s = (s * 9301 + 49297) % 233280;
+            unchecked { s = (s * 9301 + 49297) % 233280; }
             if (s < 186624) {
                 childTraits.hatType = parentTraits.hatType;
             } else {
-                s = (s * 9301 + 49297) % 233280;
+                unchecked { s = (s * 9301 + 49297) % 233280; }
                 childTraits.hatType = uint8((s * 5) / 233280);
             }
         } else {
             // Parent has no hat: 15% chance to get one
-            s = (s * 9301 + 49297) % 233280;
+            unchecked { s = (s * 9301 + 49297) % 233280; }
             if (s < 34992) { // 233280 * 0.15 = 34992
-                s = (s * 9301 + 49297) % 233280;
+                unchecked { s = (s * 9301 + 49297) % 233280; }
                 childTraits.hatType = uint8(((s * 4) / 233280) + 1); // 1-4 (not none)
             } else {
                 childTraits.hatType = 0; // none
@@ -172,7 +172,7 @@ contract ProtocoliteInfection is ERC721, Ownable {
         }
 
         // Cigarette (10% chance - matches HTML line 780)
-        s = (s * 9301 + 49297) % 233280;
+        unchecked { s = (s * 9301 + 49297) % 233280; }
         childTraits.hasCigarette = s < 23328; // 233280 * 0.10 = 23328
 
         // 5. ENCODE THE NEW TRAITS
