@@ -60,6 +60,32 @@
             margin-left: 10px;
         }
 
+        .wallet-button {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid #000000;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .wallet-button:hover {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .wallet-button.connected {
+            background: #ffffff;
+            color: #000000;
+            border-color: #000000;
+        }
+
         .controls-bar {
             background: #ffffff;
             border-bottom: 1px solid #e8e8e8;
@@ -139,6 +165,7 @@
         .btn-small {
             padding: 8px 12px;
             font-size: 8px;
+            width: 100%;
         }
 
         .btn-expand {
@@ -252,22 +279,17 @@
             height: 200px;
             background: #ffffff;
             border: 1px solid #e8e8e8;
-            padding: 30px;
             position: relative;
             overflow: hidden;
             flex-shrink: 0;
         }
 
         .spreader-preview iframe {
-            width: 100%;
-            height: 100%;
+            width: 600px;
+            height: 600px;
             border: none;
-        }
-
-        .spreader-preview .animated-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
+            transform: scale(0.333);
+            transform-origin: top left;
         }
 
         .spreader-info {
@@ -390,7 +412,7 @@
 
         .infections-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 15px;
         }
 
@@ -410,41 +432,21 @@
         }
 
         .infection-preview {
-            width: 100%;
-            aspect-ratio: 1;
+            width: 180px;
+            height: 180px;
             background: #ffffff;
             border: 1px solid #e8e8e8;
             margin-bottom: 8px;
-            padding: 15px;
             position: relative;
             overflow: hidden;
         }
 
         .infection-preview iframe {
-            width: 100%;
-            height: 100%;
+            width: 600px;
+            height: 600px;
             border: none;
-        }
-
-        .infection-preview .animated-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translate(0, 0) rotate(0deg);
-            }
-            25% {
-                transform: translate(var(--tx1, 3px), var(--ty1, -3px)) rotate(var(--r1, 2deg));
-            }
-            50% {
-                transform: translate(var(--tx2, -3px), var(--ty2, 3px)) rotate(var(--r2, -2deg));
-            }
-            75% {
-                transform: translate(var(--tx3, 3px), var(--ty3, 3px)) rotate(var(--r3, 1deg));
-            }
+            transform: scale(0.3);
+            transform-origin: top left;
         }
 
         .infection-label {
@@ -559,6 +561,7 @@
         <div class="subtitle">
             LIVE BLOCKCHAIN VIEWER — GENERATIVE ASCII ART PROTOCOL
             <span class="network-badge">SEPOLIA TESTNET</span>
+            <button class="wallet-button" id="walletButton" onclick="connectWalletUI()">● CONNECT WALLET</button>
         </div>
         <div class="contract-address" id="contractInfo">Loading...</div>
     </div>
@@ -615,9 +618,10 @@
 
         const CONFIG = {
             RPC_URLS: [
-                'https://rpc.sepolia.org',
-                'https://ethereum-sepolia.publicnode.com',
-                'https://rpc2.sepolia.org'
+                'https://ethereum-sepolia-rpc.publicnode.com',
+                'https://sepolia.gateway.tenderly.co',
+                'https://rpc.ankr.com/eth_sepolia',
+                'https://eth-sepolia.public.blastapi.io'
             ],
             MASTER_ADDRESS: '0x6e202ebFbFAb08cc59578A513F203b78bf20dd5e',
             CHAIN_ID: 11155111
@@ -643,43 +647,53 @@
         let currentFilter = 'all';
         let currentSort = 'infections-desc';
         let expandedSpreader = null;
+        let userWallet = null;
+        let signer = null;
 
         async function init() {
             try {
-                if (typeof window.ethereum !== 'undefined') {
-                    console.log('MetaMask detected');
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                    const network = await provider.getNetwork();
-                    if (network.chainId !== CONFIG.CHAIN_ID) {
-                        showError('Please switch MetaMask to Sepolia testnet');
-                        return;
+                // Always use public RPC endpoints (works with or without MetaMask)
+                console.log('Connecting to Sepolia via public RPC...');
+                let connected = false;
+                for (const rpcUrl of CONFIG.RPC_URLS) {
+                    try {
+                        provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+                        const network = await Promise.race([
+                            provider.getNetwork(),
+                            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+                        ]);
+                        console.log('Connected to:', rpcUrl, network);
+                        connected = true;
+                        break;
+                    } catch (error) {
+                        console.log('Failed to connect to', rpcUrl, '- trying next...');
+                        continue;
                     }
-                } else {
-                    console.log('Using public RPC...');
-                    let connected = false;
-                    for (const rpcUrl of CONFIG.RPC_URLS) {
-                        try {
-                            provider = new ethers.providers.JsonRpcProvider(rpcUrl);
-                            const network = await Promise.race([
-                                provider.getNetwork(),
-                                new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
-                            ]);
-                            console.log('Connected to:', network);
-                            connected = true;
-                            break;
-                        } catch (error) {
-                            continue;
-                        }
-                    }
-                    if (!connected) {
-                        showError('Could not connect to Sepolia. Please check your connection.');
-                        return;
-                    }
+                }
+                if (!connected) {
+                    showError('Could not connect to Sepolia. Please check your connection.');
+                    return;
                 }
 
                 document.getElementById('contractInfo').textContent = 'Master: ' + CONFIG.MASTER_ADDRESS;
 
                 masterContract = new ethers.Contract(CONFIG.MASTER_ADDRESS, MASTER_ABI, provider);
+
+                // Check if wallet is already connected
+                if (typeof window.ethereum !== 'undefined') {
+                    try {
+                        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                        if (accounts.length > 0) {
+                            userWallet = accounts[0];
+                            const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+                            signer = web3Provider.getSigner();
+                            updateWalletButton();
+                        }
+                    } catch (error) {
+                        console.log('No wallet connected');
+                    }
+                }
+
                 await loadAll();
             } catch (error) {
                 showError('Failed to initialize: ' + error.message);
@@ -892,50 +906,10 @@
             if (nft.metadata && nft.metadata.animation_url) {
                 const html = decodeDataURI(nft.metadata.animation_url);
                 if (html) {
-                    const animatedContainer = document.createElement('div');
-                    animatedContainer.className = 'animated-container';
-
-                    // Generate random animation parameters with more range
-                    const duration = 3 + Math.random() * 4; // 3-7 seconds
-                    const delay = Math.random() * 2; // 0-2 second delay
-                    const tx1 = (Math.random() - 0.5) * 16;
-                    const ty1 = (Math.random() - 0.5) * 16;
-                    const tx2 = (Math.random() - 0.5) * 16;
-                    const ty2 = (Math.random() - 0.5) * 16;
-                    const tx3 = (Math.random() - 0.5) * 16;
-                    const ty3 = (Math.random() - 0.5) * 16;
-                    const r1 = (Math.random() - 0.5) * 8;
-                    const r2 = (Math.random() - 0.5) * 8;
-                    const r3 = (Math.random() - 0.5) * 8;
-
-                    animatedContainer.style.cssText = `
-                        --tx1: ${tx1}px;
-                        --ty1: ${ty1}px;
-                        --tx2: ${tx2}px;
-                        --ty2: ${ty2}px;
-                        --tx3: ${tx3}px;
-                        --ty3: ${ty3}px;
-                        --r1: ${r1}deg;
-                        --r2: ${r2}deg;
-                        --r3: ${r3}deg;
-                        animation: float ${duration}s ease-in-out ${delay}s infinite;
-                    `;
-
                     const iframe = document.createElement('iframe');
                     iframe.sandbox = 'allow-scripts allow-same-origin';
-                    animatedContainer.appendChild(iframe);
-                    preview.appendChild(animatedContainer);
-
-                    iframe.onload = function() {
-                        try {
-                            iframe.contentWindow.document.open();
-                            iframe.contentWindow.document.write(html);
-                            iframe.contentWindow.document.close();
-                        } catch (e) {
-                            console.error('Error writing to iframe:', e);
-                        }
-                    };
-                    iframe.src = 'about:blank';
+                    iframe.srcdoc = html;
+                    preview.appendChild(iframe);
                 }
             }
 
@@ -986,6 +960,34 @@
 
             info.appendChild(title);
             info.appendChild(details);
+
+            // Action buttons below owner
+            const actionButtons = document.createElement('div');
+            actionButtons.style.cssText = 'display: flex; flex-direction: column; gap: 8px; margin-top: 10px; align-self: flex-start;';
+
+            const feedButton = document.createElement('button');
+            feedButton.className = 'btn-small';
+            feedButton.textContent = '■ Feed to Reproduce';
+            feedButton.onclick = async (e) => {
+                e.stopPropagation();
+                await feedToReproduce(nft.tokenId);
+            };
+
+            const infectButton = document.createElement('button');
+            infectButton.className = 'btn-small';
+            infectButton.textContent = '● Get Infected !';
+            infectButton.onclick = async (e) => {
+                e.stopPropagation();
+                if (nft.infectionAddress !== ethers.constants.AddressZero) {
+                    await getInfected(nft.infectionAddress);
+                } else {
+                    alert('This spreader has no infection contract yet! They need to be fed first.');
+                }
+            };
+
+            actionButtons.appendChild(feedButton);
+            actionButtons.appendChild(infectButton);
+            info.appendChild(actionButtons);
 
             header.appendChild(preview);
             header.appendChild(info);
@@ -1092,53 +1094,10 @@
             if (infection.metadata && infection.metadata.animation_url) {
                 const html = decodeDataURI(infection.metadata.animation_url);
                 if (html) {
-                    const animatedContainer = document.createElement('div');
-                    animatedContainer.className = 'animated-container';
-
-                    // Generate random animation parameters with more range
-                    const duration = 2 + Math.random() * 3; // 2-5 seconds (faster for smaller infections)
-                    const delay = Math.random() * 2; // 0-2 second delay
-                    const tx1 = (Math.random() - 0.5) * 12;
-                    const ty1 = (Math.random() - 0.5) * 12;
-                    const tx2 = (Math.random() - 0.5) * 12;
-                    const ty2 = (Math.random() - 0.5) * 12;
-                    const tx3 = (Math.random() - 0.5) * 12;
-                    const ty3 = (Math.random() - 0.5) * 12;
-                    const r1 = (Math.random() - 0.5) * 10;
-                    const r2 = (Math.random() - 0.5) * 10;
-                    const r3 = (Math.random() - 0.5) * 10;
-
-                    animatedContainer.style.cssText = `
-                        --tx1: ${tx1}px;
-                        --ty1: ${ty1}px;
-                        --tx2: ${tx2}px;
-                        --ty2: ${ty2}px;
-                        --tx3: ${tx3}px;
-                        --ty3: ${ty3}px;
-                        --r1: ${r1}deg;
-                        --r2: ${r2}deg;
-                        --r3: ${r3}deg;
-                        animation: float ${duration}s ease-in-out ${delay}s infinite;
-                    `;
-
                     const iframe = document.createElement('iframe');
                     iframe.sandbox = 'allow-scripts allow-same-origin';
-                    iframe.style.width = '100%';
-                    iframe.style.height = '100%';
-                    iframe.style.border = 'none';
-                    animatedContainer.appendChild(iframe);
-                    preview.appendChild(animatedContainer);
-
-                    iframe.onload = function() {
-                        try {
-                            iframe.contentWindow.document.open();
-                            iframe.contentWindow.document.write(html);
-                            iframe.contentWindow.document.close();
-                        } catch (e) {
-                            console.error('Error writing to infection iframe:', e);
-                        }
-                    };
-                    iframe.src = 'about:blank';
+                    iframe.srcdoc = html;
+                    preview.appendChild(iframe);
                 }
             }
 
@@ -1170,16 +1129,7 @@
 
             const html = decodeDataURI(animationUrl);
             if (html) {
-                newIframe.onload = function() {
-                    try {
-                        newIframe.contentWindow.document.open();
-                        newIframe.contentWindow.document.write(html);
-                        newIframe.contentWindow.document.close();
-                    } catch (e) {
-                        console.error('Error writing to modal iframe:', e);
-                    }
-                };
-                newIframe.src = 'about:blank';
+                newIframe.srcdoc = html;
             }
 
             modal.classList.add('active');
@@ -1194,6 +1144,121 @@
             const errorDiv = document.getElementById('error');
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
+        }
+
+        async function connectWallet() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('Please install MetaMask to interact with Protocolites!');
+                return false;
+            }
+
+            try {
+                // Request account access
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                userWallet = accounts[0];
+
+                // Create provider and signer from MetaMask
+                const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = web3Provider.getSigner();
+
+                // Check network
+                const network = await web3Provider.getNetwork();
+                if (network.chainId !== CONFIG.CHAIN_ID) {
+                    alert('Please switch MetaMask to Sepolia testnet');
+                    return false;
+                }
+
+                console.log('Wallet connected:', userWallet);
+                updateWalletButton();
+                return true;
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                alert('Failed to connect wallet: ' + error.message);
+                return false;
+            }
+        }
+
+        async function connectWalletUI() {
+            await connectWallet();
+        }
+
+        function updateWalletButton() {
+            const walletButton = document.getElementById('walletButton');
+            if (userWallet) {
+                const shortAddress = `${userWallet.slice(0, 6)}...${userWallet.slice(-4)}`;
+                walletButton.textContent = `■ ${shortAddress}`;
+                walletButton.classList.add('connected');
+            } else {
+                walletButton.textContent = '● CONNECT WALLET';
+                walletButton.classList.remove('connected');
+            }
+        }
+
+        async function feedToReproduce(tokenId) {
+            if (!userWallet) {
+                const connected = await connectWallet();
+                if (!connected) return;
+            }
+
+            try {
+                const tx = await signer.sendTransaction({
+                    to: CONFIG.MASTER_ADDRESS,
+                    value: ethers.utils.parseEther('0.001')
+                });
+
+                alert('Transaction sent! Hash: ' + tx.hash + '\n\nWaiting for confirmation...');
+                await tx.wait();
+                alert('Success! Protocolite #' + tokenId + ' has been fed and will reproduce!');
+
+                // Reload the data
+                setTimeout(() => loadAll(), 2000);
+            } catch (error) {
+                console.error('Error sending feed transaction:', error);
+                alert('Transaction failed: ' + (error.message || error));
+            }
+        }
+
+        async function getInfected(infectionAddress) {
+            if (!userWallet) {
+                const connected = await connectWallet();
+                if (!connected) return;
+            }
+
+            try {
+                const tx = await signer.sendTransaction({
+                    to: infectionAddress,
+                    value: ethers.utils.parseEther('0')
+                });
+
+                alert('Transaction sent! Hash: ' + tx.hash + '\n\nWaiting for confirmation...');
+                await tx.wait();
+                alert('Success! You have been infected! Check your wallet for your new infection NFT!');
+
+                // Reload the data
+                setTimeout(() => loadAll(), 2000);
+            } catch (error) {
+                console.error('Error sending infection transaction:', error);
+                alert('Transaction failed: ' + (error.message || error));
+            }
+        }
+
+        // Handle MetaMask account changes
+        if (typeof window.ethereum !== 'undefined') {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length > 0) {
+                    userWallet = accounts[0];
+                    const web3Provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = web3Provider.getSigner();
+                } else {
+                    userWallet = null;
+                    signer = null;
+                }
+                updateWalletButton();
+            });
+
+            window.ethereum.on('chainChanged', () => {
+                window.location.reload();
+            });
         }
 
         document.addEventListener('keydown', (e) => {
