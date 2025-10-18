@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protocolite Glitch Effect Template</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: #000000;
+            color: #00ff00;
+            line-height: 1;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .glitch-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .protocolite-content {
+            position: relative;
+            z-index: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 12px;
+            letter-spacing: 0;
+            white-space: pre;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* CRT Scanlines - horizontal lines that move */
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15) 0px,
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            animation: scanlineMove 8s linear infinite;
+        }
+
+        @keyframes scanlineMove {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(2px);
+            }
+        }
+
+        /* CRT Screen curve and vignette */
+        .crt-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 11;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 0%,
+                transparent 60%,
+                rgba(0, 0, 0, 0.3) 80%,
+                rgba(0, 0, 0, 0.7) 100%
+            );
+        }
+
+        /* Screen flicker */
+        .flicker-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 12;
+            background: rgba(255, 255, 255, 0);
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% {
+                opacity: 0.27861;
+            }
+            5% {
+                opacity: 0.34769;
+            }
+            10% {
+                opacity: 0.23604;
+            }
+            15% {
+                opacity: 0.90626;
+            }
+            20% {
+                opacity: 0.18128;
+            }
+            25% {
+                opacity: 0.83891;
+            }
+            30% {
+                opacity: 0.65583;
+            }
+            35% {
+                opacity: 0.67807;
+            }
+            40% {
+                opacity: 0.26559;
+            }
+            45% {
+                opacity: 0.84693;
+            }
+            50% {
+                opacity: 0.96019;
+            }
+            55% {
+                opacity: 0.08594;
+            }
+            60% {
+                opacity: 0.20313;
+            }
+            65% {
+                opacity: 0.71988;
+            }
+            70% {
+                opacity: 0.53455;
+            }
+            75% {
+                opacity: 0.37288;
+            }
+            80% {
+                opacity: 0.71428;
+            }
+            85% {
+                opacity: 0.70419;
+            }
+            90% {
+                opacity: 0.7003;
+            }
+            95% {
+                opacity: 0.36108;
+            }
+            100% {
+                opacity: 0.24387;
+            }
+        }
+
+        /* Glitch effect on content */
+        .protocolite-content {
+            animation: glitchText 5s infinite;
+        }
+
+        @keyframes glitchText {
+            0%, 90%, 100% {
+                text-shadow: none;
+                transform: translateX(0);
+            }
+            91% {
+                text-shadow:
+                    2px 0 #ff0000,
+                    -2px 0 #00ffff;
+                transform: translateX(-2px);
+            }
+            92% {
+                text-shadow:
+                    -2px 0 #ff0000,
+                    2px 0 #00ffff;
+                transform: translateX(2px);
+            }
+            93% {
+                text-shadow: none;
+                transform: translateX(0);
+            }
+        }
+
+        /* Chromatic aberration glitch */
+        .glitch-container::before,
+        .glitch-container::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0;
+        }
+
+        .glitch-container::before {
+            color: #ff0000;
+            animation: glitchRed 3s infinite;
+        }
+
+        .glitch-container::after {
+            color: #00ffff;
+            animation: glitchCyan 3s infinite;
+        }
+
+        @keyframes glitchRed {
+            0%, 90%, 100% {
+                opacity: 0;
+                transform: translateX(0);
+            }
+            91% {
+                opacity: 0.8;
+                transform: translateX(-3px);
+            }
+            92% {
+                opacity: 0;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes glitchCyan {
+            0%, 90%, 100% {
+                opacity: 0;
+                transform: translateX(0);
+            }
+            91.5% {
+                opacity: 0.8;
+                transform: translateX(3px);
+            }
+            92.5% {
+                opacity: 0;
+                transform: translateX(0);
+            }
+        }
+
+        /* Screen glow */
+        .protocolite-content {
+            text-shadow:
+                0 0 5px currentColor,
+                0 0 10px currentColor;
+        }
+
+        /* RGB shift animation */
+        @keyframes rgbShift {
+            0%, 98%, 100% {
+                filter: none;
+            }
+            99% {
+                filter:
+                    drop-shadow(2px 0 0 rgba(255, 0, 0, 0.8))
+                    drop-shadow(-2px 0 0 rgba(0, 255, 255, 0.8));
+            }
+        }
+
+        .glitch-container {
+            animation: rgbShift 7s infinite;
+        }
+
+        /* Screen curvature effect */
+        .screen-wrapper {
+            background: #0a0a0a;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow:
+                0 0 50px rgba(0, 255, 0, 0.2),
+                inset 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Noise texture overlay */
+        .noise-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 13;
+            opacity: 0.03;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)"/></svg>');
+            animation: noiseMove 0.2s infinite;
+        }
+
+        @keyframes noiseMove {
+            0% {
+                transform: translate(0, 0);
+            }
+            10% {
+                transform: translate(-5%, -5%);
+            }
+            20% {
+                transform: translate(-10%, 5%);
+            }
+            30% {
+                transform: translate(5%, -10%);
+            }
+            40% {
+                transform: translate(-5%, 15%);
+            }
+            50% {
+                transform: translate(-10%, 5%);
+            }
+            60% {
+                transform: translate(15%, 0%);
+            }
+            70% {
+                transform: translate(0%, 10%);
+            }
+            80% {
+                transform: translate(-15%, 0%);
+            }
+            90% {
+                transform: translate(10%, 5%);
+            }
+            100% {
+                transform: translate(5%, 0%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="screen-wrapper">
+        <div class="glitch-container" id="glitchContainer">
+            <!-- PROTOCOLITE CONTENT GOES HERE -->
+            <div class="protocolite-content" id="protocoliteContent">
+<!-- REPLACE THIS SECTION WITH YOUR PROTOCOLITE ASCII ART -->
+          │
+         ★
+          │
+          │
+  ─────█████████─────
+       ██████████
+       ██●███●███
+       ██████████
+  ─────█████████─────
+       ██████████
+       ██████████
+  ─────█████████─────
+         │││││
+         │││││
+         │││││
+<!-- END PROTOCOLITE CONTENT -->
+            </div>
+
+            <!-- Overlay effects -->
+            <div class="scanlines"></div>
+            <div class="crt-overlay"></div>
+            <div class="flicker-overlay"></div>
+            <div class="noise-overlay"></div>
+        </div>
+    </div>
+
+    <script>
+        // Usage instructions:
+        // 1. Replace the ASCII art in #protocoliteContent with your protocolite
+        // 2. Optionally customize colors by changing the CSS color values
+        // 3. Adjust glitch intensity by modifying animation keyframes
+
+        // Example: Load protocolite dynamically from tokenURI
+        // async function loadProtocolite(tokenURI) {
+        //     const base64 = tokenURI.split(',')[1];
+        //     const json = atob(base64);
+        //     const metadata = JSON.parse(json);
+        //     const animationData = metadata.animation_url;
+        //     const htmlContent = atob(animationData.split(',')[1]);
+        //
+        //     // Extract ASCII from HTML
+        //     const parser = new DOMParser();
+        //     const doc = parser.parseFromString(htmlContent, 'text/html');
+        //     const ascii = doc.querySelector('.ascii-art').textContent;
+        //
+        //     document.getElementById('protocoliteContent').textContent = ascii;
+        // }
+
+        // Example: Change color scheme
+        function setColorScheme(primaryColor) {
+            document.body.style.color = primaryColor;
+            document.querySelector('.screen-wrapper').style.boxShadow =
+                `0 0 50px ${primaryColor}33, inset 0 0 50px rgba(0, 0, 0, 0.5)`;
+        }
+
+        // Uncomment to try different colors:
+        // setColorScheme('#00ff00'); // Green (default)
+        // setColorScheme('#ff0000'); // Red
+        // setColorScheme('#0000ff'); // Blue
+        // setColorScheme('#ff00ff'); // Purple
+        // setColorScheme('#00ffff'); // Cyan
+        // setColorScheme('#ffff00'); // Yellow
+    </script>
+</body>
+</html>
