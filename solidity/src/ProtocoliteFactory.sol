@@ -1,57 +1,79 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "./Protocolites.sol";
+import "./ProtocoliteInfection.sol";
 import "solady/auth/Ownable.sol";
 
 contract ProtocoliteFactory is Ownable {
-    
-    event ProtocoliteSpawned(address indexed spawner, address indexed newProtocolite, uint256 parentTokenId);
-    
+    event InfectionContractDeployed(
+        uint256 indexed parentTokenId, address indexed infectionContract, uint256 parentDna
+    );
+
     address public renderer;
-    uint256 public spawnCounter;
-    
-    mapping(address => address[]) public spawnedByAddress;
-    mapping(address => bool) public isProtocolite;
-    
+    uint256 public deployedCount;
+
+    // Track all deployed infection contracts
+    mapping(uint256 => address) public infectionContracts; // parentTokenId => infection contract
+    address[] public allInfectionContracts;
+
     constructor() {
         _initializeOwner(msg.sender);
     }
-    
+
     function setRenderer(address _renderer) external onlyOwner {
         renderer = _renderer;
     }
-    
-    function spawnProtocolite(uint256 parentTokenId, address parentContract, address spawner) external returns (address) {
-        require(isProtocolite[parentContract], "Invalid parent contract");
-        require(msg.sender == parentContract, "Only parent contract can spawn");
-        require(Protocolites(payable(parentContract)).ownerOf(parentTokenId) != address(0), "Parent token does not exist");
-        
-        // Create new Protocolite contract
-        Protocolites newProtocolite = new Protocolites();
-        address newAddress = address(newProtocolite);
-        
-        // Set renderer
-        newProtocolite.setRenderer(renderer);
-        
-        // Transfer ownership to the spawner
-        newProtocolite.transferOwnership(spawner);
-        
-        // Track the spawn
-        spawnedByAddress[spawner].push(newAddress);
-        isProtocolite[newAddress] = true;
-        spawnCounter++;
-        
-        emit ProtocoliteSpawned(spawner, newAddress, parentTokenId);
-        
-        return newAddress;
+
+    function deployInfectionContract(uint256 parentTokenId, uint256 parentDna) external returns (address) {
+        // Only allow the master contract to deploy infection contracts
+        require(msg.sender == owner(), "Only master can deploy");
+        require(infectionContracts[parentTokenId] == address(0), "Infection contract already exists");
+
+        // Deploy new infection contract
+        // Pass msg.sender (master) as the master contract address
+        ProtocoliteInfection infection = new ProtocoliteInfection(parentTokenId, parentDna, msg.sender);
+        address infectionAddress = address(infection);
+
+        // Transfer ownership to the caller (master contract)
+        infection.transferOwnership(msg.sender);
+
+        // Track the deployment
+        infectionContracts[parentTokenId] = infectionAddress;
+        allInfectionContracts.push(infectionAddress);
+        deployedCount++;
+
+        emit InfectionContractDeployed(parentTokenId, infectionAddress, parentDna);
+
+        return infectionAddress;
     }
-    
-    function registerProtocolite(address protocolite) external onlyOwner {
-        isProtocolite[protocolite] = true;
+
+    function getInfectionContract(uint256 parentTokenId) external view returns (address) {
+        return infectionContracts[parentTokenId];
     }
-    
-    function getSpawnedByAddress(address spawner) external view returns (address[] memory) {
-        return spawnedByAddress[spawner];
+
+    function getInfectionContracts(uint256 offset, uint256 limit)
+        external
+        view
+        returns (address[] memory contracts, uint256 total)
+    {
+        total = allInfectionContracts.length;
+
+        if (offset >= total) {
+            return (new address[](0), total);
+        }
+
+        uint256 end = offset + limit;
+        if (end > total) {
+            end = total;
+        }
+
+        contracts = new address[](end - offset);
+        for (uint256 i = offset; i < end; i++) {
+            contracts[i - offset] = allInfectionContracts[i];
+        }
+    }
+
+    function getDeployedCount() external view returns (uint256) {
+        return deployedCount;
     }
 }

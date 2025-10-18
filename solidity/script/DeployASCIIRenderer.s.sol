@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {ProtocolitesRenderASCII} from "../src/ProtocolitesRenderASCII.sol";
+import {ProtocolitesRenderer} from "../src/ProtocolitesRenderer.sol";
 import {ProtocolitesMaster} from "../src/ProtocolitesMaster.sol";
 
 contract DeployASCIIRendererScript is Script {
@@ -19,7 +19,7 @@ contract DeployASCIIRendererScript is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         // Deploy new ASCII renderer
-        ProtocolitesRenderASCII asciiRenderer = new ProtocolitesRenderASCII();
+        ProtocolitesRenderer asciiRenderer = new ProtocolitesRenderer();
         console.log("ProtocolitesRenderASCII deployed at:", address(asciiRenderer));
 
         // Update master contract to use new renderer
