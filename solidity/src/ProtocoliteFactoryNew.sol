@@ -39,7 +39,7 @@ contract ProtocoliteFactoryNew is Ownable {
         // Track the deployment
         infectionContracts[parentTokenId] = infectionAddress;
         allInfectionContracts.push(infectionAddress);
-        deployedCount++;
+        ++deployedCount;
 
         emit InfectionContractDeployed(parentTokenId, infectionAddress, parentDna);
 

@@ -97,7 +97,7 @@ contract ProtocolitesMaster is ERC721, Ownable {
     }
     
     function _spawnNewParent(address to) internal {
-        _currentTokenId++;
+        ++_currentTokenId;
         uint256 tokenId = _currentTokenId;
         
         // Generate DNA
