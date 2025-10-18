@@ -6,15 +6,15 @@ pragma solidity ^0.8.13;
 struct TokenTraits {
     // Family is not part of the core DNA hash,
     // as it's derived from it. We handle it separately.
-    uint8 bodyType;       // 6 types -> needs 3 bits
-    uint8 bodyChar;       // 4 types -> needs 2 bits
-    uint8 eyeChar;        // 4 types -> needs 2 bits
-    uint8 eyeSize;        // 2 types -> needs 1 bit (0=normal, 1=mega)
-    uint8 antennaTip;     // 7 types -> needs 3 bits
-    uint8 armStyle;       // 2 types -> needs 1 bit (0=block, 1=line)
-    uint8 legStyle;       // 2 types -> needs 1 bit (0=block, 1=line)
-    uint8 hatType;        // 5 types -> needs 3 bits (0=none, 1=top, etc.)
-    bool hasCigarette;    // 2 types -> needs 1 bit
+    uint8 bodyType; // 6 types -> needs 3 bits
+    uint8 bodyChar; // 4 types -> needs 2 bits
+    uint8 eyeChar; // 4 types -> needs 2 bits
+    uint8 eyeSize; // 2 types -> needs 1 bit (0=normal, 1=mega)
+    uint8 antennaTip; // 7 types -> needs 3 bits
+    uint8 armStyle; // 2 types -> needs 1 bit (0=block, 1=line)
+    uint8 legStyle; // 2 types -> needs 1 bit (0=block, 1=line)
+    uint8 hatType; // 5 types -> needs 3 bits (0=none, 1=top, etc.)
+    bool hasCigarette; // 2 types -> needs 1 bit
 }
 
 /**
@@ -48,15 +48,15 @@ library DNAParser {
     uint256 private constant CIGARETTE_SHIFT = 16;
 
     // Masks to extract values
-    uint256 private constant BODY_TYPE_MASK = 0x7;    // 3 bits (111)
-    uint256 private constant BODY_CHAR_MASK = 0x3;    // 2 bits (11)
-    uint256 private constant EYE_CHAR_MASK = 0x3;     // 2 bits (11)
-    uint256 private constant EYE_SIZE_MASK = 0x1;     // 1 bit (1)
-    uint256 private constant ANTENNA_TIP_MASK = 0x7;  // 3 bits (111)
-    uint256 private constant ARM_STYLE_MASK = 0x1;    // 1 bit (1)
-    uint256 private constant LEG_STYLE_MASK = 0x1;    // 1 bit (1)
-    uint256 private constant HAT_TYPE_MASK = 0x7;     // 3 bits (111)
-    uint256 private constant CIGARETTE_MASK = 0x1;    // 1 bit (1)
+    uint256 private constant BODY_TYPE_MASK = 0x7; // 3 bits (111)
+    uint256 private constant BODY_CHAR_MASK = 0x3; // 2 bits (11)
+    uint256 private constant EYE_CHAR_MASK = 0x3; // 2 bits (11)
+    uint256 private constant EYE_SIZE_MASK = 0x1; // 1 bit (1)
+    uint256 private constant ANTENNA_TIP_MASK = 0x7; // 3 bits (111)
+    uint256 private constant ARM_STYLE_MASK = 0x1; // 1 bit (1)
+    uint256 private constant LEG_STYLE_MASK = 0x1; // 1 bit (1)
+    uint256 private constant HAT_TYPE_MASK = 0x7; // 3 bits (111)
+    uint256 private constant CIGARETTE_MASK = 0x1; // 1 bit (1)
 
     /// @notice Decodes a DNA hash into a struct of its traits.
     function decode(uint256 dna) internal pure returns (TokenTraits memory traits) {
@@ -100,8 +100,10 @@ library DNAParser {
             uint256 parentHighBits = parentDna & ~uint256(0x1FFFF); // Mask out low 17 bits
             result |= parentHighBits;
         } else {
-            // No parent - hash the traits to create full 256-bit DNA
-            result = uint256(keccak256(abi.encode(result)));
+            // No parent - use hash to fill high bits but preserve traits in low bits
+            uint256 hashValue = uint256(keccak256(abi.encode(result)));
+            uint256 highBits = hashValue & ~uint256(0x1FFFF); // Keep high bits from hash
+            result |= highBits; // Combine with our traits in low bits
         }
 
         dna = result;

@@ -21,7 +21,7 @@ cp .env.example .env
 
 ### 3. Test On-Chain
 ```bash
-# Test deployed contracts
+# Test deployed contracts, create protocolites
 ./test_onchain.sh
 ```
 
@@ -61,8 +61,8 @@ ETHERSCAN_API_KEY=your_key_here
 
 This deploys:
 - `ProtocolitesRender`: On-chain HTML renderer
-- `ProtocoliteFactory`: Factory for spawning new collections  
-- `Protocolites`: Main NFT contract
+- `ProtocoliteFactory`: Factory for spawning new collections
+- `ProtocolitesMaster`: Main NFT contract
 
 ### 3. Verify Deployment
 
@@ -135,7 +135,7 @@ cast call $PROTOCOLITES_ADDRESS "totalSupply()" --rpc-url $RPC_URL
 
 Approximate gas costs:
 - Deploy all contracts: ~2-3M gas
-- Mint parent: ~200K gas  
+- Mint parent: ~200K gas
 - Breed kid: ~300K gas
 - Spawn collection: ~3M gas
 
@@ -157,14 +157,14 @@ forge verify-contract CONTRACT_ADDRESS src/Protocolites.sol:Protocolites --ether
 ## Security Notes
 
 - Never share your private key
-- Test on testnets first  
+- Test on testnets first
 - Verify contract addresses before large transactions
 - The renderer is upgradeable by the owner (you)
 
 ## What's Next?
 
 1. **Update Renderer**: Call `setRenderScript()` to upgrade the art algorithm
-2. **Build UI**: Create a web interface for minting/breeding  
+2. **Build UI**: Create a web interface for minting/breeding
 3. **Analytics**: Track breeding patterns and generational trees
 4. **Marketplace**: List your Protocolites on OpenSea/LooksRare
 

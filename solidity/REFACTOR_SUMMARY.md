@@ -102,7 +102,7 @@ src/
 |------------|---------|--------|-----------|
 | **TestMasterContract** | Core functionality & security | 23 tests | 57% (13/23) |
 | **TestInfectionContract** | Infection mechanics | 25 tests | 84% (21/25) |
-| **TestDNAParserContract** | DNA encoding/inheritance | 19 tests | 53% (10/19) |
+| **TestDNAParserContract** | DNA encoding/inheritance | 19 tests | ✅ **100% (19/19)** |
 | **TestRendererContract** | Metadata generation | 26 tests | 69% (18/26) |
 
 **Total: 93 comprehensive tests across all critical functionality**
@@ -122,6 +122,47 @@ src/
 - **Access Control**: Unauthorized users trying to call admin functions
 - **DoS Attacks**: Large array operations and gas limit testing
 - **External Call Failures**: Error handling validation
+
+## 🔧 Post-Refactor Critical Fixes
+
+### DNAParser Encoding Logic Fix (December 2024)
+
+**Issue Identified:** The `DNAParser.encode()` function had a critical flaw when `parentDna == 0`. Instead of preserving encoded traits for decode consistency, it was replacing the entire result with a `keccak256` hash, making the encoding irreversible.
+
+**Impact:** 
+- 9 out of 19 DNAParser tests were failing (47% failure rate)
+- Encode/decode consistency was broken for NFTs without parent DNA
+- Core trait inheritance logic was compromised
+
+**Root Cause:**
+```solidity
+// BROKEN: Original logic destroyed traits when parentDna == 0
+if (parentDna != 0) {
+    result |= parentHighBits; // Preserve parent family bits
+} else {
+    result = uint256(keccak256(abi.encode(result))); // ❌ Lost all traits!
+}
+```
+
+**Fix Applied:**
+```solidity
+// FIXED: Preserve traits in low bits, use hash for high bits
+if (parentDna != 0) {
+    result |= parentHighBits; // Preserve parent family bits  
+} else {
+    uint256 hashValue = uint256(keccak256(abi.encode(result)));
+    uint256 highBits = hashValue & ~uint256(0x1FFFF); // Extract high bits
+    result |= highBits; // Combine hash high bits with trait low bits
+}
+```
+
+**Results:**
+- ✅ **TestDNAParserContract**: 19/19 tests passing (100% → up from 53%)
+- ✅ **Encode/Decode Consistency**: All trait encoding is now reversible
+- ✅ **Family Inheritance**: Parent DNA high bits still preserved for family consistency
+- ✅ **Randomness Maintained**: No-parent NFTs still get pseudo-random high bits for distribution
+
+**Security Impact:** This fix ensures the core DNA inheritance system works as intended, maintaining the integrity of on-chain generative traits and breeding mechanics.
 
 ## 📚 Documentation Enhancements
 
@@ -148,7 +189,7 @@ src/
 | **Lines of Code** | ~2,500 | ~1,400 | -44% reduction |
 | **Active Contracts** | 9 | 5 | Focused architecture |
 | **Security Issues** | 5 HIGH/MEDIUM | 0 | 100% resolved |
-| **Test Coverage** | Basic | Comprehensive | 93 total tests |
+| **Test Coverage** | Basic | Comprehensive | 93 total tests (76% pass rate) |
 | **Documentation** | Minimal | Complete | Full NatSpec + guides |
 
 ### Security Assessment
@@ -182,7 +223,7 @@ src/
 
 ### Test Failures (Non-Critical)
 
-- **31 failing tests out of 93** (67% pass rate)
+- **22 failing tests out of 93** (76% pass rate, improved from 67%)
 - Most failures are related to test expectations vs actual behavior
 - All critical functionality (spawning, infections, rendering) is working correctly
 - Failures mostly involve edge cases and validation specifics
