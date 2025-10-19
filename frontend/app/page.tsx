@@ -1,55 +1,107 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Header } from '@/components/Header'
 import { ControlsBar, FilterType, SortType } from '@/components/ControlsBar'
 import { SpreaderCard } from '@/components/SpreaderCard'
-import { useProtocolites } from '@/hooks/useProtocolites'
 import { useAccount, useSendTransaction } from 'wagmi'
 import { parseEther } from 'viem'
+import { count, desc, asc, gt } from '@ponder/client'
+import { usePonderQuery } from '@ponder/react'
 import { MASTER_ADDRESS } from '@/lib/contracts'
+import { spreader, infection } from '@/lib/ponder.schema'
 
 export default function Home() {
   const [filter, setFilter] = useState<FilterType>('all')
   const [sort, setSort] = useState<SortType>('infections-desc')
   const [expandedSpreader, setExpandedSpreader] = useState<number | null>(null)
 
-  const { data: nfts, isLoading, error } = useProtocolites()
   const { isConnected } = useAccount()
   const { sendTransaction } = useSendTransaction()
 
-  const totalInfections = useMemo(() => {
-    return nfts?.reduce((sum, nft) => sum + nft.infections.length, 0) || 0
-  }, [nfts])
+  // Query total spreaders count
+  const {
+    data: [{ count: totalSupply }] = [{ count: 0 }],
+    isLoading: isLoadingTotal,
+  } = usePonderQuery({
+    queryFn: (db) =>
+      db.select({ count: count(spreader.id) }).from(spreader),
+  })
 
-  const sortedAndFiltered = useMemo(() => {
-    if (!nfts) return []
+  // Query total infections count
+  const {
+    data: [{ count: totalInfections }] = [{ count: 0 }],
+    isLoading: isLoadingInfections,
+  } = usePonderQuery({
+    queryFn: (db) =>
+      db.select({ count: count(infection.id) }).from(infection),
+  })
 
-    let filtered = [...nfts]
+  // Query spreaders with filtering and sorting
+  const { data: spreaders = [], isLoading: isLoadingSpreaders } = usePonderQuery({
+    queryFn: (db) => {
+      let query = db.select().from(spreader)
 
-    // Apply filter
-    if (filter === 'with-infections') {
-      filtered = filtered.filter((nft) => nft.infections.length > 0)
-    }
-
-    // Apply sort
-    filtered.sort((a, b) => {
-      switch (sort) {
-        case 'id-asc':
-          return a.tokenId - b.tokenId
-        case 'id-desc':
-          return b.tokenId - a.tokenId
-        case 'infections-desc':
-          return b.infections.length - a.infections.length
-        case 'infections-asc':
-          return a.infections.length - b.infections.length
-        default:
-          return 0
+      // Apply filter
+      if (filter === 'with-infections') {
+        query = query.where(gt(spreader.infectionCount, 0))
       }
-    })
 
-    return filtered
-  }, [nfts, filter, sort])
+      // Apply sort
+      if (sort === 'id-asc') {
+        query = query.orderBy(asc(spreader.tokenId))
+      } else if (sort === 'id-desc') {
+        query = query.orderBy(desc(spreader.tokenId))
+      } else if (sort === 'infections-desc') {
+        query = query.orderBy(desc(spreader.infectionCount))
+      } else if (sort === 'infections-asc') {
+        query = query.orderBy(asc(spreader.infectionCount))
+      }
+
+      return query
+    },
+  })
+
+  // Query all infections
+  const { data: infections = [], isLoading: isLoadingInfectionsData } = usePonderQuery({
+    queryFn: (db) => db.select().from(infection),
+  })
+
+  // Transform Ponder data to match our UI types
+  const nfts = spreaders.map((s) => {
+    const spreaderInfections = infections.filter(
+      (inf) => inf.parentSpreaderId === s.id
+    )
+
+    return {
+      tokenId: Number(s.tokenId),
+      metadata: {
+        name: s.name || `Protocolite #${s.tokenId}`,
+        description: s.description || '',
+        image: s.image || '',
+        animation_url: s.animationUrl || '',
+      },
+      dna: s.dna.toString(),
+      owner: s.owner,
+      infectionAddress: s.infectionContractAddress,
+      infections: spreaderInfections.map((inf) => ({
+        tokenId: Number(inf.tokenId),
+        metadata: {
+          name: inf.name || `Infection #${inf.tokenId}`,
+          description: inf.description || '',
+          image: inf.image || '',
+          animation_url: inf.animationUrl || '',
+        },
+        owner: inf.owner,
+      })),
+    }
+  })
+
+  const isLoading = isLoadingTotal || isLoadingInfections || isLoadingSpreaders || isLoadingInfectionsData
+  const error = null
+  const isFromIndexer = true
+
+  const sortedAndFiltered = nfts
 
   const handleFeed = async (tokenId: number) => {
     if (!isConnected) {
@@ -117,7 +169,7 @@ export default function Home() {
       <ControlsBar
         filter={filter}
         sort={sort}
-        totalSupply={nfts?.length || 0}
+        totalSupply={totalSupply}
         totalInfections={totalInfections}
         onFilterChange={setFilter}
         onSortChange={setSort}
@@ -126,7 +178,9 @@ export default function Home() {
       <div className="content">
         {isLoading && (
           <div className="loading">
-            <div className="loading-dots">LOADING FROM BLOCKCHAIN</div>
+            <div className="loading-dots">
+              {isFromIndexer ? 'LOADING FROM INDEXER' : 'LOADING FROM BLOCKCHAIN'}
+            </div>
           </div>
         )}
 

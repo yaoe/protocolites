@@ -2,12 +2,13 @@
 
 import { use } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSingleProtocolite } from '@/hooks/useSingleProtocolite'
 import { InfectionCard } from '@/components/InfectionCard'
 import { useAccount, useSendTransaction } from 'wagmi'
-import { parseEther } from 'viem'
+import { parseEther, zeroAddress } from 'viem'
+import { eq } from '@ponder/client'
+import { usePonderQuery } from '@ponder/react'
 import { MASTER_ADDRESS } from '@/lib/contracts'
-import { zeroAddress } from 'viem'
+import { spreader, infection } from '@/lib/ponder.schema'
 
 export default function ProtocoliteDetailPage({
   params,
@@ -16,10 +17,60 @@ export default function ProtocoliteDetailPage({
 }) {
   const { tokenId } = use(params)
   const router = useRouter()
-
-  const { data: nft, isLoading, error, refetch } = useSingleProtocolite(Number(tokenId))
   const { isConnected } = useAccount()
   const { sendTransaction } = useSendTransaction()
+
+  // Query the specific spreader
+  const { data: spreaderData = [], isLoading: isLoadingSpreader, refetch: refetchSpreader } = usePonderQuery({
+    queryFn: (db) =>
+      db
+        .select()
+        .from(spreader)
+        .where(eq(spreader.tokenId, BigInt(tokenId))),
+  })
+
+  // Query infections for this spreader
+  const { data: infections = [], isLoading: isLoadingInfections, refetch: refetchInfections } = usePonderQuery({
+    queryFn: (db) =>
+      db
+        .select()
+        .from(infection)
+        .where(eq(infection.parentTokenId, BigInt(tokenId))),
+    enabled: !!spreaderData[0],
+  })
+
+  const isLoading = isLoadingSpreader || isLoadingInfections
+  const error = null
+  const isFromIndexer = true
+
+  // Transform data to match UI types
+  const nft = spreaderData[0] ? {
+    tokenId: Number(spreaderData[0].tokenId),
+    metadata: {
+      name: spreaderData[0].name || `Protocolite #${spreaderData[0].tokenId}`,
+      description: spreaderData[0].description || '',
+      image: spreaderData[0].image || '',
+      animation_url: spreaderData[0].animationUrl || '',
+    },
+    dna: spreaderData[0].dna.toString(),
+    owner: spreaderData[0].owner,
+    infectionAddress: spreaderData[0].infectionContractAddress,
+    infections: infections.map((inf) => ({
+      tokenId: Number(inf.tokenId),
+      metadata: {
+        name: inf.name || `Infection #${inf.tokenId}`,
+        description: inf.description || '',
+        image: inf.image || '',
+        animation_url: inf.animationUrl || '',
+      },
+      owner: inf.owner,
+    })),
+  } : null
+
+  const refetch = () => {
+    refetchSpreader()
+    refetchInfections()
+  }
 
   const handleFeed = async () => {
     if (!isConnected) {
@@ -109,7 +160,9 @@ export default function ProtocoliteDetailPage({
         </div>
         <div className="content">
           <div className="loading">
-            <div className="loading-dots">LOADING FROM BLOCKCHAIN</div>
+            <div className="loading-dots">
+              {isFromIndexer ? 'LOADING FROM INDEXER' : 'LOADING FROM BLOCKCHAIN'}
+            </div>
           </div>
         </div>
       </>
