@@ -30,7 +30,7 @@ echo "🚀 Deploying to network: $RPC_URL"
 echo "📝 Using deployer private key: ${PRIVATE_KEY:0:10}..."
 
 # Deploy contracts
-forge script script/Deploy.s.sol:DeployScript \
+forge script script/Deploy.s.sol:DeployFreshASCIIScript \
     --rpc-url $RPC_URL \
     --broadcast \
     --verify \
