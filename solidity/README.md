@@ -57,7 +57,7 @@ export PRIVATE_KEY="your_private_key"
 export RPC_URL="your_rpc_url"
 
 # Deploy complete system
-forge script script/DeployFreshASCII.s.sol:DeployFreshASCIIScript \
+forge script script/Deploy.s.sol:DeployFreshASCIIScript \
   --rpc-url $RPC_URL \
   --private-key $PRIVATE_KEY \
   --broadcast \
