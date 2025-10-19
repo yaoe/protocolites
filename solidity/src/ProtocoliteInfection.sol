@@ -5,8 +5,8 @@ import "solady/tokens/ERC721.sol";
 import "solady/auth/Ownable.sol";
 import "solady/utils/LibString.sol";
 import "./interfaces/IProtocolitesRenderer.sol";
+import "./libraries/DNAParser.sol";
 import "./libraries/TokenDataLib.sol";
-import "./DNAParser.sol";
 
 interface IMaster {
     function renderer() external view returns (IProtocolitesRenderer);

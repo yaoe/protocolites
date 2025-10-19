@@ -6,7 +6,7 @@ import {ProtocoliteInfection} from "../src/ProtocoliteInfection.sol";
 import {ProtocolitesMaster} from "../src/ProtocolitesMaster.sol";
 import {ProtocolitesRenderer} from "../src/ProtocolitesRenderer.sol";
 import {ProtocoliteFactory} from "../src/ProtocoliteFactory.sol";
-import "../src/DNAParser.sol";
+import "../src/libraries/DNAParser.sol";
 import {IProtocolitesRenderer} from "../src/interfaces/IProtocolitesRenderer.sol";
 
 contract TestInfectionContract is Test {

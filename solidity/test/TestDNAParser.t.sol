@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import "../src/DNAParser.sol";
+import "../src/libraries/DNAParser.sol";
 
 contract TestDNAParserContract is Test {
     using DNAParser for uint256;
