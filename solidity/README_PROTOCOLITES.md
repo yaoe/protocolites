@@ -1,4 +1,4 @@
-# Protocolites NFT System
+# Protocolites NFT System (old code)
 
 An on-chain generative NFT system where Protocolites can breed kids or spawn new colonies.
 
