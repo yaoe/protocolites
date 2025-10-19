@@ -1,14 +1,15 @@
 'use client'
 
-import { use } from 'react'
+import { use, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { InfectionCard } from '@/components/InfectionCard'
-import { useAccount, useSendTransaction } from 'wagmi'
+import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther, zeroAddress } from 'viem'
 import { eq } from '@ponder/client'
 import { usePonderQuery } from '@ponder/react'
 import { MASTER_ADDRESS } from '@/lib/contracts'
 import { spreader, infection } from '@/lib/ponder.schema'
+import toast from 'react-hot-toast'
 
 export default function ProtocoliteDetailPage({
   params,
@@ -18,7 +19,10 @@ export default function ProtocoliteDetailPage({
   const { tokenId } = use(params)
   const router = useRouter()
   const { isConnected } = useAccount()
-  const { sendTransaction } = useSendTransaction()
+  const { sendTransaction, data: hash } = useSendTransaction()
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  })
 
   // Query the specific spreader
   const { data: spreaderData = [], isLoading: isLoadingSpreader, refetch: refetchSpreader } = usePonderQuery({
@@ -72,9 +76,16 @@ export default function ProtocoliteDetailPage({
     refetchInfections()
   }
 
+  useEffect(() => {
+    if (isConfirmed) {
+      toast.success('Transaction confirmed! ✓', { duration: 5000 })
+      setTimeout(() => refetch(), 2000)
+    }
+  }, [isConfirmed, refetchSpreader, refetchInfections])
+
   const handleFeed = async () => {
     if (!isConnected) {
-      alert('Please connect your wallet first!')
+      toast.error('Please connect your wallet first!')
       return
     }
 
@@ -86,31 +97,31 @@ export default function ProtocoliteDetailPage({
         },
         {
           onSuccess: () => {
-            alert(
-              `Transaction sent! Protocolite #${tokenId} will be fed and reproduce once the transaction is confirmed.`
+            toast.success(
+              `Transaction sent! Protocolite #${tokenId} will be fed and reproduce once confirmed.`
             )
             setTimeout(() => refetch(), 3000)
           },
           onError: (error) => {
             console.error('Transaction failed:', error)
-            alert('Transaction failed: ' + error.message)
+            toast.error('Transaction failed: ' + error.message)
           },
         }
       )
     } catch (error) {
       console.error('Error sending feed transaction:', error)
-      alert('Transaction failed: ' + (error as Error).message)
+      toast.error('Transaction failed: ' + (error as Error).message)
     }
   }
 
   const handleInfect = async () => {
     if (!isConnected) {
-      alert('Please connect your wallet first!')
+      toast.error('Please connect your wallet first!')
       return
     }
 
     if (!nft || nft.infectionAddress === zeroAddress) {
-      alert('This spreader has no infection contract yet! They need to be fed first.')
+      toast.error('This spreader has no infection contract yet! They need to be fed first.')
       return
     }
 
@@ -122,20 +133,20 @@ export default function ProtocoliteDetailPage({
         },
         {
           onSuccess: () => {
-            alert(
-              'Transaction sent! You will receive your infection NFT once the transaction is confirmed.'
+            toast.success(
+              'Transaction sent! You will receive your infection NFT once confirmed.'
             )
             setTimeout(() => refetch(), 3000)
           },
           onError: (error) => {
             console.error('Transaction failed:', error)
-            alert('Transaction failed: ' + error.message)
+            toast.error('Transaction failed: ' + error.message)
           },
         }
       )
     } catch (error) {
       console.error('Error sending infection transaction:', error)
-      alert('Transaction failed: ' + (error as Error).message)
+      toast.error('Transaction failed: ' + (error as Error).message)
     }
   }
 

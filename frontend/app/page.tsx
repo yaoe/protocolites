@@ -1,15 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Header } from '@/components/Header'
 import { ControlsBar, FilterType, SortType } from '@/components/ControlsBar'
 import { SpreaderCard } from '@/components/SpreaderCard'
-import { useAccount, useSendTransaction } from 'wagmi'
+import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther } from 'viem'
 import { count, desc, asc, gt } from '@ponder/client'
 import { usePonderQuery } from '@ponder/react'
 import { MASTER_ADDRESS } from '@/lib/contracts'
 import { spreader, infection } from '@/lib/ponder.schema'
+import toast from 'react-hot-toast'
 
 export default function Home() {
   const [filter, setFilter] = useState<FilterType>('all')
@@ -17,7 +18,16 @@ export default function Home() {
   const [expandedSpreader, setExpandedSpreader] = useState<number | null>(null)
 
   const { isConnected } = useAccount()
-  const { sendTransaction } = useSendTransaction()
+  const { sendTransaction, data: hash } = useSendTransaction()
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  useEffect(() => {
+    if (isConfirmed) {
+      toast.success('Transaction confirmed! ✓', { duration: 5000 })
+    }
+  }, [isConfirmed])
 
   // Query total spreaders count
   const {
@@ -105,7 +115,7 @@ export default function Home() {
 
   const handleFeed = async (tokenId: number) => {
     if (!isConnected) {
-      alert('Please connect your wallet first!')
+      toast.error('Please connect your wallet first!')
       return
     }
 
@@ -117,25 +127,25 @@ export default function Home() {
         },
         {
           onSuccess: () => {
-            alert(
-              `Transaction sent! Protocolite #${tokenId} will be fed and reproduce once the transaction is confirmed.`
+            toast.success(
+              `Transaction sent! Protocolite #${tokenId} will be fed and reproduce once confirmed.`
             )
           },
           onError: (error) => {
             console.error('Transaction failed:', error)
-            alert('Transaction failed: ' + error.message)
+            toast.error('Transaction failed: ' + error.message)
           },
         }
       )
     } catch (error) {
       console.error('Error sending feed transaction:', error)
-      alert('Transaction failed: ' + (error as Error).message)
+      toast.error('Transaction failed: ' + (error as Error).message)
     }
   }
 
   const handleInfect = async (infectionAddress: string) => {
     if (!isConnected) {
-      alert('Please connect your wallet first!')
+      toast.error('Please connect your wallet first!')
       return
     }
 
@@ -147,19 +157,19 @@ export default function Home() {
         },
         {
           onSuccess: () => {
-            alert(
-              'Transaction sent! You will receive your infection NFT once the transaction is confirmed.'
+            toast.success(
+              'Transaction sent! You will receive your infection NFT once confirmed.'
             )
           },
           onError: (error) => {
             console.error('Transaction failed:', error)
-            alert('Transaction failed: ' + error.message)
+            toast.error('Transaction failed: ' + error.message)
           },
         }
       )
     } catch (error) {
       console.error('Error sending infection transaction:', error)
-      alert('Transaction failed: ' + (error as Error).message)
+      toast.error('Transaction failed: ' + (error as Error).message)
     }
   }
 
