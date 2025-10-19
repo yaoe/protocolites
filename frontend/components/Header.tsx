@@ -2,11 +2,17 @@
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { MASTER_ADDRESS } from '@/lib/contracts'
+import { useEffect, useState } from 'react'
 
 export function Header() {
   const { address, isConnected } = useAccount()
   const { connect, connectors } = useConnect()
   const { disconnect } = useDisconnect()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const handleWalletClick = () => {
     if (isConnected) {
@@ -30,10 +36,10 @@ export function Header() {
         LIVE BLOCKCHAIN VIEWER — GENERATIVE ASCII ART PROTOCOL
         <span className="network-badge">SEPOLIA TESTNET</span>
         <button
-          className={`wallet-button ${isConnected ? 'connected' : ''}`}
+          className={`wallet-button ${mounted && isConnected ? 'connected' : ''}`}
           onClick={handleWalletClick}
         >
-          {isConnected ? `■ ${shortAddress}` : '● CONNECT WALLET'}
+          {mounted && isConnected ? `■ ${shortAddress}` : '● CONNECT WALLET'}
         </button>
       </div>
       <div className="contract-address">Master: {MASTER_ADDRESS}</div>

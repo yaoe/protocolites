@@ -4,12 +4,12 @@ import { SpreaderNFT } from '@/lib/types'
 import { InfectionCard } from './InfectionCard'
 import { MASTER_ADDRESS } from '@/lib/contracts'
 import { zeroAddress } from 'viem'
+import { useRouter } from 'next/navigation'
 
 interface SpreaderCardProps {
   nft: SpreaderNFT
   isExpanded: boolean
   onToggleExpand: () => void
-  onOpenModal: (animationUrl: string) => void
   onFeed: (tokenId: number) => void
   onInfect: (infectionAddress: string) => void
 }
@@ -18,10 +18,11 @@ export function SpreaderCard({
   nft,
   isExpanded,
   onToggleExpand,
-  onOpenModal,
   onFeed,
   onInfect,
 }: SpreaderCardProps) {
+  const router = useRouter()
+
   const decodeDataURI = (uri: string): string | null => {
     try {
       if (!uri || !uri.startsWith('data:')) return null
@@ -51,18 +52,28 @@ export function SpreaderCard({
 
   const shortOwner = `${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking on a button or link
+    const target = e.target as HTMLElement
+    if (
+      target.tagName === 'BUTTON' ||
+      target.tagName === 'A' ||
+      target.closest('button') ||
+      target.closest('a')
+    ) {
+      return
+    }
+    // Navigate to detail page
+    router.push(`/${nft.tokenId}`)
+  }
+
   return (
-    <div className={`spreader-card ${isExpanded ? 'expanded' : ''}`}>
+    <div
+      className={`spreader-card ${isExpanded ? 'expanded' : ''}`}
+      onClick={handleCardClick}
+    >
       <div className="spreader-header">
-        <div
-          className="spreader-preview"
-          onDoubleClick={(e) => {
-            e.stopPropagation()
-            if (nft.metadata.animation_url) {
-              onOpenModal(nft.metadata.animation_url)
-            }
-          }}
-        >
+        <div className="spreader-preview">
           {html && (
             <iframe
               sandbox="allow-scripts allow-same-origin"
@@ -202,11 +213,7 @@ export function SpreaderCard({
               <InfectionCard
                 key={infection.tokenId}
                 infection={infection}
-                onClick={() => {
-                  if (infection.metadata.animation_url) {
-                    onOpenModal(infection.metadata.animation_url)
-                  }
-                }}
+                onClick={() => {}}
               />
             ))}
           </div>

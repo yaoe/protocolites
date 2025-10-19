@@ -4,9 +4,8 @@ import { useMemo, useState } from 'react'
 import { Header } from '@/components/Header'
 import { ControlsBar, FilterType, SortType } from '@/components/ControlsBar'
 import { SpreaderCard } from '@/components/SpreaderCard'
-import { Modal } from '@/components/Modal'
 import { useProtocolites } from '@/hooks/useProtocolites'
-import { useAccount, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useSendTransaction } from 'wagmi'
 import { parseEther } from 'viem'
 import { MASTER_ADDRESS } from '@/lib/contracts'
 
@@ -14,15 +13,10 @@ export default function Home() {
   const [filter, setFilter] = useState<FilterType>('all')
   const [sort, setSort] = useState<SortType>('infections-desc')
   const [expandedSpreader, setExpandedSpreader] = useState<number | null>(null)
-  const [modalAnimationUrl, setModalAnimationUrl] = useState<string | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { data: nfts, isLoading, error, refetch } = useProtocolites()
   const { isConnected } = useAccount()
-  const { sendTransaction, data: txHash } = useSendTransaction()
-  const { isLoading: isTxPending } = useWaitForTransactionReceipt({
-    hash: txHash,
-  })
+  const { sendTransaction } = useSendTransaction()
 
   const totalInfections = useMemo(() => {
     return nfts?.reduce((sum, nft) => sum + nft.infections.length, 0) || 0
@@ -117,16 +111,6 @@ export default function Home() {
     }
   }
 
-  const openModal = (animationUrl: string) => {
-    setModalAnimationUrl(animationUrl)
-    setIsModalOpen(true)
-  }
-
-  const closeModal = () => {
-    setIsModalOpen(false)
-    setModalAnimationUrl(null)
-  }
-
   return (
     <>
       <Header />
@@ -169,7 +153,6 @@ export default function Home() {
                     expandedSpreader === nft.tokenId ? null : nft.tokenId
                   )
                 }
-                onOpenModal={openModal}
                 onFeed={handleFeed}
                 onInfect={handleInfect}
               />
@@ -177,12 +160,6 @@ export default function Home() {
           </div>
         )}
       </div>
-
-      <Modal
-        isOpen={isModalOpen}
-        animationUrl={modalAnimationUrl}
-        onClose={closeModal}
-      />
     </>
   )
 }
