@@ -14,7 +14,7 @@ export default function Home() {
   const [sort, setSort] = useState<SortType>('infections-desc')
   const [expandedSpreader, setExpandedSpreader] = useState<number | null>(null)
 
-  const { data: nfts, isLoading, error, refetch } = useProtocolites()
+  const { data: nfts, isLoading, error } = useProtocolites()
   const { isConnected } = useAccount()
   const { sendTransaction } = useSendTransaction()
 
@@ -121,7 +121,6 @@ export default function Home() {
         totalInfections={totalInfections}
         onFilterChange={setFilter}
         onSortChange={setSort}
-        onRefresh={() => refetch()}
       />
 
       <div className="content">

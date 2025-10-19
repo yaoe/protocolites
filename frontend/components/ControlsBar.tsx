@@ -10,7 +10,6 @@ interface ControlsBarProps {
   totalInfections: number
   onFilterChange: (filter: FilterType) => void
   onSortChange: (sort: SortType) => void
-  onRefresh: () => void
 }
 
 export function ControlsBar({
@@ -20,14 +19,10 @@ export function ControlsBar({
   totalInfections,
   onFilterChange,
   onSortChange,
-  onRefresh,
 }: ControlsBarProps) {
   return (
     <div className="controls-bar">
       <div className="controls-left">
-        <button className="btn" onClick={onRefresh}>
-          ↻ REFRESH
-        </button>
         <button
           className={`btn-secondary btn-small ${filter === 'all' ? 'active' : ''}`}
           onClick={() => onFilterChange('all')}
