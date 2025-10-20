@@ -42,10 +42,10 @@ export function SpreaderCard({
     nft.metadata?.name || `Protocolite #${nft.tokenId}`
   ).replace(/\s*\(spreader\)\s*/i, "");
 
-  const raribleNftUrl = `https://rarible.com/token/${MASTER_ADDRESS.toLowerCase()}:${nft.tokenId}`;
+  const raribleNftUrl = `https://og.rarible.com/token/${MASTER_ADDRESS.toLowerCase()}:${nft.tokenId}`;
   const raribleCollectionUrl =
     nft.infectionAddress !== zeroAddress
-      ? `https://rarible.com/collection/${nft.infectionAddress.toLowerCase()}/items`
+      ? `https://og.rarible.com/collection/${nft.infectionAddress.toLowerCase()}/items`
       : null;
   const openseaUserUrl = `https://opensea.io/${nft.owner}`;
 

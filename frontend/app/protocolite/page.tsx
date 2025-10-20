@@ -251,12 +251,12 @@ function ProtocoliteDetailPageContent() {
     ? decodeDataURI(nft.metadata.animation_url)
     : null;
   const shortOwner = `${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`;
-  const raribleNftUrl = `https://testnet.rarible.com/token/${MASTER_ADDRESS.toLowerCase()}:${nft.tokenId}`;
+  const raribleNftUrl = `https://og.rarible.com/token/${MASTER_ADDRESS.toLowerCase()}:${nft.tokenId}`;
   const raribleCollectionUrl =
     nft.infectionAddress !== zeroAddress
-      ? `https://testnet.rarible.com/collection/${nft.infectionAddress.toLowerCase()}/items`
+      ? `https://og.rarible.com/collection/${nft.infectionAddress.toLowerCase()}/items`
       : null;
-  const openseaUserUrl = `https://testnets.opensea.io/${nft.owner}`;
+  const openseaUserUrl = `https://opensea.io/${nft.owner}`;
 
   return (
     <>
