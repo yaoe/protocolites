@@ -143,7 +143,7 @@ export default function Home() {
       sendTransaction(
         {
           to: MASTER_ADDRESS,
-          value: parseEther("0.001"), // Sepolia testnet amount
+          value: parseEther("0.01"), // Mainnet amount
         },
         {
           onSuccess: () => {

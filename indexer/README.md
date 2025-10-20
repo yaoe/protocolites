@@ -13,7 +13,7 @@ This indexer tracks:
 
 ## Features
 
-- ✅ **Real-time indexing** of Sepolia testnet
+- ✅ **Real-time indexing** of Sepolia / Mainnet
 - ✅ **Dynamic contract indexing** for infection contracts
 - ✅ **DNA trait decoding** for searchable attributes
 - ✅ **REST API** with pagination support
