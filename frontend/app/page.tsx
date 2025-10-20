@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
 import { ControlsBar, FilterType, SortType } from "@/components/ControlsBar";
 import { SpreaderCard } from "@/components/SpreaderCard";
+import { FloatingQRCode } from "@/components/FloatingQRCode";
 import {
   useAccount,
   useSendTransaction,
@@ -245,6 +246,7 @@ export default function Home() {
           </div>
         )}
       </div>
+      <FloatingQRCode />
     </>
   );
 }
