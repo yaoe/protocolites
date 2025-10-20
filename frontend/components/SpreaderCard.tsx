@@ -1,17 +1,17 @@
-'use client'
+"use client";
 
-import { SpreaderNFT } from '@/lib/types'
-import { InfectionCard } from './InfectionCard'
-import { MASTER_ADDRESS } from '@/lib/contracts'
-import { zeroAddress } from 'viem'
-import { useRouter } from 'next/navigation'
+import { SpreaderNFT } from "@/lib/types";
+import { InfectionCard } from "./InfectionCard";
+import { MASTER_ADDRESS } from "@/lib/contracts";
+import { zeroAddress } from "viem";
+import { useRouter } from "next/navigation";
 
 interface SpreaderCardProps {
-  nft: SpreaderNFT
-  isExpanded: boolean
-  onToggleExpand: () => void
-  onFeed: (tokenId: number) => void
-  onInfect: (infectionAddress: string) => void
+  nft: SpreaderNFT;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onFeed: (tokenId: number) => void;
+  onInfect: (infectionAddress: string) => void;
 }
 
 export function SpreaderCard({
@@ -21,55 +21,54 @@ export function SpreaderCard({
   onFeed,
   onInfect,
 }: SpreaderCardProps) {
-  const router = useRouter()
+  const router = useRouter();
 
   const decodeDataURI = (uri: string): string | null => {
     try {
-      if (!uri || !uri.startsWith('data:')) return null
-      const base64 = uri.split(',')[1]
-      return atob(base64)
+      if (!uri || !uri.startsWith("data:")) return null;
+      const base64 = uri.split(",")[1];
+      return atob(base64);
     } catch (error) {
-      console.error('Error decoding data URI:', error)
-      return null
+      console.error("Error decoding data URI:", error);
+      return null;
     }
-  }
+  };
 
   const html = nft.metadata.animation_url
     ? decodeDataURI(nft.metadata.animation_url)
-    : null
+    : null;
 
-  const titleText = (nft.metadata?.name || `Protocolite #${nft.tokenId}`).replace(
-    /\s*\(spreader\)\s*/i,
-    ''
-  )
+  const titleText = (
+    nft.metadata?.name || `Protocolite #${nft.tokenId}`
+  ).replace(/\s*\(spreader\)\s*/i, "");
 
-  const raribleNftUrl = `https://testnet.rarible.com/token/${MASTER_ADDRESS.toLowerCase()}:${nft.tokenId}`
+  const raribleNftUrl = `https://testnet.rarible.com/token/${MASTER_ADDRESS.toLowerCase()}:${nft.tokenId}`;
   const raribleCollectionUrl =
     nft.infectionAddress !== zeroAddress
       ? `https://testnet.rarible.com/collection/${nft.infectionAddress.toLowerCase()}/items`
-      : null
-  const openseaUserUrl = `https://testnets.opensea.io/${nft.owner}`
+      : null;
+  const openseaUserUrl = `https://testnets.opensea.io/${nft.owner}`;
 
-  const shortOwner = `${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`
+  const shortOwner = `${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`;
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking on a button or link
-    const target = e.target as HTMLElement
+    const target = e.target as HTMLElement;
     if (
-      target.tagName === 'BUTTON' ||
-      target.tagName === 'A' ||
-      target.closest('button') ||
-      target.closest('a')
+      target.tagName === "BUTTON" ||
+      target.tagName === "A" ||
+      target.closest("button") ||
+      target.closest("a")
     ) {
-      return
+      return;
     }
     // Navigate to detail page
-    router.push(`/${nft.tokenId}`)
-  }
+    router.push(`/protocolite?tokenId=${nft.tokenId}`);
+  };
 
   return (
     <div
-      className={`spreader-card ${isExpanded ? 'expanded' : ''}`}
+      className={`spreader-card ${isExpanded ? "expanded" : ""}`}
       onClick={handleCardClick}
     >
       <div className="spreader-header">
@@ -97,7 +96,9 @@ export function SpreaderCard({
             </div>
             <div className="spreader-detail">
               <span className="spreader-detail-label">Infections:</span>
-              <span className="spreader-detail-value">{nft.infections.length}</span>
+              <span className="spreader-detail-value">
+                {nft.infections.length}
+              </span>
             </div>
             <div className="spreader-detail">
               <span className="spreader-detail-label">Owner:</span>
@@ -115,18 +116,18 @@ export function SpreaderCard({
 
           <div
             style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '8px',
-              marginTop: '10px',
-              alignSelf: 'flex-start',
+              display: "flex",
+              flexDirection: "column",
+              gap: "8px",
+              marginTop: "10px",
+              alignSelf: "flex-start",
             }}
           >
             <button
               className="btn btn-small"
               onClick={(e) => {
-                e.stopPropagation()
-                onFeed(nft.tokenId)
+                e.stopPropagation();
+                onFeed(nft.tokenId);
               }}
             >
               ■ Feed to Reproduce
@@ -134,13 +135,13 @@ export function SpreaderCard({
             <button
               className="btn btn-small"
               onClick={(e) => {
-                e.stopPropagation()
+                e.stopPropagation();
                 if (nft.infectionAddress !== zeroAddress) {
-                  onInfect(nft.infectionAddress)
+                  onInfect(nft.infectionAddress);
                 } else {
                   alert(
-                    'This spreader has no infection contract yet! They need to be fed first.'
-                  )
+                    "This spreader has no infection contract yet! They need to be fed first.",
+                  );
                 }
               }}
             >
@@ -159,11 +160,11 @@ export function SpreaderCard({
               <button
                 className="btn-expand"
                 onClick={(e) => {
-                  e.stopPropagation()
-                  onToggleExpand()
+                  e.stopPropagation();
+                  onToggleExpand();
                 }}
               >
-                {isExpanded ? '▲ HIDE INFECTIONS' : '▼ SHOW INFECTIONS'}
+                {isExpanded ? "▲ HIDE INFECTIONS" : "▼ SHOW INFECTIONS"}
               </button>
             )}
           </div>
@@ -200,8 +201,8 @@ export function SpreaderCard({
             <button
               className="infections-close"
               onClick={(e) => {
-                e.stopPropagation()
-                onToggleExpand()
+                e.stopPropagation();
+                onToggleExpand();
               }}
             >
               ×
@@ -220,5 +221,5 @@ export function SpreaderCard({
         </div>
       )}
     </div>
-  )
+  );
 }
