@@ -4,37 +4,40 @@ import { parseAbiItem } from "viem";
 import { ProtocolitesMasterAbi } from "./abis/ProtocolitesMasterAbi";
 import { ProtocoliteFactoryAbi } from "./abis/ProtocoliteFactoryAbi";
 import { ProtocoliteInfectionAbi } from "./abis/ProtocoliteInfectionAbi";
+import { mainnet } from "viem/chains";
 
 export default createConfig({
   chains: {
-    sepolia: {
-      id: 11155111,
-      rpc: process.env.PONDER_RPC_URL_11155111!,
+    mainnet: {
+      id: 1,
+      rpc: process.env.PONDER_RPC_URL_1!,
     },
   },
   contracts: {
     ProtocolitesMaster: {
-      chain: "sepolia",
+      chain: "mainnet",
       abi: ProtocolitesMasterAbi,
-      address: "0x35bea8249cde6c0e3ce9a3f3d0a526b1845b957d",
-      startBlock: 9440296,
+      address: "0xB990DDE14b6510E8EA615Ffb66C55aeBF7cd9192",
+      startBlock: 23617975,
     },
     ProtocoliteFactory: {
-      chain: "sepolia",
+      chain: "mainnet",
       abi: ProtocoliteFactoryAbi,
-      address: "0x4b7201b36a699de652249064ff3094c16eda161b",
-      startBlock: 9440296,
+      address: "0xE1ce2E011239AEb8095659Cb81020Ac16C2fc483",
+      startBlock: 23617975,
     },
     ProtocoliteInfection: {
-      chain: "sepolia",
+      chain: "mainnet",
       abi: ProtocoliteInfectionAbi,
       // Dynamic factory pattern - infections are created by Factory contract
       address: factory({
-        address: "0x4b7201b36a699de652249064ff3094c16eda161b",
-        event: parseAbiItem("event InfectionContractDeployed(uint256 indexed parentTokenId, address indexed infectionContract, uint256 parentDna)"),
+        address: "0xE1ce2E011239AEb8095659Cb81020Ac16C2fc483",
+        event: parseAbiItem(
+          "event InfectionContractDeployed(uint256 indexed parentTokenId, address indexed infectionContract, uint256 parentDna)",
+        ),
         parameter: "infectionContract",
       }),
-      startBlock: 9440296,
+      startBlock: 23617975,
     },
   },
 });

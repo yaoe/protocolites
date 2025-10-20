@@ -1,13 +1,12 @@
-import { http, createConfig } from 'wagmi'
-import { sepolia } from 'wagmi/chains'
-import { injected } from 'wagmi/connectors'
+import { http, createConfig } from "wagmi";
+import { mainnet } from "wagmi/chains";
+import { injected } from "wagmi/connectors";
 
 export const config = createConfig({
-  chains: [sepolia],
-  connectors: [
-    injected()
-  ],
+  chains: [mainnet],
+  connectors: [injected()],
   transports: {
-    [sepolia.id]: http('https://ethereum-sepolia-rpc.publicnode.com'),
+    [mainnet.id]: http("https://ethereum-rpc.publicnode.com"),
+    // [sepolia.id]: http("https://ethereum-sepolia-rpc.publicnode.com"),
   },
-})
+});
