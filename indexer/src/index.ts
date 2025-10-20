@@ -9,7 +9,11 @@ import { decodeTokenURI } from "./utils/metadata";
  * Triggered when a new spreader NFT is minted
  */
 ponder.on("ProtocolitesMaster:ParentSpawned", async ({ event, context }) => {
-  const { tokenId, owner, infectionContract: infectionContractAddress } = event.args;
+  const {
+    tokenId,
+    owner,
+    infectionContract: infectionContractAddress,
+  } = event.args;
   const { client, db } = context;
 
   // Fetch parent data from contract
@@ -40,8 +44,8 @@ ponder.on("ProtocolitesMaster:ParentSpawned", async ({ event, context }) => {
   const metadata = decodeTokenURI(tokenURI);
   console.log("Spreader metadata:", JSON.stringify(metadata, null, 2));
 
-  // Create spreader ID (use hardcoded chain ID for Sepolia)
-  const chainId = 11155111;
+  // Create spreader ID (use hardcoded chain ID for mainnet)
+  const chainId = 1;
   const spreaderId = `${chainId}:${context.contracts.ProtocolitesMaster.address}:${tokenId}`;
 
   // Insert spreader
@@ -98,12 +102,10 @@ ponder.on("ProtocolitesMaster:Transfer", async ({ event, context }) => {
   const spreaderId = `${chainId}:${context.contracts.ProtocolitesMaster.address}:${tokenId}`;
 
   // Update owner
-  await db
-    .update(spreader, { id: spreaderId })
-    .set({
-      owner: to,
-      updatedAt: event.block.timestamp,
-    });
+  await db.update(spreader, { id: spreaderId }).set({
+    owner: to,
+    updatedAt: event.block.timestamp,
+  });
 });
 
 /**
@@ -220,10 +222,8 @@ ponder.on("ProtocoliteInfection:Transfer", async ({ event, context }) => {
   });
 
   if (infectionRecord) {
-    await db
-      .update(infection, { id: infectionId })
-      .set({
-        owner: to,
-      });
+    await db.update(infection, { id: infectionId }).set({
+      owner: to,
+    });
   }
 });
