@@ -11,7 +11,7 @@ interface FloatingQRCodeProps {
 export function FloatingQRCode({
   title = "SCAN TO ACCESS",
   description = "PROTOCOLITES APP",
-  url = "https://protocolites.app",
+  url = "https://protocolites.xyz",
 }: FloatingQRCodeProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
