@@ -86,6 +86,25 @@
                 border-color: #000000;
             }
 
+            .network-selector {
+                display: inline-block;
+                padding: 4px 12px;
+                background: #ffffff;
+                color: #000000;
+                border: 1px solid #000000;
+                font-size: 9px;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                margin-left: 10px;
+                cursor: pointer;
+                font-family: inherit;
+                transition: all 0.2s ease;
+            }
+
+            .network-selector:hover {
+                background: #f8f8f8;
+            }
+
             .controls-bar {
                 background: #ffffff;
                 border-bottom: 1px solid #e8e8e8;
@@ -571,7 +590,11 @@
             <h1>プロトコライト // ON-CHAIN PROTOCOLITES</h1>
             <div class="subtitle">
                 LIVE BLOCKCHAIN VIEWER — GENERATIVE ASCII ART PROTOCOL
-                <span class="network-badge">SEPOLIA TESTNET</span>
+                <span class="network-badge" id="networkBadge">MAINNET</span>
+                <select class="network-selector" id="networkSelector" onchange="switchNetwork()">
+                    <option value="mainnet">MAINNET</option>
+                    <option value="sepolia">SEPOLIA</option>
+                </select>
                 <button
                     class="wallet-button"
                     id="walletButton"
@@ -665,16 +688,38 @@
                 init();
             });
 
-            const CONFIG = {
-                RPC_URLS: [
-                    "https://ethereum-sepolia-rpc.publicnode.com",
-                    "https://sepolia.gateway.tenderly.co",
-                    "https://rpc.ankr.com/eth_sepolia",
-                    "https://eth-sepolia.public.blastapi.io",
-                ],
-                MASTER_ADDRESS: "0x35bea8249cde6c0e3ce9a3f3d0a526b1845b957d",
-                CHAIN_ID: 11155111,
+            const NETWORKS = {
+                mainnet: {
+                    RPC_URLS: [
+                        "https://ethereum-rpc.publicnode.com",
+                        "https://rpc.ankr.com/eth",
+                        "https://cloudflare-eth.com",
+                        "https://eth-mainnet.g.alchemy.com/v2/demo"
+                    ],
+                    MASTER_ADDRESS: "0xB990DDE14b6510E8EA615Ffb66C55aeBF7cd9192",
+                    CHAIN_ID: 1,
+                    NAME: "MAINNET",
+                    RARIBLE_BASE: "https://rarible.com",
+                    OPENSEA_BASE: "https://opensea.io",
+                    ETHERSCAN_BASE: "https://etherscan.io"
+                },
+                sepolia: {
+                    RPC_URLS: [
+                        "https://ethereum-sepolia-rpc.publicnode.com",
+                        "https://sepolia.gateway.tenderly.co",
+                        "https://rpc.ankr.com/eth_sepolia",
+                    ],
+                    MASTER_ADDRESS: "0x36b212d862cfb7d5f808e37365b0a41ef7d82d4e",
+                    CHAIN_ID: 11155111,
+                    NAME: "SEPOLIA TESTNET",
+                    RARIBLE_BASE: "https://testnet.rarible.com",
+                    OPENSEA_BASE: "https://testnets.opensea.io",
+                    ETHERSCAN_BASE: "https://sepolia.etherscan.io"
+                }
             };
+
+            let currentNetwork = 'mainnet'; // Default to mainnet
+            let CONFIG = NETWORKS[currentNetwork]; 
 
             const MASTER_ABI = [
                 "function totalSupply() view returns (uint256)",
@@ -699,10 +744,27 @@
             let userWallet = null;
             let signer = null;
 
+            function switchNetwork() {
+                const selector = document.getElementById('networkSelector');
+                currentNetwork = selector.value;
+                CONFIG = NETWORKS[currentNetwork];
+
+                // Update UI
+                document.getElementById('networkBadge').textContent = CONFIG.NAME;
+
+                // Reset wallet connection
+                userWallet = null;
+                signer = null;
+                updateWalletButton();
+
+                // Reload data
+                init();
+            }
+
             async function init() {
                 try {
                     // Always use public RPC endpoints (works with or without MetaMask)
-                    console.log("Connecting to Sepolia via public RPC...");
+                    console.log(`Connecting to ${CONFIG.NAME} via public RPC...`);
                     let connected = false;
                     for (const rpcUrl of CONFIG.RPC_URLS) {
                         try {
@@ -732,7 +794,7 @@
                     }
                     if (!connected) {
                         showError(
-                            "Could not connect to Sepolia. Please check your connection.",
+                            `Could not connect to ${CONFIG.NAME}. Please check your connection.`,
                         );
                         return;
                     }
@@ -1037,12 +1099,12 @@
                 titleText = titleText.replace(/\s*\(spreader\)\s*/i, "");
                 title.textContent = titleText;
 
-                const raribleNftUrl = `https://testnet.rarible.com/token/${CONFIG.MASTER_ADDRESS.toLowerCase()}:${nft.tokenId}`;
+                const raribleNftUrl = `${CONFIG.RARIBLE_BASE}/token/${CONFIG.MASTER_ADDRESS.toLowerCase()}:${nft.tokenId}`;
                 const raribleCollectionUrl =
                     nft.infectionAddress !== ethers.constants.AddressZero
-                        ? `https://testnet.rarible.com/collection/${nft.infectionAddress.toLowerCase()}/items`
+                        ? `${CONFIG.RARIBLE_BASE}/collection/${nft.infectionAddress.toLowerCase()}/items`
                         : null;
-                const openseaUserUrl = `https://testnets.opensea.io/${nft.owner}`;
+                const openseaUserUrl = `${CONFIG.OPENSEA_BASE}/${nft.owner}`;
 
                 // Shorten owner address
                 const shortOwner = `${nft.owner.slice(0, 6)}...${nft.owner.slice(-4)}`;
@@ -1297,11 +1359,25 @@
                     );
                     signer = web3Provider.getSigner();
 
-                    // Check network
+                    // Check network and switch if needed
                     const network = await web3Provider.getNetwork();
                     if (network.chainId !== CONFIG.CHAIN_ID) {
-                        alert("Please switch MetaMask to Sepolia testnet");
-                        return false;
+                        try {
+                            // Request MetaMask to switch to the correct network
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: '0x' + CONFIG.CHAIN_ID.toString(16) }],
+                            });
+                            console.log(`Switched to ${CONFIG.NAME}`);
+                        } catch (switchError) {
+                            // This error code indicates that the chain has not been added to MetaMask
+                            if (switchError.code === 4902) {
+                                alert(`Please add ${CONFIG.NAME} to MetaMask manually`);
+                            } else {
+                                alert(`Please switch MetaMask to ${CONFIG.NAME} manually`);
+                            }
+                            return false;
+                        }
                     }
 
                     console.log("Wallet connected:", userWallet);
@@ -1337,9 +1413,10 @@
                 }
 
                 try {
+                    const spawnCost = currentNetwork === 'mainnet' ? "0.01" : "0.001";
                     const tx = await signer.sendTransaction({
                         to: CONFIG.MASTER_ADDRESS,
-                        value: ethers.utils.parseEther("0.001"),
+                        value: ethers.utils.parseEther(spawnCost),
                     });
 
                     alert(

@@ -1,0 +1,2045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>プロトコライト // ASCII PROTOCOLITE VII — FUSION</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            background: #1a1520;
+            color: #e8e8e8;
+            line-height: 1;
+            font-size: 12px;
+            font-weight: 200;
+            padding: 0;
+            margin: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1520 0%, #2a1530 100%);
+            border-bottom: 2px solid #4a2550;
+            padding: 30px;
+        }
+
+        h1 {
+            font-size: 13px;
+            font-weight: 200;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #ff6b9d 0%, #c561f5 50%, #4effff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 10px;
+            color: #9966bb;
+            letter-spacing: 0.2em;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 120px);
+        }
+
+        .sidebar {
+            width: 320px;
+            background: #201828;
+            border-right: 2px solid #3a2840;
+            padding: 30px 20px;
+            overflow-y: auto;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            background: #1a1520;
+        }
+
+        .control-section {
+            margin-bottom: 30px;
+        }
+
+        .control-title {
+            font-size: 10px;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #9966bb;
+            margin-bottom: 15px;
+        }
+
+        .family-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .family-btn {
+            padding: 12px;
+            background: #2a1f32;
+            color: #e8e8e8;
+            border: 1px solid #4a3050;
+            font-family: inherit;
+            font-size: 9px;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-align: center;
+        }
+
+        .family-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+        }
+
+        .family-btn.active {
+            background: linear-gradient(135deg, #ff6b9d, #c561f5);
+            color: #ffffff;
+            border-color: #ff6b9d;
+        }
+
+        .family-btn[data-family="red"] { border-left: 3px solid #ff3366; }
+        .family-btn[data-family="green"] { border-left: 3px solid #33ff88; }
+        .family-btn[data-family="blue"] { border-left: 3px solid #3366ff; }
+        .family-btn[data-family="yellow"] { border-left: 3px solid #ffcc33; }
+        .family-btn[data-family="purple"] { border-left: 3px solid #cc66ff; }
+        .family-btn[data-family="cyan"] { border-left: 3px solid #33ffff; }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ff6b9d, #c561f5);
+            color: #ffffff;
+            border: 1px solid #ff6b9d;
+            font-family: inherit;
+            font-size: 10px;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            box-shadow: 0 4px 20px rgba(255, 107, 157, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #2a1f32;
+            color: #e8e8e8;
+            border: 1px solid #4a3050;
+        }
+
+        .btn-secondary:hover {
+            background: #3a2840;
+            border-color: #6a4870;
+            box-shadow: 0 4px 12px rgba(102, 102, 255, 0.3);
+        }
+
+        .stats-panel {
+            background: #2a1f32;
+            border: 2px solid #4a3050;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 10px;
+            color: #9966bb;
+        }
+
+        .stat-value {
+            color: #ff6b9d;
+            font-weight: 400;
+        }
+
+        .creatures-grid {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 30px;
+            height: 100%;
+        }
+
+        .spreaders-panel {
+            background: #201828;
+            border: 2px solid #3a2840;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .children-panel {
+            background: #1a1520;
+            border: 2px solid #3a2840;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-size: 11px;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #9966bb;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4a3050;
+        }
+
+        .spreader-card {
+            background: #2a1f32;
+            border: 2px solid #4a3050;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .spreader-card:hover {
+            transform: translateX(5px);
+            box-shadow: -5px 0 20px rgba(255, 107, 157, 0.3);
+            border-color: #ff6b9d;
+        }
+
+        .creature-canvas {
+            margin-bottom: 10px;
+            border: 2px solid #3a2840;
+            border-radius: 4px;
+        }
+
+        .creature-info {
+            font-size: 9px;
+            color: #9966bb;
+            margin-top: 8px;
+        }
+
+        .children-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .child-card {
+            background: #201828;
+            border: 2px solid #3a2840;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .child-card:hover {
+            background: #2a1f32;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(197, 97, 245, 0.3);
+            border-color: #c561f5;
+        }
+
+        .temperament-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 7px;
+            font-weight: 400;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-left: 5px;
+        }
+
+        .temp-calm { background: #2a4a6a; color: #7dd3fc; }
+        .temp-balanced { background: #2a5a3a; color: #86efac; }
+        .temp-energetic { background: #6a4a2a; color: #fbbf24; }
+        .temp-chaotic { background: #6a2a4a; color: #f472b6; }
+        .temp-glitchy { background: #4a2a6a; color: #c084fc; }
+        .temp-unstable { background: #6a2a2a; color: #ff6b6b; }
+
+        .species-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 7px;
+            font-weight: 400;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            background: linear-gradient(135deg, #4a3050, #2a1f32);
+            color: #ff6b9d;
+            border: 1px solid #ff6b9d;
+        }
+
+        .dna-traits {
+            font-size: 8px;
+            color: #9966bb;
+            margin-top: 8px;
+            padding: 8px;
+            background: #1a1520;
+            border-radius: 4px;
+            line-height: 1.5;
+        }
+
+        .dna-trait {
+            display: inline-block;
+            margin-right: 8px;
+            padding: 2px 4px;
+            background: #2a1f32;
+            border: 1px solid #4a3050;
+            border-radius: 2px;
+        }
+
+        .dna-trait.inherited {
+            background: #1a3a2a;
+            border-color: #33ff88;
+        }
+
+        .dna-trait.mutated {
+            background: #3a1a2a;
+            border-color: #ff3366;
+        }
+
+        .parent-link {
+            display: inline-block;
+            padding: 2px 6px;
+            background: linear-gradient(135deg, #ff6b9d, #c561f5);
+            color: #fff;
+            font-size: 8px;
+            border-radius: 3px;
+            margin-bottom: 5px;
+        }
+
+        .spreader-card.selected {
+            border: 2px solid #ff6b9d;
+            background: #3a2840;
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.4);
+        }
+
+        @media (max-width: 1200px) {
+            .creatures-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>プロトコライト // ASCII PROTOCOLITE VII — FUSION</h1>
+        <div class="subtitle">SPECIES × TEMPERAMENT HYBRID SYSTEM — UNIFIED DNA INHERITANCE</div>
+    </div>
+
+    <div class="main-container">
+        <div class="sidebar">
+            <div class="control-section">
+                <div class="control-title">Family Selection</div>
+                <div class="family-grid">
+                    <button class="family-btn" data-family="red" onclick="selectFamily('red')">RED<br>赤</button>
+                    <button class="family-btn" data-family="green" onclick="selectFamily('green')">GREEN<br>緑</button>
+                    <button class="family-btn" data-family="blue" onclick="selectFamily('blue')">BLUE<br>青</button>
+                    <button class="family-btn" data-family="yellow" onclick="selectFamily('yellow')">YELLOW<br>黄</button>
+                    <button class="family-btn" data-family="purple" onclick="selectFamily('purple')">PURPLE<br>紫</button>
+                    <button class="family-btn" data-family="cyan" onclick="selectFamily('cyan')">CYAN<br>水</button>
+                </div>
+            </div>
+
+            <div class="control-section">
+                <div class="control-title">Actions</div>
+                <div class="action-buttons">
+                    <button class="btn" onclick="generateSpreader()">GENERATE SPREADER</button>
+                    <button class="btn btn-secondary" onclick="generateBatch()">GENERATE BATCH (6)</button>
+                    <button class="btn btn-secondary" onclick="clearFamily()">CLEAR FAMILY</button>
+                    <button class="btn btn-secondary" onclick="clearAll()">CLEAR ALL</button>
+                </div>
+            </div>
+
+            <div class="stats-panel">
+                <div class="stat-item">
+                    <span>Active Families:</span>
+                    <span class="stat-value" id="activeFamilies">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Spreaders:</span>
+                    <span class="stat-value" id="totalSpreaders">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Children:</span>
+                    <span class="stat-value" id="totalChildren">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Current Family:</span>
+                    <span class="stat-value" id="currentFamilyName">RED</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="creatures-grid">
+                <div class="spreaders-panel">
+                    <div class="panel-title">SPREADERS (24×24) — Click to breed</div>
+                    <div id="spreaders"></div>
+                </div>
+
+                <div class="children-panel">
+                    <div class="panel-title">CHILDREN (16×16)</div>
+                    <div class="children-grid" id="children"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const familyColors = {
+            red: { name: 'RED', rgb: '#ff3366' },
+            green: { name: 'GREEN', rgb: '#33ff88' },
+            blue: { name: 'BLUE', rgb: '#3366ff' },
+            yellow: { name: 'YELLOW', rgb: '#ffcc33' },
+            purple: { name: 'PURPLE', rgb: '#cc66ff' },
+            cyan: { name: 'CYAN', rgb: '#33ffff' }
+        };
+
+        // TEMPERAMENT SYSTEM - affects animation intensity (from V)
+        const temperaments = [
+            { name: 'calm', weight: 35, speed: 1.5, glitchChance: 0.02, charCorrupt: 0.0 },
+            { name: 'balanced', weight: 30, speed: 2.5, glitchChance: 0.05, charCorrupt: 0.0 },
+            { name: 'energetic', weight: 20, speed: 3.5, glitchChance: 0.12, charCorrupt: 0.03 },
+            { name: 'chaotic', weight: 10, speed: 5.0, glitchChance: 0.25, charCorrupt: 0.08 },
+            { name: 'glitchy', weight: 4, speed: 6.0, glitchChance: 0.40, charCorrupt: 0.15 },
+            { name: 'unstable', weight: 1, speed: 7.0, glitchChance: 0.60, charCorrupt: 0.25 }
+        ];
+
+        // SPECIES SYSTEM - determines visual form (from VI)
+        const speciesTypes = ['insectoid', 'reptilian', 'mammalian', 'viral', 'skeletal', 'alien', 'aquatic'];
+
+        // TRAIT LIBRARIES - for maximum variation
+        const EYE_STYLES = ['●', '◉', '◎', '○', '◐', '◑', '⊙', '⊗', '◈', '◇'];
+        const BODY_TEXTURES = ['█', '▓', '▒', '░', '▪', '▫', '■', '□', '▀', '▄'];
+        const ANTENNA_TIPS = ['●', '◉', '○', '◎', '✦', '✧', '★', '✪', '⊛', '⊚'];
+        const ARM_STYLES = [
+            { chars: ['─', '─'], tip: '●' },
+            { chars: ['═', '═'], tip: '■' },
+            { chars: ['▬', '▬'], tip: '▪' },
+            { chars: ['─', '┈'], tip: '○' },
+            { chars: ['~', '~'], tip: '●' }
+        ];
+        const LEG_STYLES = [
+            { chars: ['│', '│'], tip: '●' },
+            { chars: ['┃', '┃'], tip: '■' },
+            { chars: ['║', '║'], tip: '▪' },
+            { chars: ['╎', '╎'], tip: '○' },
+            { chars: ['┆', '┆'], tip: '●' }
+        ];
+        const MOUTH_STYLES = ['─', '═', '▬', '≈', '∼', '~', 'ω', 'w', 'v'];
+        const TAIL_STYLES = ['spike', 'curl', 'fan', 'thin', 'club'];
+        const WING_TYPES = ['insect', 'bat', 'feather', 'fin'];
+
+        let currentFamily = 'red';
+        let familyData = {};
+        let animators = {}; // Store animators by creature ID
+
+        // Initialize family data
+        Object.keys(familyColors).forEach(key => {
+            familyData[key] = { spreaders: [], children: [] };
+        });
+
+        function generateASCIICreature(size, family, seed = null, parentDNA = null) {
+            if (seed === null) {
+                seed = Date.now() * Math.random() * 1000000;
+            }
+
+            let s = seed;
+            function random() {
+                s = (s * 9301 + 49297) % 233280;
+                return s / 233280;
+            }
+
+            const isChild = size === 16;
+            let dna = {};
+
+            // TEMPERAMENT - 80% inheritance or weighted random
+            let temperament;
+            if (parentDNA && parentDNA.temperament) {
+                if (random() < 0.8) {
+                    temperament = parentDNA.temperament;
+                } else {
+                    const totalWeight = temperaments.reduce((sum, t) => sum + t.weight, 0);
+                    let r = random() * totalWeight;
+                    for (const t of temperaments) {
+                        r -= t.weight;
+                        if (r <= 0) {
+                            temperament = t.name;
+                            break;
+                        }
+                    }
+                }
+            } else {
+                const totalWeight = temperaments.reduce((sum, t) => sum + t.weight, 0);
+                let r = random() * totalWeight;
+                for (const t of temperaments) {
+                    r -= t.weight;
+                    if (r <= 0) {
+                        temperament = t.name;
+                        break;
+                    }
+                }
+            }
+            dna.temperament = temperament;
+
+            // SPECIES - 100% inheritance (never mutates)
+            if (parentDNA && parentDNA.species) {
+                dna.species = parentDNA.species;
+            } else {
+                dna.species = speciesTypes[Math.floor(random() * speciesTypes.length)];
+            }
+
+            // Helper function for 80% inheritance
+            const inherit80 = (parentVal, options) => {
+                if (parentDNA && parentVal !== undefined && random() < 0.8) {
+                    return parentVal;
+                }
+                return Array.isArray(options)
+                    ? options[Math.floor(random() * options.length)]
+                    : Math.floor(random() * options);
+            };
+
+            // UNIVERSAL TRAITS (80% inheritance)
+            dna.eyeStyleIdx = inherit80(parentDNA?.eyeStyleIdx, EYE_STYLES.length);
+            dna.bodyTextureIdx = inherit80(parentDNA?.bodyTextureIdx, BODY_TEXTURES.length);
+            dna.mouthStyleIdx = inherit80(parentDNA?.mouthStyleIdx, MOUTH_STYLES.length);
+
+            // SPECIES-SPECIFIC TRAITS (80% inheritance, highly varied)
+            if (dna.species === 'insectoid') {
+                dna.legCount = inherit80(parentDNA?.legCount, [2, 3, 4]); // 2-4 pairs
+                dna.legStyleIdx = inherit80(parentDNA?.legStyleIdx, LEG_STYLES.length);
+                dna.antennaTipIdx = inherit80(parentDNA?.antennaTipIdx, ANTENNA_TIPS.length);
+                dna.antennaLength = inherit80(parentDNA?.antennaLength, isChild ? [1, 2] : [2, 3, 4]);
+                dna.hasWings = inherit80(parentDNA?.hasWings, [true, false, false]); // 33% chance
+                dna.wingTypeIdx = inherit80(parentDNA?.wingTypeIdx, WING_TYPES.length);
+                dna.hasStinger = inherit80(parentDNA?.hasStinger, [true, false, false, false]); // 25%
+                dna.bodySegments = inherit80(parentDNA?.bodySegments, [2, 3]); // 2-3 segments
+                dna.mandibleStyle = inherit80(parentDNA?.mandibleStyle, 4); // 4 styles
+                dna.eyeSize = inherit80(parentDNA?.eyeSize, ['small', 'normal', 'large']);
+
+            } else if (dna.species === 'reptilian') {
+                dna.numEyes = inherit80(parentDNA?.numEyes, [1, 2, 2, 2, 3]); // Usually 2
+                dna.headShape = inherit80(parentDNA?.headShape, ['triangle', 'square', 'round', 'flat']);
+                dna.numArms = inherit80(parentDNA?.numArms, [0, 1, 2, 2]); // Usually 2
+                dna.numLegs = inherit80(parentDNA?.numLegs, [2, 2, 2, 4]); // Usually 2
+                dna.armStyleIdx = inherit80(parentDNA?.armStyleIdx, ARM_STYLES.length);
+                dna.legStyleIdx = inherit80(parentDNA?.legStyleIdx, LEG_STYLES.length);
+                dna.hasSpines = inherit80(parentDNA?.hasSpines, [true, true, false, false]);
+                dna.spineCount = inherit80(parentDNA?.spineCount, isChild ? [2, 3] : [3, 4, 5]);
+                dna.hasTail = inherit80(parentDNA?.hasTail, [true, true, true, false]);
+                dna.tailStyleIdx = inherit80(parentDNA?.tailStyleIdx, TAIL_STYLES.length);
+                dna.hasHorns = inherit80(parentDNA?.hasHorns, [true, false, false]);
+                dna.bodyHeight = inherit80(parentDNA?.bodyHeight, isChild ? [2, 3, 4] : [3, 4, 5]);
+
+            } else if (dna.species === 'mammalian') {
+                dna.earStyle = inherit80(parentDNA?.earStyle, ['triangle', 'round', 'long', 'none']);
+                dna.numEyes = inherit80(parentDNA?.numEyes, [1, 2, 2, 2]); // Usually 2
+                dna.hasNose = inherit80(parentDNA?.hasNose, [true, true, false]);
+                dna.noseStyle = inherit80(parentDNA?.noseStyle, ['triangle', 'circle', 'line']);
+                dna.hasTail = inherit80(parentDNA?.hasTail, [true, true, false]);
+                dna.tailLength = inherit80(parentDNA?.tailLength, isChild ? [1, 2] : [2, 3, 4]);
+                dna.furPattern = inherit80(parentDNA?.furPattern, ['solid', 'striped', 'spotted', 'patchy']);
+                dna.numArms = inherit80(parentDNA?.numArms, [2, 2, 2, 4]);
+                dna.numLegs = inherit80(parentDNA?.numLegs, [2, 2, 4, 4]);
+                dna.armStyleIdx = inherit80(parentDNA?.armStyleIdx, ARM_STYLES.length);
+                dna.legStyleIdx = inherit80(parentDNA?.legStyleIdx, LEG_STYLES.length);
+                dna.bodyShape = inherit80(parentDNA?.bodyShape, ['round', 'oval', 'square']);
+
+            } else if (dna.species === 'viral') {
+                dna.coreSize = inherit80(parentDNA?.coreSize, isChild ? [1, 2, 2] : [2, 3, 3]);
+                dna.spikeCount = inherit80(parentDNA?.spikeCount, isChild ? [4, 6, 8] : [6, 8, 10, 12]);
+                dna.spikeLength = inherit80(parentDNA?.spikeLength, isChild ? [1, 2] : [2, 3, 4]);
+                dna.spikeStyle = inherit80(parentDNA?.spikeStyle, ['straight', 'curved', 'zigzag']);
+                dna.hasTentacles = inherit80(parentDNA?.hasTentacles, [true, false, false]);
+                dna.tentacleCount = inherit80(parentDNA?.tentacleCount, [4, 6, 8]);
+                dna.numEyes = inherit80(parentDNA?.numEyes, [0, 1, 2, 3, 4]);
+                dna.eyePattern = inherit80(parentDNA?.eyePattern, ['centered', 'scattered', 'ring']);
+
+            } else if (dna.species === 'skeletal') {
+                dna.skullShape = inherit80(parentDNA?.skullShape, ['human', 'beast', 'alien']);
+                dna.jawType = inherit80(parentDNA?.jawType, ['closed', 'open', 'wide']);
+                dna.ribCount = inherit80(parentDNA?.ribCount, isChild ? [2, 3] : [3, 4, 5]);
+                dna.hasSpine = inherit80(parentDNA?.hasSpine, [true, true, false]);
+                dna.numArms = inherit80(parentDNA?.numArms, [0, 1, 2, 2]);
+                dna.numLegs = inherit80(parentDNA?.numLegs, [1, 2, 2]);
+                dna.boneStyle = inherit80(parentDNA?.boneStyle, ['thin', 'thick', 'ornate']);
+                dna.hasExtraBones = inherit80(parentDNA?.hasExtraBones, [true, false, false]);
+
+            } else if (dna.species === 'alien') {
+                dna.headSize = inherit80(parentDNA?.headSize, isChild ? [2, 3, 3] : [3, 4, 5]); // Aliens have BIG heads
+                dna.bodySize = inherit80(parentDNA?.bodySize, isChild ? [1, 2] : [2, 3]); // Small bodies
+                dna.eyeSize = inherit80(parentDNA?.eyeSize, ['normal', 'large', 'huge', 'mega']);
+                dna.numEyes = inherit80(parentDNA?.numEyes, [1, 2, 2, 3, 4]);
+                dna.eyePattern = inherit80(parentDNA?.eyePattern, ['side', 'front', 'scattered']);
+                dna.numArms = inherit80(parentDNA?.numArms, [0, 1, 2, 3, 4]);
+                dna.numLegs = inherit80(parentDNA?.numLegs, [0, 1, 1, 2]);
+                dna.hasAntennae = inherit80(parentDNA?.hasAntennae, [true, true, false]);
+                dna.antennaCount = inherit80(parentDNA?.antennaCount, [1, 2, 3]);
+                dna.antennaTipIdx = inherit80(parentDNA?.antennaTipIdx, ANTENNA_TIPS.length);
+
+            } else if (dna.species === 'aquatic') {
+                dna.bodyLength = inherit80(parentDNA?.bodyLength, isChild ? [2, 3, 4] : [4, 5, 6]);
+                dna.bodyShape = inherit80(parentDNA?.bodyShape, ['fish', 'eel', 'round', 'flat']);
+                dna.finCount = inherit80(parentDNA?.finCount, [2, 3, 4, 5]);
+                dna.finStyle = inherit80(parentDNA?.finStyle, ['spike', 'wave', 'round']);
+                dna.tailType = inherit80(parentDNA?.tailType, ['fan', 'point', 'split']);
+                dna.numEyes = inherit80(parentDNA?.numEyes, [1, 2, 2]);
+                dna.eyePosition = inherit80(parentDNA?.eyePosition, ['side', 'top', 'front']);
+                dna.hasScales = inherit80(parentDNA?.hasScales, [true, true, false]);
+                dna.hasTentacles = inherit80(parentDNA?.hasTentacles, [true, false, false, false]);
+                dna.tentacleCount = inherit80(parentDNA?.tentacleCount, [2, 4, 6, 8]);
+            }
+
+            // Create grid with type tracking
+            const grid = Array(size).fill().map(() =>
+                Array(size).fill(null).map(() => ({ char: ' ', type: 'empty' }))
+            );
+
+            const cx = Math.floor(size / 2);
+            const cy = Math.floor(size / 2);
+
+            // Render based on species
+            switch(dna.species) {
+                case 'insectoid':
+                    renderInsectoid(grid, size, cx, cy, dna, random, isChild);
+                    break;
+                case 'reptilian':
+                    renderReptilian(grid, size, cx, cy, dna, random, isChild);
+                    break;
+                case 'mammalian':
+                    renderMammalian(grid, size, cx, cy, dna, random, isChild);
+                    break;
+                case 'viral':
+                    renderViral(grid, size, cx, cy, dna, random, isChild);
+                    break;
+                case 'skeletal':
+                    renderSkeletal(grid, size, cx, cy, dna, random, isChild);
+                    break;
+                case 'alien':
+                    renderAlien(grid, size, cx, cy, dna, random, isChild);
+                    break;
+                case 'aquatic':
+                    renderAquatic(grid, size, cx, cy, dna, random, isChild);
+                    break;
+            }
+
+            return {
+                grid,
+                family,
+                seed,
+                id: Math.random().toString(36).substr(2, 9),
+                dna,
+                size,
+                traits: {
+                    species: dna.species,
+                    temperament: temperament,
+                    hasWings: dna.hasWings,
+                    hasSpikes: dna.hasSpikes
+                }
+            };
+        }
+
+        // ═══ SPECIES RENDERING FUNCTIONS ═══
+
+        function renderInsectoid(grid, size, cx, cy, dna, random, isChild) {
+            const bodyTexture = BODY_TEXTURES[dna.bodyTextureIdx];
+            const eyeStyle = EYE_STYLES[dna.eyeStyleIdx];
+            const antennaTip = ANTENNA_TIPS[dna.antennaTipIdx];
+            const legStyle = LEG_STYLES[dna.legStyleIdx];
+
+            const segH = isChild ? 2 : 3;
+            const baseY = isChild ? 5 : 6;
+            const segments = dna.bodySegments || 2;
+
+            // HEAD segment (variable size based on eye size)
+            const headW = dna.eyeSize === 'large' ? (isChild ? 3 : 4) : (isChild ? 2 : 3);
+            for (let y = 0; y < segH; y++) {
+                for (let x = -headW; x <= headW; x++) {
+                    const posY = baseY + y;
+                    const posX = cx + x;
+                    if (posX >= 0 && posX < size && posY >= 0 && posY < size) {
+                        grid[posY][posX] = { char: bodyTexture, type: 'body' };
+                    }
+                }
+            }
+
+            // EYES (compound, using style)
+            const eyeSpacing = dna.eyeSize === 'small' ? 1 : (dna.eyeSize === 'large' ? 2 : 1);
+            if (baseY + 1 >= 0 && baseY + 1 < size) {
+                if (cx - eyeSpacing >= 0) grid[baseY + 1][cx - eyeSpacing] = { char: eyeStyle, type: 'eye' };
+                if (cx + eyeSpacing < size) grid[baseY + 1][cx + eyeSpacing] = { char: eyeStyle, type: 'eye' };
+            }
+
+            // THORAX (variable width)
+            const thoraxY = baseY + segH;
+            const thoraxW = isChild ? (2 + segments % 2) : (3 + segments % 2);
+            for (let y = 0; y < segH; y++) {
+                for (let x = -thoraxW; x <= thoraxW; x++) {
+                    const posY = thoraxY + y;
+                    const posX = cx + x;
+                    if (posX >= 0 && posX < size && posY >= 0 && posY < size) {
+                        grid[posY][posX] = { char: bodyTexture, type: 'body' };
+                    }
+                }
+            }
+
+            // LEGS (variable count and style)
+            const legCount = dna.legCount || 3;
+            const legLen = isChild ? 2 : 3;
+            for (let leg = 0; leg < legCount; leg++) {
+                const legY = thoraxY + Math.floor(leg * segH / legCount);
+                if (legY >= 0 && legY < size) {
+                    // Left legs
+                    for (let i = 0; i < legLen; i++) {
+                        if (cx - thoraxW - 1 - i >= 0) {
+                            const char = i === legLen - 1 && legStyle.tip ? legStyle.tip : legStyle.chars[i % legStyle.chars.length];
+                            grid[legY][cx - thoraxW - 1 - i] = { char, type: 'leg' };
+                        }
+                    }
+                    // Right legs
+                    for (let i = 0; i < legLen; i++) {
+                        if (cx + thoraxW + 1 + i < size) {
+                            const char = i === legLen - 1 && legStyle.tip ? legStyle.tip : legStyle.chars[i % legStyle.chars.length];
+                            grid[legY][cx + thoraxW + 1 + i] = { char, type: 'leg' };
+                        }
+                    }
+                }
+            }
+
+            // ANTENNAE (variable length and tip)
+            const antennaLen = dna.antennaLength || (isChild ? 2 : 3);
+            for (let ant of [-1, 1]) {
+                const antX = cx + ant * (headW - 1);
+                for (let i = 1; i <= antennaLen; i++) {
+                    const antY = baseY - i;
+                    if (antY >= 0 && antX >= 0 && antX < size) {
+                        grid[antY][antX] = {
+                            char: i === antennaLen ? antennaTip : '│',
+                            type: 'antenna'
+                        };
+                    }
+                }
+            }
+
+            // MANDIBLES (different styles)
+            const MANDIBLES = [['⊏', '⊐'], ['<', '>'], ['╰', '╯'], ['(', ')']];
+            const mand = MANDIBLES[dna.mandibleStyle % 4];
+            if (baseY + segH - 1 >= 0 && baseY + segH - 1 < size) {
+                if (cx - 1 >= 0) grid[baseY + segH - 1][cx - 1] = { char: mand[0], type: 'mouth' };
+                if (cx + 1 < size) grid[baseY + segH - 1][cx + 1] = { char: mand[1], type: 'mouth' };
+            }
+
+            // WINGS (if has wings, different types)
+            if (dna.hasWings && !isChild) {
+                const wingType = WING_TYPES[dna.wingTypeIdx % WING_TYPES.length];
+                const wingChars = wingType === 'insect' ? ['╱', '/', '/'] :
+                                  wingType === 'bat' ? ['╱', '╲', '│'] :
+                                  wingType === 'feather' ? ['╱', '│', '/'] : ['~', '≈', '∼'];
+
+                for (let w = 0; w < Math.min(3, wingChars.length); w++) {
+                    const wingY = thoraxY + w;
+                    if (wingY >= 0 && wingY < size) {
+                        if (cx - thoraxW - 1 >= 0) grid[wingY][cx - thoraxW - 1] = { char: wingChars[w], type: 'wing' };
+                        if (cx + thoraxW + 1 < size) {
+                            const rightChar = wingChars[w] === '╱' ? '╲' : (wingChars[w] === '╲' ? '╱' : wingChars[w]);
+                            grid[wingY][cx + thoraxW + 1] = { char: rightChar, type: 'wing' };
+                        }
+                    }
+                }
+            }
+
+            // STINGER (if has stinger)
+            if (dna.hasStinger && !isChild) {
+                const abdomenY = thoraxY + segH;
+                const stingerLen = 2;
+                for (let i = 0; i < stingerLen; i++) {
+                    const sy = abdomenY + i;
+                    if (sy >= 0 && sy < size && cx >= 0 && cx < size) {
+                        grid[sy][cx] = { char: i === stingerLen - 1 ? '▼' : '│', type: 'spike' };
+                    }
+                }
+            }
+        }
+
+        function renderReptilian(grid, size, cx, cy, dna, random, isChild) {
+            const bodyTexture = BODY_TEXTURES[dna.bodyTextureIdx];
+            const eyeStyle = EYE_STYLES[dna.eyeStyleIdx];
+            const armStyle = ARM_STYLES[dna.armStyleIdx % ARM_STYLES.length];
+            const legStyle = LEG_STYLES[dna.legStyleIdx % LEG_STYLES.length];
+
+            const headY = isChild ? 4 : 5;
+            const bodyY = isChild ? 7 : 9;
+            const bodyH = dna.bodyHeight || (isChild ? 3 : 4);
+            const bodyW = isChild ? 2 : 3;
+
+            // HEAD (variable shapes)
+            const headShape = dna.headShape || 'triangle';
+            if (headShape === 'triangle') {
+                for (let y = 0; y < 3; y++) {
+                    const w = 3 - y;
+                    for (let x = -w; x <= w; x++) {
+                        if (headY + y >= 0 && headY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[headY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            } else if (headShape === 'square') {
+                for (let y = 0; y < 3; y++) {
+                    for (let x = -2; x <= 2; x++) {
+                        if (headY + y >= 0 && headY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[headY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            } else if (headShape === 'round') {
+                const positions = [
+                    [0, -2, -1, 0, 1, 2],
+                    [-2, -1, 0, 1, 2],
+                    [0, -2, -1, 0, 1, 2]
+                ];
+                for (let y = 0; y < positions.length; y++) {
+                    for (let x of positions[y]) {
+                        if (headY + y >= 0 && headY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[headY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            } else { // flat
+                for (let y = 0; y < 2; y++) {
+                    for (let x = -3; x <= 3; x++) {
+                        if (headY + y >= 0 && headY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[headY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            }
+
+            // HORNS (if has horns)
+            if (dna.hasHorns && !isChild) {
+                if (headY - 1 >= 0) {
+                    if (cx - 2 >= 0) grid[headY - 1][cx - 2] = { char: '▲', type: 'horn' };
+                    if (cx + 2 < size) grid[headY - 1][cx + 2] = { char: '▲', type: 'horn' };
+                }
+            }
+
+            // EYES (variable count)
+            const numEyes = dna.numEyes || 2;
+            if (headY + 1 >= 0 && headY + 1 < size) {
+                if (numEyes === 1) {
+                    if (cx >= 0 && cx < size) grid[headY + 1][cx] = { char: eyeStyle, type: 'eye' };
+                } else if (numEyes === 2) {
+                    if (cx - 1 >= 0) grid[headY + 1][cx - 1] = { char: eyeStyle, type: 'eye' };
+                    if (cx + 1 < size) grid[headY + 1][cx + 1] = { char: eyeStyle, type: 'eye' };
+                } else if (numEyes === 3) {
+                    if (cx - 2 >= 0) grid[headY + 1][cx - 2] = { char: eyeStyle, type: 'eye' };
+                    if (cx >= 0 && cx < size) grid[headY + 1][cx] = { char: eyeStyle, type: 'eye' };
+                    if (cx + 2 < size) grid[headY + 1][cx + 2] = { char: eyeStyle, type: 'eye' };
+                }
+            }
+
+            // BODY (rectangular)
+            for (let y = 0; y < bodyH; y++) {
+                for (let x = -bodyW; x <= bodyW; x++) {
+                    if (bodyY + y >= 0 && bodyY + y < size && cx + x >= 0 && cx + x < size) {
+                        grid[bodyY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                    }
+                }
+            }
+
+            // ARMS (variable count and style)
+            const numArms = dna.numArms || 2;
+            if (numArms > 0) {
+                const armY = bodyY + 1;
+                const armLen = isChild ? 2 : 3;
+                if (armY >= 0 && armY < size) {
+                    if (numArms >= 2) {
+                        for (let i = 0; i < armLen; i++) {
+                            if (cx - bodyW - 1 - i >= 0) grid[armY][cx - bodyW - 1 - i] = { char: armStyle.chars[i % armStyle.chars.length], type: 'arm' };
+                            if (cx + bodyW + 1 + i < size) grid[armY][cx + bodyW + 1 + i] = { char: armStyle.chars[i % armStyle.chars.length], type: 'arm' };
+                        }
+                    }
+                    if (numArms === 1 && cx >= 0 && cx < size) {
+                        for (let i = 0; i < armLen; i++) {
+                            if (cx + bodyW + 1 + i < size) grid[armY][cx + bodyW + 1 + i] = { char: armStyle.chars[i % armStyle.chars.length], type: 'arm' };
+                        }
+                    }
+                }
+            }
+
+            // LEGS (variable count and style)
+            const numLegs = dna.numLegs || 2;
+            const legY = bodyY + bodyH;
+            const legLen = isChild ? 2 : 3;
+            const legPositions = numLegs === 4 ? [cx - 2, cx - 1, cx + 1, cx + 2] :
+                                numLegs === 2 ? [cx - 1, cx + 1] :
+                                numLegs === 1 ? [cx] : [];
+            for (let legPos of legPositions) {
+                if (legPos >= 0 && legPos < size) {
+                    for (let i = 0; i < legLen; i++) {
+                        if (legY + i < size) {
+                            grid[legY + i][legPos] = { char: legStyle.chars[i % legStyle.chars.length], type: 'leg' };
+                        }
+                    }
+                }
+            }
+
+            // SPINES (if has spines, variable count)
+            if (dna.hasSpines && !isChild) {
+                const spikeCount = dna.spineCount || 3;
+                for (let i = 0; i < spikeCount; i++) {
+                    const spikeY = bodyY + Math.floor(i * bodyH / spikeCount);
+                    if (spikeY >= 0 && spikeY < size && cx >= 0 && cx < size) {
+                        grid[spikeY][cx] = { char: '▲', type: 'spike' };
+                    }
+                }
+            }
+
+            // TAIL (if has tail, different styles)
+            if (dna.hasTail) {
+                const tailStyles = TAIL_STYLES;
+                const tailStyle = tailStyles[dna.tailStyleIdx % tailStyles.length];
+                const tailY = bodyY + bodyH;
+                const tailLen = isChild ? 2 : 3;
+
+                for (let i = 0; i < tailLen; i++) {
+                    if (tailY + i < size && cx + bodyW + 1 + i < size) {
+                        const char = tailStyle === 'spike' ? (i === tailLen - 1 ? '▶' : '─') :
+                                    tailStyle === 'curl' ? (i % 2 === 0 ? '╯' : '╰') :
+                                    tailStyle === 'fan' ? (i === tailLen - 1 ? '▷' : '─') :
+                                    tailStyle === 'club' ? (i === tailLen - 1 ? '●' : '─') : '~';
+                        grid[tailY + i][cx + bodyW + 1 + i] = { char, type: 'tail' };
+                    }
+                }
+            }
+        }
+
+        function renderMammalian(grid, size, cx, cy, dna, random, isChild) {
+            const bodyTexture = BODY_TEXTURES[dna.bodyTextureIdx];
+            const eyeStyle = EYE_STYLES[dna.eyeStyleIdx];
+            const armStyle = ARM_STYLES[dna.armStyleIdx % ARM_STYLES.length];
+            const legStyle = LEG_STYLES[dna.legStyleIdx % LEG_STYLES.length];
+
+            const headY = isChild ? 4 : 5;
+            const bodyY = isChild ? 7 : 9;
+            const bodyH = isChild ? 3 : 4;
+            const bodyW = isChild ? 2 : 3;
+
+            // HEAD (variable shapes based on bodyShape)
+            const bodyShape = dna.bodyShape || 'round';
+            const headR = bodyShape === 'square' ? 2 : (bodyShape === 'oval' ? 3 : 2);
+
+            if (bodyShape === 'round' || bodyShape === 'oval') {
+                const adjustR = bodyShape === 'oval' ? 1.5 : 1;
+                for (let y = -headR; y <= headR; y++) {
+                    for (let x = -headR; x <= headR; x++) {
+                        if ((x*x) / (headR*headR) + (y*y*adjustR*adjustR) / (headR*headR) <= 1) {
+                            const posY = headY + y;
+                            const posX = cx + x;
+                            if (posX >= 0 && posX < size && posY >= 0 && posY < size) {
+                                grid[posY][posX] = { char: bodyTexture, type: 'body' };
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Square head
+                for (let y = -2; y <= 2; y++) {
+                    for (let x = -2; x <= 2; x++) {
+                        const posY = headY + y;
+                        const posX = cx + x;
+                        if (posX >= 0 && posX < size && posY >= 0 && posY < size) {
+                            grid[posY][posX] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            }
+
+            // EARS (variable styles)
+            const earStyle = dna.earStyle || 'triangle';
+            if (earStyle === 'triangle') {
+                if (headY - 2 >= 0) {
+                    if (cx - 2 >= 0) grid[headY - 2][cx - 2] = { char: '△', type: 'ear' };
+                    if (cx + 2 < size) grid[headY - 2][cx + 2] = { char: '△', type: 'ear' };
+                }
+            } else if (earStyle === 'round') {
+                if (headY - 2 >= 0) {
+                    if (cx - 2 >= 0) grid[headY - 2][cx - 2] = { char: '◯', type: 'ear' };
+                    if (cx + 2 < size) grid[headY - 2][cx + 2] = { char: '◯', type: 'ear' };
+                }
+            } else if (earStyle === 'long') {
+                for (let i = 0; i < 2; i++) {
+                    if (headY - 2 - i >= 0) {
+                        if (cx - 2 >= 0) grid[headY - 2 - i][cx - 2] = { char: '│', type: 'ear' };
+                        if (cx + 2 < size) grid[headY - 2 - i][cx + 2] = { char: '│', type: 'ear' };
+                    }
+                }
+            }
+
+            // EYES (variable count)
+            const numEyes = dna.numEyes || 2;
+            if (headY >= 0 && headY < size) {
+                if (numEyes === 1) {
+                    if (cx >= 0 && cx < size) grid[headY][cx] = { char: eyeStyle, type: 'eye' };
+                } else if (numEyes === 2) {
+                    if (cx - 1 >= 0) grid[headY][cx - 1] = { char: eyeStyle, type: 'eye' };
+                    if (cx + 1 < size) grid[headY][cx + 1] = { char: eyeStyle, type: 'eye' };
+                }
+            }
+
+            // NOSE (variable styles if has nose)
+            if (dna.hasNose) {
+                const noseStyle = dna.noseStyle || 'triangle';
+                if (headY + 1 >= 0 && headY + 1 < size && cx >= 0 && cx < size) {
+                    const noseChar = noseStyle === 'triangle' ? '▼' : (noseStyle === 'circle' ? '●' : '─');
+                    grid[headY + 1][cx] = { char: noseChar, type: 'nose' };
+                }
+            }
+
+            // BODY (variable shapes with fur pattern)
+            const furPattern = dna.furPattern || 'solid';
+            for (let y = 0; y < bodyH; y++) {
+                const w = bodyShape === 'oval' ? (bodyW - Math.floor(Math.abs(y - bodyH/2) * 0.5)) :
+                          bodyShape === 'square' ? bodyW : (bodyW - Math.floor(Math.abs(y - bodyH/2)));
+
+                for (let x = -w; x <= w; x++) {
+                    if (bodyY + y >= 0 && bodyY + y < size && cx + x >= 0 && cx + x < size) {
+                        let char = bodyTexture;
+                        // Apply fur pattern
+                        if (furPattern === 'striped' && y % 2 === 0) char = BODY_TEXTURES[(dna.bodyTextureIdx + 1) % BODY_TEXTURES.length];
+                        else if (furPattern === 'spotted' && (x + y) % 3 === 0) char = BODY_TEXTURES[(dna.bodyTextureIdx + 2) % BODY_TEXTURES.length];
+                        else if (furPattern === 'patchy' && Math.abs(x) % 2 === 0) char = BODY_TEXTURES[(dna.bodyTextureIdx + 1) % BODY_TEXTURES.length];
+
+                        grid[bodyY + y][cx + x] = { char, type: 'body' };
+                    }
+                }
+            }
+
+            // ARMS (variable count)
+            const numArms = dna.numArms || 2;
+            if (numArms > 0) {
+                const armY = bodyY + 1;
+                const armLen = isChild ? 2 : 3;
+                if (armY >= 0 && armY < size) {
+                    if (numArms >= 2) {
+                        for (let i = 0; i < armLen; i++) {
+                            if (cx - bodyW - 1 - i >= 0) grid[armY][cx - bodyW - 1 - i] = { char: armStyle.chars[i % armStyle.chars.length], type: 'arm' };
+                            if (cx + bodyW + 1 + i < size) grid[armY][cx + bodyW + 1 + i] = { char: armStyle.chars[i % armStyle.chars.length], type: 'arm' };
+                        }
+                    }
+                    if (numArms === 4) {
+                        // Add second pair of arms
+                        const armY2 = bodyY + 2;
+                        if (armY2 >= 0 && armY2 < size) {
+                            for (let i = 0; i < armLen; i++) {
+                                if (cx - bodyW - 1 - i >= 0) grid[armY2][cx - bodyW - 1 - i] = { char: armStyle.chars[i % armStyle.chars.length], type: 'arm' };
+                                if (cx + bodyW + 1 + i < size) grid[armY2][cx + bodyW + 1 + i] = { char: armStyle.chars[i % armStyle.chars.length], type: 'arm' };
+                            }
+                        }
+                    }
+                }
+            }
+
+            // LEGS (variable count)
+            const numLegs = dna.numLegs || 2;
+            const legY = bodyY + bodyH;
+            const legLen = isChild ? 2 : 3;
+            const legPositions = numLegs === 4 ? [cx - 2, cx - 1, cx + 1, cx + 2] :
+                                numLegs === 2 ? [cx - 1, cx + 1] : [];
+            for (let legPos of legPositions) {
+                if (legPos >= 0 && legPos < size) {
+                    for (let i = 0; i < legLen; i++) {
+                        if (legY + i < size) {
+                            grid[legY + i][legPos] = { char: legStyle.chars[i % legStyle.chars.length], type: 'leg' };
+                        }
+                    }
+                }
+            }
+
+            // TAIL (if has tail, variable length)
+            if (dna.hasTail) {
+                const tailLen = dna.tailLength || (isChild ? 2 : 3);
+                for (let i = 0; i < tailLen; i++) {
+                    if (bodyY + bodyH - 1 + i < size && cx + bodyW + 1 + i < size) {
+                        grid[bodyY + bodyH - 1 + i][cx + bodyW + 1 + i] = { char: i === tailLen - 1 ? '○' : '~', type: 'tail' };
+                    }
+                }
+            }
+        }
+
+        function renderViral(grid, size, cx, cy, dna, random, isChild) {
+            const bodyTexture = BODY_TEXTURES[dna.bodyTextureIdx];
+            const eyeStyle = EYE_STYLES[dna.eyeStyleIdx];
+
+            const coreR = dna.coreSize || (isChild ? 2 : 3);
+
+            // CORE (circular with texture)
+            for (let y = -coreR; y <= coreR; y++) {
+                for (let x = -coreR; x <= coreR; x++) {
+                    if (x*x + y*y <= coreR*coreR) {
+                        const posY = cy + y;
+                        const posX = cx + x;
+                        if (posX >= 0 && posX < size && posY >= 0 && posY < size) {
+                            grid[posY][posX] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            }
+
+            // EYES (variable count and pattern)
+            const numEyes = dna.numEyes || 2;
+            const eyePattern = dna.eyePattern || 'centered';
+
+            if (numEyes > 0 && cy >= 0 && cy < size) {
+                if (eyePattern === 'centered') {
+                    if (numEyes === 1) {
+                        if (cx >= 0 && cx < size) grid[cy][cx] = { char: eyeStyle, type: 'eye' };
+                    } else if (numEyes === 2) {
+                        if (cx - 1 >= 0) grid[cy][cx - 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 1 < size) grid[cy][cx + 1] = { char: eyeStyle, type: 'eye' };
+                    } else if (numEyes === 3) {
+                        if (cx - 1 >= 0) grid[cy][cx - 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx >= 0 && cx < size) grid[cy][cx] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 1 < size) grid[cy][cx + 1] = { char: eyeStyle, type: 'eye' };
+                    } else if (numEyes === 4) {
+                        if (cx - 1 >= 0 && cy - 1 >= 0) grid[cy - 1][cx - 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 1 < size && cy - 1 >= 0) grid[cy - 1][cx + 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx - 1 >= 0 && cy + 1 < size) grid[cy + 1][cx - 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 1 < size && cy + 1 < size) grid[cy + 1][cx + 1] = { char: eyeStyle, type: 'eye' };
+                    }
+                } else if (eyePattern === 'scattered') {
+                    // Scatter eyes around the core
+                    const eyePositions = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+                    for (let i = 0; i < Math.min(numEyes, 4); i++) {
+                        const [dx, dy] = eyePositions[i];
+                        if (cx + dx >= 0 && cx + dx < size && cy + dy >= 0 && cy + dy < size) {
+                            grid[cy + dy][cx + dx] = { char: eyeStyle, type: 'eye' };
+                        }
+                    }
+                } else if (eyePattern === 'ring') {
+                    // Ring of eyes around the core
+                    for (let i = 0; i < numEyes; i++) {
+                        const angle = (i / numEyes) * Math.PI * 2;
+                        const ex = cx + Math.round(Math.cos(angle) * (coreR - 1));
+                        const ey = cy + Math.round(Math.sin(angle) * (coreR - 1));
+                        if (ex >= 0 && ex < size && ey >= 0 && ey < size) {
+                            grid[ey][ex] = { char: eyeStyle, type: 'eye' };
+                        }
+                    }
+                }
+            }
+
+            // SPIKES (variable count, length, and style)
+            const spikeCount = dna.spikeCount || (isChild ? 6 : 8);
+            const spikeLen = dna.spikeLength || (isChild ? 2 : 3);
+            const spikeStyle = dna.spikeStyle || 'straight';
+
+            for (let i = 0; i < spikeCount; i++) {
+                const angle = (i / spikeCount) * Math.PI * 2;
+                const dx = Math.cos(angle);
+                const dy = Math.sin(angle);
+
+                for (let j = 1; j <= spikeLen; j++) {
+                    let spikeX = cx + Math.round(dx * (coreR + j));
+                    let spikeY = cy + Math.round(dy * (coreR + j));
+
+                    // Apply spike style
+                    if (spikeStyle === 'curved') {
+                        spikeX += Math.round(Math.sin(j * 0.5) * 0.5);
+                        spikeY += Math.round(Math.cos(j * 0.5) * 0.5);
+                    } else if (spikeStyle === 'zigzag') {
+                        spikeX += (j % 2 === 0 ? 1 : -1) * Math.round(Math.abs(dx) * 0.5);
+                        spikeY += (j % 2 === 0 ? 1 : -1) * Math.round(Math.abs(dy) * 0.5);
+                    }
+
+                    if (spikeX >= 0 && spikeX < size && spikeY >= 0 && spikeY < size) {
+                        grid[spikeY][spikeX] = { char: j === spikeLen ? '●' : '│', type: 'spike' };
+                    }
+                }
+            }
+
+            // TENTACLES (if has tentacles)
+            if (dna.hasTentacles && !isChild) {
+                const tentacleCount = dna.tentacleCount || 4;
+                for (let i = 0; i < tentacleCount; i++) {
+                    const angle = (i / tentacleCount) * Math.PI * 2 + Math.PI / 8;
+                    const tentacleLen = 3;
+                    for (let j = 1; j <= tentacleLen; j++) {
+                        const tx = cx + Math.round(Math.cos(angle) * (coreR + j));
+                        const ty = cy + Math.round(Math.sin(angle) * (coreR + j));
+                        if (tx >= 0 && tx < size && ty >= 0 && ty < size) {
+                            grid[ty][tx] = { char: '~', type: 'tentacle' };
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderSkeletal(grid, size, cx, cy, dna, random, isChild) {
+            const bodyTexture = BODY_TEXTURES[dna.bodyTextureIdx];
+            const eyeStyle = EYE_STYLES[dna.eyeStyleIdx];
+
+            const headY = isChild ? 4 : 5;
+            const bodyY = isChild ? 7 : 9;
+            const bodyH = isChild ? 3 : 4;
+
+            // SKULL (variable shapes)
+            const skullShape = dna.skullShape || 'human';
+            const skullW = isChild ? 2 : 3;
+
+            if (skullShape === 'human') {
+                for (let y = 0; y < 3; y++) {
+                    for (let x = -skullW; x <= skullW; x++) {
+                        if (headY + y >= 0 && headY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[headY + y][cx + x] = { char: y === 0 ? '▀' : bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            } else if (skullShape === 'beast') {
+                // Elongated snout
+                for (let y = 0; y < 3; y++) {
+                    const w = y === 0 ? skullW : (y === 1 ? skullW + 1 : skullW + 2);
+                    for (let x = -skullW; x <= w; x++) {
+                        if (headY + y >= 0 && headY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[headY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            } else { // alien
+                // Large cranium
+                for (let y = 0; y < 4; y++) {
+                    const w = y < 2 ? skullW + 1 : skullW;
+                    for (let x = -w; x <= w; x++) {
+                        if (headY + y >= 0 && headY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[headY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            }
+
+            // EYE SOCKETS
+            if (headY + 1 >= 0 && headY + 1 < size) {
+                if (cx - 1 >= 0) grid[headY + 1][cx - 1] = { char: eyeStyle, type: 'eye' };
+                if (cx + 1 < size) grid[headY + 1][cx + 1] = { char: eyeStyle, type: 'eye' };
+            }
+
+            // JAW (variable types)
+            const jawType = dna.jawType || 'closed';
+            if (headY + 2 >= 0 && headY + 2 < size) {
+                if (jawType === 'open') {
+                    if (cx - 1 >= 0) grid[headY + 2][cx - 1] = { char: '╰', type: 'mouth' };
+                    if (cx >= 0 && cx < size) grid[headY + 2][cx] = { char: '─', type: 'mouth' };
+                    if (cx + 1 < size) grid[headY + 2][cx + 1] = { char: '╯', type: 'mouth' };
+                } else if (jawType === 'wide') {
+                    for (let x = -2; x <= 2; x++) {
+                        if (cx + x >= 0 && cx + x < size) {
+                            grid[headY + 2][cx + x] = { char: '▼', type: 'mouth' };
+                        }
+                    }
+                }
+            }
+
+            // RIBCAGE (variable rib count and bone style)
+            const ribCount = dna.ribCount || (isChild ? 3 : 4);
+            const boneStyle = dna.boneStyle || 'thin';
+            const ribChar = boneStyle === 'thick' ? '┃' : (boneStyle === 'ornate' ? '║' : '│');
+            const spineChar = boneStyle === 'thick' ? '━' : (boneStyle === 'ornate' ? '═' : '─');
+
+            for (let y = 0; y < ribCount; y++) {
+                if (bodyY + y >= 0 && bodyY + y < size) {
+                    const ribW = isChild ? 2 : 3;
+                    if (cx - ribW >= 0) grid[bodyY + y][cx - ribW] = { char: ribChar, type: 'body' };
+                    if (cx + ribW < size) grid[bodyY + y][cx + ribW] = { char: ribChar, type: 'body' };
+
+                    // Ribs
+                    for (let x = -ribW + 1; x < ribW; x++) {
+                        if (cx + x >= 0 && cx + x < size) {
+                            grid[bodyY + y][cx + x] = { char: spineChar, type: 'body' };
+                        }
+                    }
+                }
+            }
+
+            // SPINE (if has spine)
+            if (dna.hasSpine) {
+                for (let y = 0; y < bodyH; y++) {
+                    if (bodyY + y >= 0 && bodyY + y < size && cx >= 0 && cx < size) {
+                        if (y % 2 === 1) { // Don't overwrite ribs
+                            grid[bodyY + y][cx] = { char: '┃', type: 'body' };
+                        }
+                    }
+                }
+            }
+
+            // ARM BONES (variable count)
+            const numArms = dna.numArms || 2;
+            if (numArms > 0) {
+                const armY = bodyY + 1;
+                const armLen = isChild ? 2 : 3;
+                if (armY >= 0 && armY < size) {
+                    if (numArms >= 2) {
+                        for (let i = 1; i <= armLen; i++) {
+                            if (cx - 3 - i >= 0) grid[armY][cx - 3 - i] = { char: spineChar, type: 'arm' };
+                            if (cx + 3 + i < size) grid[armY][cx + 3 + i] = { char: spineChar, type: 'arm' };
+                        }
+                    }
+                }
+            }
+
+            // LEG BONES (variable count)
+            const numLegs = dna.numLegs || 2;
+            const legY = bodyY + ribCount;
+            const legLen = isChild ? 2 : 3;
+            const legPositions = numLegs === 2 ? [cx - 1, cx + 1] : numLegs === 1 ? [cx] : [];
+
+            for (let legPos of legPositions) {
+                if (legPos >= 0 && legPos < size) {
+                    for (let i = 0; i < legLen; i++) {
+                        if (legY + i < size) {
+                            grid[legY + i][legPos] = { char: ribChar, type: 'leg' };
+                        }
+                    }
+                }
+            }
+
+            // EXTRA BONES (if has extra bones - random bone bits)
+            if (dna.hasExtraBones && !isChild) {
+                if (bodyY - 1 >= 0 && cx + 3 < size) grid[bodyY - 1][cx + 3] = { char: '╱', type: 'bone' };
+                if (bodyY >= 0 && cx - 3 >= 0) grid[bodyY][cx - 3] = { char: '╲', type: 'bone' };
+            }
+        }
+
+        function renderAlien(grid, size, cx, cy, dna, random, isChild) {
+            const bodyTexture = BODY_TEXTURES[dna.bodyTextureIdx];
+            const eyeStyle = EYE_STYLES[dna.eyeStyleIdx];
+            const antennaTip = ANTENNA_TIPS[dna.antennaTipIdx || 0];
+
+            const headY = isChild ? 4 : 5;
+            const bodyY = isChild ? 8 : 10;
+
+            // LARGE HEAD (variable sizes - aliens have BIG heads)
+            const headSize = dna.headSize || (isChild ? 3 : 4);
+            for (let y = 0; y < headSize; y++) {
+                const w = headSize - y;
+                for (let x = -w; x <= w; x++) {
+                    if (headY + y >= 0 && headY + y < size && cx + x >= 0 && cx + x < size) {
+                        grid[headY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                    }
+                }
+            }
+
+            // EYES (variable count, size, and pattern)
+            const numEyes = dna.numEyes || 2;
+            const eyeSize = dna.eyeSize || 'large';
+            const eyePattern = dna.eyePattern || 'side';
+
+            if (headY + 1 >= 0 && headY + 2 < size) {
+                if (eyeSize === 'huge' || eyeSize === 'mega') {
+                    // HUGE eyes (3x3 or larger)
+                    const eyeW = eyeSize === 'mega' ? 2 : 1;
+                    if (numEyes >= 2) {
+                        for (let dy = 0; dy < 2; dy++) {
+                            for (let dx = 0; dx <= eyeW; dx++) {
+                                if (cx - 3 + dx >= 0 && cx - 3 + dx < size) {
+                                    grid[headY + 1 + dy][cx - 3 + dx] = { char: eyeStyle, type: 'eye' };
+                                }
+                                if (cx + 2 + dx >= 0 && cx + 2 + dx < size) {
+                                    grid[headY + 1 + dy][cx + 2 + dx] = { char: eyeStyle, type: 'eye' };
+                                }
+                            }
+                        }
+                    }
+                } else if (eyeSize === 'large') {
+                    // Large eyes (2x2)
+                    if (numEyes >= 2) {
+                        for (let dy = 0; dy < 2; dy++) {
+                            for (let dx = 0; dx < 2; dx++) {
+                                if (cx - 2 + dx >= 0 && cx - 2 + dx < size) {
+                                    grid[headY + 1 + dy][cx - 2 + dx] = { char: eyeStyle, type: 'eye' };
+                                }
+                                if (cx + 1 + dx >= 0 && cx + 1 + dx < size) {
+                                    grid[headY + 1 + dy][cx + 1 + dx] = { char: eyeStyle, type: 'eye' };
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Normal eyes
+                    if (numEyes === 1) {
+                        if (cx >= 0 && cx < size) grid[headY + 2][cx] = { char: eyeStyle, type: 'eye' };
+                    } else if (numEyes === 2) {
+                        if (cx - 1 >= 0) grid[headY + 2][cx - 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 1 < size) grid[headY + 2][cx + 1] = { char: eyeStyle, type: 'eye' };
+                    } else if (numEyes === 3) {
+                        if (cx - 2 >= 0) grid[headY + 2][cx - 2] = { char: eyeStyle, type: 'eye' };
+                        if (cx >= 0 && cx < size) grid[headY + 2][cx] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 2 < size) grid[headY + 2][cx + 2] = { char: eyeStyle, type: 'eye' };
+                    } else if (numEyes === 4) {
+                        if (cx - 2 >= 0) grid[headY + 1][cx - 2] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 2 < size) grid[headY + 1][cx + 2] = { char: eyeStyle, type: 'eye' };
+                        if (cx - 1 >= 0) grid[headY + 3][cx - 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 1 < size) grid[headY + 3][cx + 1] = { char: eyeStyle, type: 'eye' };
+                    }
+                }
+            }
+
+            // ANTENNAE (if has antennae)
+            if (dna.hasAntennae) {
+                const antennaCount = dna.antennaCount || 2;
+                const antennaLen = isChild ? 2 : 3;
+                const positions = antennaCount === 1 ? [0] :
+                                 antennaCount === 2 ? [-2, 2] :
+                                 antennaCount === 3 ? [-2, 0, 2] : [-3, -1, 1, 3];
+
+                for (let pos of positions.slice(0, antennaCount)) {
+                    for (let i = 1; i <= antennaLen; i++) {
+                        const antY = headY - i;
+                        if (antY >= 0 && cx + pos >= 0 && cx + pos < size) {
+                            grid[antY][cx + pos] = {
+                                char: i === antennaLen ? antennaTip : '│',
+                                type: 'antenna'
+                            };
+                        }
+                    }
+                }
+            }
+
+            // SMALL BODY (variable sizes)
+            const bodySize = dna.bodySize || (isChild ? 1 : 2);
+            const bodyH = isChild ? 2 : 3;
+            const bodyW = bodySize;
+
+            for (let y = 0; y < bodyH; y++) {
+                for (let x = -bodyW; x <= bodyW; x++) {
+                    if (bodyY + y >= 0 && bodyY + y < size && cx + x >= 0 && cx + x < size) {
+                        grid[bodyY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                    }
+                }
+            }
+
+            // ARMS (variable count - aliens can have many arms or none!)
+            const numArms = dna.numArms || 2;
+            if (numArms > 0) {
+                const armY = bodyY;
+                const armLen = isChild ? 2 : 3;
+                if (armY >= 0 && armY < size) {
+                    const armPositions = numArms === 1 ? [[1, 1]] :
+                                        numArms === 2 ? [[-1, -1], [1, 1]] :
+                                        numArms === 3 ? [[-1, -1], [0, 0], [1, 1]] :
+                                        [[-1, -1], [-1, 0], [1, 0], [1, 1]];
+
+                    for (let [side, yOffset] of armPositions.slice(0, numArms)) {
+                        const ay = armY + (yOffset < numArms / 2 ? 0 : 1);
+                        if (ay < size) {
+                            for (let i = 1; i <= armLen; i++) {
+                                const ax = cx + (bodyW + i) * side;
+                                if (ax >= 0 && ax < size) {
+                                    grid[ay][ax] = { char: '─', type: 'arm' };
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // LEGS (variable count - can have 0-2 legs)
+            const numLegs = dna.numLegs || 1;
+            const legY = bodyY + bodyH;
+            const legLen = isChild ? 2 : 3;
+
+            if (numLegs === 1) {
+                if (cx >= 0 && cx < size) {
+                    for (let i = 0; i < legLen; i++) {
+                        if (legY + i < size) {
+                            grid[legY + i][cx] = { char: '│', type: 'leg' };
+                        }
+                    }
+                }
+            } else if (numLegs === 2) {
+                for (let legPos of [cx - 1, cx + 1]) {
+                    if (legPos >= 0 && legPos < size) {
+                        for (let i = 0; i < legLen; i++) {
+                            if (legY + i < size) {
+                                grid[legY + i][legPos] = { char: '│', type: 'leg' };
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderAquatic(grid, size, cx, cy, dna, random, isChild) {
+            const bodyTexture = BODY_TEXTURES[dna.bodyTextureIdx];
+            const eyeStyle = EYE_STYLES[dna.eyeStyleIdx];
+
+            const bodyY = isChild ? 5 : 6;
+            const bodyLength = dna.bodyLength || (isChild ? 3 : 5);
+            const bodyShape = dna.bodyShape || 'fish';
+
+            // BODY (variable shapes)
+            if (bodyShape === 'fish') {
+                // Traditional fish shape
+                for (let y = 0; y < bodyLength; y++) {
+                    const w = Math.floor(4 - Math.abs(y - bodyLength/2) * 1.2);
+                    for (let x = -w; x <= w; x++) {
+                        if (bodyY + y >= 0 && bodyY + y < size && cx + x >= 0 && cx + x < size) {
+                            const char = dna.hasScales && (x + y) % 2 === 0 ?
+                                BODY_TEXTURES[(dna.bodyTextureIdx + 1) % BODY_TEXTURES.length] : bodyTexture;
+                            grid[bodyY + y][cx + x] = { char, type: 'body' };
+                        }
+                    }
+                }
+            } else if (bodyShape === 'eel') {
+                // Long thin eel
+                for (let y = 0; y < bodyLength; y++) {
+                    for (let x = -1; x <= 1; x++) {
+                        if (bodyY + y >= 0 && bodyY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[bodyY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            } else if (bodyShape === 'round') {
+                // Pufferfish/round
+                const r = Math.floor(bodyLength / 2);
+                for (let y = -r; y <= r; y++) {
+                    for (let x = -r; x <= r; x++) {
+                        if (x*x + y*y <= r*r) {
+                            const posY = bodyY + r + y;
+                            const posX = cx + x;
+                            if (posX >= 0 && posX < size && posY >= 0 && posY < size) {
+                                grid[posY][posX] = { char: bodyTexture, type: 'body' };
+                            }
+                        }
+                    }
+                }
+            } else { // flat (ray/skate)
+                const w = Math.floor(bodyLength * 0.8);
+                for (let y = 0; y < Math.floor(bodyLength/2); y++) {
+                    for (let x = -w; x <= w; x++) {
+                        if (bodyY + y >= 0 && bodyY + y < size && cx + x >= 0 && cx + x < size) {
+                            grid[bodyY + y][cx + x] = { char: bodyTexture, type: 'body' };
+                        }
+                    }
+                }
+            }
+
+            // EYES (variable position and count)
+            const numEyes = dna.numEyes || 2;
+            const eyePosition = dna.eyePosition || 'side';
+            const eyeY = bodyY + 1;
+
+            if (eyePosition === 'side' && numEyes >= 2) {
+                const eyeOffset = bodyShape === 'eel' ? 1 : (bodyShape === 'round' ? 2 : 3);
+                if (eyeY >= 0 && eyeY < size) {
+                    if (cx - eyeOffset >= 0) grid[eyeY][cx - eyeOffset] = { char: eyeStyle, type: 'eye' };
+                    if (cx + eyeOffset < size) grid[eyeY][cx + eyeOffset] = { char: eyeStyle, type: 'eye' };
+                }
+            } else if (eyePosition === 'top') {
+                if (bodyY >= 0 && bodyY < size) {
+                    if (numEyes === 1) {
+                        if (cx >= 0 && cx < size) grid[bodyY][cx] = { char: eyeStyle, type: 'eye' };
+                    } else if (numEyes === 2) {
+                        if (cx - 1 >= 0) grid[bodyY][cx - 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 1 < size) grid[bodyY][cx + 1] = { char: eyeStyle, type: 'eye' };
+                    }
+                }
+            } else if (eyePosition === 'front') {
+                if (eyeY >= 0 && eyeY < size) {
+                    if (numEyes === 1) {
+                        if (cx >= 0 && cx < size) grid[eyeY][cx] = { char: eyeStyle, type: 'eye' };
+                    } else if (numEyes === 2) {
+                        if (cx - 1 >= 0) grid[eyeY][cx - 1] = { char: eyeStyle, type: 'eye' };
+                        if (cx + 1 < size) grid[eyeY][cx + 1] = { char: eyeStyle, type: 'eye' };
+                    }
+                }
+            }
+
+            // FINS (variable count and style)
+            const finCount = dna.finCount || 3;
+            const finStyle = dna.finStyle || 'spike';
+
+            const finChars = finStyle === 'spike' ? ['/', '\\'] :
+                            finStyle === 'wave' ? ['~', '≈'] :
+                            ['(', ')'];
+
+            // Top/bottom fins
+            if (finCount >= 2) {
+                const finLen = isChild ? 2 : 3;
+                for (let i = 1; i <= finLen; i++) {
+                    const finY1 = bodyY - i;
+                    const finY2 = bodyY + bodyLength - 1 + i;
+                    if (finY1 >= 0 && cx >= 0 && cx < size) {
+                        grid[finY1][cx] = { char: finChars[0], type: 'fin' };
+                    }
+                    if (finY2 < size && cx >= 0 && cx < size) {
+                        grid[finY2][cx] = { char: finChars[1], type: 'fin' };
+                    }
+                }
+            }
+
+            // Side fins
+            if (finCount >= 3) {
+                const sideFinY = bodyY + Math.floor(bodyLength / 2);
+                if (sideFinY >= 0 && sideFinY < size) {
+                    const sideFinLen = isChild ? 1 : 2;
+                    for (let i = 1; i <= sideFinLen; i++) {
+                        const offset = bodyShape === 'eel' ? 2 : (bodyShape === 'round' ? 3 : 4);
+                        if (cx - offset - i >= 0) grid[sideFinY][cx - offset - i] = { char: '─', type: 'fin' };
+                        if (cx + offset + i < size) grid[sideFinY][cx + offset + i] = { char: '─', type: 'fin' };
+                    }
+                }
+            }
+
+            // TAIL (variable types)
+            const tailType = dna.tailType || 'fan';
+            const tailStartX = cx + (bodyShape === 'eel' ? 2 : (bodyShape === 'round' ? 3 : 5));
+
+            if (tailType === 'fan') {
+                // Fan tail
+                const tailY = bodyY + Math.floor(bodyLength / 2);
+                if (tailY >= 0 && tailY < size && tailStartX < size) {
+                    grid[tailY][tailStartX] = { char: '>', type: 'tail' };
+                    if (tailStartX + 1 < size) {
+                        grid[tailY - 1][tailStartX + 1] = { char: '/', type: 'tail' };
+                        grid[tailY][tailStartX + 1] = { char: '─', type: 'tail' };
+                        grid[tailY + 1][tailStartX + 1] = { char: '\\', type: 'tail' };
+                    }
+                }
+            } else if (tailType === 'point') {
+                // Pointed tail
+                const tailY = bodyY + Math.floor(bodyLength / 2);
+                if (tailY >= 0 && tailY < size) {
+                    for (let i = 0; i < 3 && tailStartX + i < size; i++) {
+                        grid[tailY][tailStartX + i] = { char: i === 2 ? '▶' : '─', type: 'tail' };
+                    }
+                }
+            } else { // split
+                // Split tail
+                const tailY = bodyY + Math.floor(bodyLength / 2);
+                if (tailY >= 0 && tailY < size && tailStartX < size) {
+                    grid[tailY - 1][tailStartX] = { char: '/', type: 'tail' };
+                    grid[tailY + 1][tailStartX] = { char: '\\', type: 'tail' };
+                    if (tailStartX + 1 < size) {
+                        grid[tailY - 1][tailStartX + 1] = { char: '/', type: 'tail' };
+                        grid[tailY + 1][tailStartX + 1] = { char: '\\', type: 'tail' };
+                    }
+                }
+            }
+
+            // TENTACLES (if has tentacles - like jellyfish)
+            if (dna.hasTentacles && !isChild) {
+                const tentacleCount = dna.tentacleCount || 4;
+                const tentacleY = bodyY + bodyLength;
+                for (let i = 0; i < tentacleCount; i++) {
+                    const tx = cx - Math.floor(tentacleCount/2) + i;
+                    const tentacleLen = 2 + (i % 2);
+                    for (let j = 0; j < tentacleLen; j++) {
+                        if (tentacleY + j < size && tx >= 0 && tx < size) {
+                            grid[tentacleY + j][tx] = { char: '~', type: 'tentacle' };
+                        }
+                    }
+                }
+            }
+        }
+
+        // ═══ ANIMATION ENGINE ═══
+        class CreatureAnimator {
+            constructor(creature, canvas) {
+                this.creature = creature;
+                this.canvas = canvas;
+                this.ctx = canvas.getContext('2d');
+                this.running = false;
+                this.time = 0;
+
+                const tempConfig = temperaments.find(t => t.name === creature.dna.temperament);
+                this.tempConfig = tempConfig || temperaments[0];
+
+                const fontSize = creature.size === 24 ? 9 : 8;
+                this.fontSize = fontSize;
+                this.lineHeight = fontSize;
+
+                this.ctx.font = `${fontSize}px "Courier New", monospace`;
+                this.ctx.textBaseline = 'top';
+                this.ctx.textAlign = 'left';
+
+                const metrics = this.ctx.measureText('█');
+                this.charWidth = metrics.width;
+
+                canvas.width = creature.size * this.charWidth;
+                canvas.height = creature.size * this.lineHeight;
+
+                this.color = familyColors[creature.family].rgb;
+            }
+
+            start() {
+                this.running = true;
+                this.animate();
+            }
+
+            stop() {
+                this.running = false;
+            }
+
+            animate() {
+                if (!this.running) return;
+
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.ctx.font = `${this.fontSize}px "Courier New", monospace`;
+                this.ctx.textBaseline = 'top';
+                this.ctx.textAlign = 'left';
+
+                this.time += this.tempConfig.speed * 0.016;
+
+                const glitchChance = this.tempConfig.glitchChance;
+                const charCorruptChance = this.tempConfig.charCorrupt;
+                const isGlitching = Math.random() < glitchChance;
+
+                const corruptChars = ['█', '▓', '▒', '░', '▀', '▄', '■', '□', '▪', '▫'];
+
+                for (let y = 0; y < this.creature.size; y++) {
+                    let rowOffsetX = 0;
+
+                    // Row corruption for chaotic temperaments
+                    if (isGlitching && this.tempConfig.speed > 4) {
+                        if (Math.random() < 0.1) {
+                            rowOffsetX = (Math.random() - 0.5) * 6;
+                        }
+                    }
+
+                    for (let x = 0; x < this.creature.size; x++) {
+                        const cell = this.creature.grid[y][x];
+                        if (!cell || cell.char === ' ') continue;
+
+                        let char = cell.char;
+                        const type = cell.type;
+
+                        // Character corruption
+                        if (isGlitching && Math.random() < charCorruptChance) {
+                            char = corruptChars[Math.floor(Math.random() * corruptChars.length)];
+                        }
+
+                        let posX = x * this.charWidth;
+                        let posY = y * this.lineHeight;
+
+                        // TYPE-SPECIFIC ANIMATIONS
+                        if (type === 'body') {
+                            const breatheOffset = Math.sin(this.time + x * 0.1) * 1.5;
+                            posY += breatheOffset;
+                        } else if (type === 'eye') {
+                            // Blinking
+                            if (Math.sin(this.time * 0.5) < -0.95) {
+                                char = '─';
+                            }
+                            // Eye darting for energetic
+                            if (this.tempConfig.speed > 3) {
+                                posX += Math.sin(this.time * 2 + y) * 1.5;
+                            }
+                        } else if (type === 'arm' || type === 'fin') {
+                            // Wave motion
+                            const waveY = Math.sin(this.time * 1.5 + y * 0.5) * 2.5;
+                            posY += waveY;
+                        } else if (type === 'leg') {
+                            // March motion
+                            const marchY = Math.sin(this.time * 2 + x * 1.5) * 2;
+                            posY += marchY;
+                        } else if (type === 'antenna' || type === 'wing') {
+                            // Wobble
+                            const wobbleX = Math.sin(this.time + x * 0.3) * 2;
+                            posX += wobbleX;
+                        } else if (type === 'spike') {
+                            // Pulse
+                            const pulseScale = 1 + Math.sin(this.time * 2 + x) * 0.1;
+                            this.ctx.save();
+                            this.ctx.translate(posX, posY);
+                            this.ctx.scale(pulseScale, pulseScale);
+                            this.ctx.translate(-posX, -posY);
+                        }
+
+                        // Position glitch
+                        if (isGlitching) {
+                            const glitchMult = this.tempConfig.speed / 2;
+                            posX += (Math.random() - 0.5) * glitchMult;
+                            posY += (Math.random() - 0.5) * glitchMult;
+                        }
+
+                        posX += rowOffsetX;
+
+                        // Color with RGB split for chaotic
+                        let color = this.color;
+                        if (isGlitching && this.tempConfig.speed > 4) {
+                            const colors = ['#ff0000', '#00ff00', '#0000ff', this.color];
+                            color = colors[Math.floor(Math.random() * colors.length)];
+                        }
+
+                        this.ctx.fillStyle = color;
+                        this.ctx.fillText(char, posX, posY);
+
+                        if (type === 'spike') {
+                            this.ctx.restore();
+                        }
+                    }
+                }
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        function selectFamily(family) {
+            currentFamily = family;
+
+            document.querySelectorAll('.family-btn').forEach(btn => {
+                if (btn.dataset.family === family) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            document.getElementById('currentFamilyName').textContent = familyColors[family].name;
+            displayFamily(family);
+        }
+
+        let spreaderCounter = 0;
+
+        function generateSpreader() {
+            const uniqueSeed = (Date.now() + spreaderCounter) * 99991 +
+                              Math.random() * 10000000 +
+                              spreaderCounter++ * 314159;
+            const spreader = generateASCIICreature(24, currentFamily, uniqueSeed);
+            familyData[currentFamily].spreaders.push(spreader);
+            displayFamily(currentFamily);
+            updateStats();
+        }
+
+        function generateBatch() {
+            for (let i = 0; i < 6; i++) {
+                generateSpreader();
+            }
+        }
+
+        function generateChildren(spreaderData, count = 3) {
+            for (let i = 0; i < count; i++) {
+                const childSeed = (spreaderData.seed % 1000000) * (i + 2) * 13337 +
+                                 Date.now() * (i + 1) +
+                                 Math.random() * 10000000 +
+                                 i * 987654;
+
+                const child = generateASCIICreature(16, spreaderData.family, childSeed, spreaderData.dna);
+                child.parentId = spreaderData.id;
+                familyData[spreaderData.family].children.push(child);
+            }
+            displayFamily(currentFamily);
+            updateStats();
+        }
+
+        function displayFamily(family) {
+            // Stop all existing animators
+            Object.values(animators).forEach(anim => anim.stop());
+            animators = {};
+
+            document.getElementById('spreaders').innerHTML = '';
+            document.getElementById('children').innerHTML = '';
+
+            // Display spreaders
+            familyData[family].spreaders.forEach(spreader => {
+                const card = document.createElement('div');
+                card.className = 'spreader-card';
+                card.dataset.spreaderId = spreader.id;
+                card.onclick = () => generateChildren(spreader);
+
+                card.onmouseenter = () => {
+                    document.querySelectorAll(`.child-card[data-parent-id="${spreader.id}"]`).forEach(c => {
+                        c.classList.add('highlight-parent');
+                    });
+                };
+                card.onmouseleave = () => {
+                    document.querySelectorAll('.child-card').forEach(c => {
+                        c.classList.remove('highlight-parent');
+                    });
+                };
+
+                const canvas = document.createElement('canvas');
+                canvas.className = 'creature-canvas';
+
+                const animator = new CreatureAnimator(spreader, canvas);
+                animators[spreader.id] = animator;
+                animator.start();
+
+                const info = document.createElement('div');
+                info.className = 'creature-info';
+                info.innerHTML = `
+                    ID: ${spreader.id.substr(0,6)} | CLICK TO BREED
+                    <span class="species-badge">${getSpeciesIcon(spreader.dna.species)} ${spreader.dna.species}</span>
+                    <span class="temperament-badge temp-${spreader.dna.temperament}">${spreader.dna.temperament}</span>
+                `;
+
+                const traitsDiv = document.createElement('div');
+                traitsDiv.className = 'dna-traits';
+                traitsDiv.innerHTML = `
+                    <div class="dna-trait">Fill: ${spreader.dna.bodyChar}</div>
+                    <div class="dna-trait">Eyes: ${spreader.dna.eyeChar}</div>
+                    <div class="dna-trait">Arms: ${spreader.dna.armStyle}</div>
+                    <div class="dna-trait">Legs: ${spreader.dna.legStyle}</div>
+                    ${spreader.dna.hasWings ? `<div class="dna-trait">Wings</div>` : ''}
+                    ${spreader.dna.hasSpikes ? `<div class="dna-trait">Spikes</div>` : ''}
+                `;
+
+                card.appendChild(canvas);
+                card.appendChild(info);
+                card.appendChild(traitsDiv);
+                document.getElementById('spreaders').appendChild(card);
+            });
+
+            // Display children
+            familyData[family].children.forEach(child => {
+                const card = document.createElement('div');
+                card.className = 'child-card';
+                card.dataset.parentId = child.parentId;
+
+                const parent = familyData[family].spreaders.find(s => s.id === child.parentId);
+
+                const canvas = document.createElement('canvas');
+                canvas.className = 'creature-canvas';
+
+                const animator = new CreatureAnimator(child, canvas);
+                animators[child.id] = animator;
+                animator.start();
+
+                card.onmouseenter = () => {
+                    const parentCard = document.querySelector(`.spreader-card[data-spreader-id="${child.parentId}"]`);
+                    if (parentCard) {
+                        parentCard.classList.add('selected');
+                    }
+                };
+                card.onmouseleave = () => {
+                    document.querySelectorAll('.spreader-card').forEach(c => {
+                        c.classList.remove('selected');
+                    });
+                };
+
+                const parentLink = document.createElement('div');
+                parentLink.className = 'parent-link';
+                parentLink.textContent = `↑ ${child.parentId.substr(0,6)}`;
+
+                const info = document.createElement('div');
+                info.className = 'creature-info';
+                info.innerHTML = `
+                    ID: ${child.id.substr(0,6)}
+                    <span class="temperament-badge temp-${child.dna.temperament}">${child.dna.temperament}</span>
+                `;
+
+                const traitsDiv = document.createElement('div');
+                traitsDiv.className = 'dna-traits';
+
+                if (parent) {
+                    const speciesMatch = child.dna.species === parent.dna.species;
+                    const bodyCharMatch = child.dna.bodyChar === parent.dna.bodyChar;
+                    const eyeMatch = child.dna.eyeChar === parent.dna.eyeChar;
+                    const tempMatch = child.dna.temperament === parent.dna.temperament;
+
+                    traitsDiv.innerHTML = `
+                        <div class="dna-trait ${speciesMatch ? 'inherited' : 'mutated'}">${getSpeciesIcon(child.dna.species)} ${child.dna.species.substr(0,4)}</div>
+                        <div class="dna-trait ${bodyCharMatch ? 'inherited' : 'mutated'}">Fill: ${child.dna.bodyChar}</div>
+                        <div class="dna-trait ${eyeMatch ? 'inherited' : 'mutated'}">Eye: ${child.dna.eyeChar}</div>
+                        <div class="dna-trait ${tempMatch ? 'inherited' : 'mutated'}">Temp: ${child.dna.temperament.substr(0,3)}</div>
+                        ${child.dna.hasWings ? `<div class="dna-trait">Wings</div>` : ''}
+                        ${child.dna.hasSpikes ? `<div class="dna-trait">Spikes</div>` : ''}
+                    `;
+                } else {
+                    traitsDiv.innerHTML = `<div style="color: #ff3366;">Parent not found</div>`;
+                }
+
+                card.appendChild(parentLink);
+                card.appendChild(canvas);
+                card.appendChild(info);
+                card.appendChild(traitsDiv);
+                document.getElementById('children').appendChild(card);
+            });
+        }
+
+        function getSpeciesIcon(species) {
+            const icons = {
+                insectoid: '🐜',
+                reptilian: '🦎',
+                mammalian: '🐻',
+                viral: '🦠',
+                skeletal: '💀',
+                alien: '👽',
+                aquatic: '🐟'
+            };
+            return icons[species] || '●';
+        }
+
+        function clearFamily() {
+            Object.values(animators).forEach(anim => anim.stop());
+            animators = {};
+            familyData[currentFamily] = { spreaders: [], children: [] };
+            displayFamily(currentFamily);
+            updateStats();
+        }
+
+        function clearAll() {
+            Object.values(animators).forEach(anim => anim.stop());
+            animators = {};
+            Object.keys(familyColors).forEach(key => {
+                familyData[key] = { spreaders: [], children: [] };
+            });
+            displayFamily(currentFamily);
+            updateStats();
+        }
+
+        function updateStats() {
+            let activeFamilies = 0;
+            let totalSpreaders = 0;
+            let totalChildren = 0;
+
+            Object.keys(familyData).forEach(key => {
+                if (familyData[key].spreaders.length > 0) activeFamilies++;
+                totalSpreaders += familyData[key].spreaders.length;
+                totalChildren += familyData[key].children.length;
+            });
+
+            document.getElementById('activeFamilies').textContent = activeFamilies;
+            document.getElementById('totalSpreaders').textContent = totalSpreaders;
+            document.getElementById('totalChildren').textContent = totalChildren;
+        }
+
+        // Initialize
+        selectFamily('red');
+        updateStats();
+
+        // Generate initial batch for demo
+        setTimeout(() => {
+            for (let i = 0; i < 3; i++) {
+                generateSpreader();
+            }
+        }, 100);
+    </script>
+</body>
+</html>
